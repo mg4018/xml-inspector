@@ -79,9 +79,55 @@ namespace Xml
 		void SaveNumbers();
 	public:
 		/**
+			@brief Initializes a new instance of the Inspector class.
+		*/
+		Inspector();
+
+		/**
+			@brief Initializes a new instance of the Inspector class
+				with the specified file path.
+		*/
+		Inspector(const char* filePath);
+
+		/**
+			@brief Initializes a new instance of the Inspector class
+				with the specified file path.
+		*/
+		Inspector(const std::string& filePath);
+
+		/**
+			@brief Initializes a new instance of the Inspector class
+				with the specified stream.
+
+			TODO: warning - stream from this pointer must exist while reading nodes.
+		*/
+		Inspector(std::istream* inputStream);
+
+		/**
+			@brief Initializes a new instance of the Inspector class
+				with the specified iterators.
+
+			@param[in] first,last Input iterators to the initial
+				and final positions in a sequence. The range used
+				is [first,last), which contains all the elements
+				between first and last, including the element pointed
+				by first but not the element pointed by last.
+		*/
+		template <typename TInputIterator>
+		Inspector(TInputIterator first, TInputIterator last);
+
+		/**
+			@brief Initializes a new instance of the Inspector class
+				with the specified characters reader interface.
+
+			TODO: warning message about BOM.
+		*/
+		Inspector(CharactersReader* reader);
+
+		/**
 			@brief Reads the next node from the stream.
 
-			TODO: detailed description and exceptions.
+			TODO: detailed description...
 
 			@return True if the next node was read successfully.
 				False if there are no more nodes to read.
@@ -141,6 +187,44 @@ namespace Xml
 		*/
 		SizeType GetDepth() const;
 	};
+
+	template <typename TFinalEncoding>
+	inline Inspector<TFinalEncoding>::Inspector()
+	{
+	
+	}
+
+	template <typename TFinalEncoding>
+	inline Inspector<TFinalEncoding>::Inspector(const char* /* filePath */)
+	{
+	
+	}
+
+	template <typename TFinalEncoding>
+	inline Inspector<TFinalEncoding>::Inspector(const std::string& /* filePath */)
+	{
+	
+	}
+
+	template <typename TFinalEncoding>
+	inline Inspector<TFinalEncoding>::Inspector(std::istream* /* inputStream */)
+	{
+	
+	}
+
+	template <typename TFinalEncoding>
+	template <typename TInputIterator>
+	inline Inspector<TFinalEncoding>::Inspector(
+		TInputIterator /* first */, TInputIterator /* last */)
+	{
+	
+	}
+
+	template <typename TFinalEncoding>
+	inline Inspector<TFinalEncoding>::Inspector(CharactersReader* /* reader */)
+	{
+	
+	}
 
 	template <typename TFinalEncoding>
 	inline void Inspector<TFinalEncoding>::SaveNumbers()

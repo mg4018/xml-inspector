@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <streambuf>
+#include <fstream>
 #include <cstddef>
 #include <algorithm>
 #include <cassert>
@@ -40,6 +41,7 @@ public:
 		Utf8FinalEncodingTest();
 		Utf16FinalEncodingTest();
 		Utf32FinalEncodingTest();
+		InspectorConstructorsTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -188,6 +190,36 @@ public:
 			Xml::Utf32FinalEncoding::PutCharacter(destination, *i);
 
 		assert(destination == source);
+
+		std::cout << "OK\n";
+	}
+
+	void InspectorConstructorsTest()
+	{
+		std::cout << "Inspector constructors test... ";
+
+		// Defaul constructor.
+		Xml::Inspector<Xml::Utf32FinalEncoding> i0;
+
+		// File path from const char*
+		Xml::Inspector<Xml::Utf8FinalEncoding> i1("test.xml");
+
+		// File path from const std::string&
+		std::string path = "test.xml";
+		Xml::Inspector<Xml::Utf16FinalEncoding> i2(path);
+
+		// From input stream.
+		std::ifstream ifs("test.xml");
+		Xml::Inspector<Xml::Utf32FinalEncoding> i3(&ifs);
+	
+		// From bytes.
+		char bytes[] = u8"<root>bytes test</root>";
+		Xml::Inspector<Xml::Utf16FinalEncoding> i4(bytes, bytes + sizeof(bytes));
+
+		// From reader interface.
+		std::string content = u8"<root>abc</root>";
+		Xml::Utf8IteratorsReader<std::string::const_iterator> reader(content.cbegin(), content.cend());
+		Xml::Inspector<Xml::Utf32FinalEncoding> i5(&reader);
 
 		std::cout << "OK\n";
 	}

@@ -137,12 +137,12 @@ namespace Xml
 	/**
 		@brief UTF-8 characters reader from iterators.
 	*/
-	template <typename InputIterator>
+	template <typename TInputIterator>
 	class Utf8IteratorsReader : public Utf8ReaderBase
 	{
 	private:
-		InputIterator iterBegin;
-		InputIterator iterEnd;
+		TInputIterator iterBegin;
+		TInputIterator iterEnd;
 	public:
 		/**
 			@brief Constructor.
@@ -153,7 +153,7 @@ namespace Xml
 				between first and last, including the element pointed
 				by first but not the element pointed by last.
 		*/
-		Utf8IteratorsReader(InputIterator first, InputIterator last);
+		Utf8IteratorsReader(TInputIterator first, TInputIterator last);
 
 		/**
 			@brief Destructor.
@@ -177,12 +177,12 @@ namespace Xml
 		/**
 			@brief Gets the first iterator.
 		*/
-		InputIterator GetFirstIterator() const;
+		TInputIterator GetFirstIterator() const;
 		
 		/**
 			@brief Gets the last iterator.
 		*/
-		InputIterator GetLastIterator() const;
+		TInputIterator GetLastIterator() const;
 
 		/**
 			@brief Replaces the iterators.
@@ -193,7 +193,7 @@ namespace Xml
 				between first and last, including the element pointed
 				by first but not the element pointed by last.
 		*/
-		void ResetIterators(InputIterator first, InputIterator last);
+		void ResetIterators(TInputIterator first, TInputIterator last);
 	};
 
 	/**
@@ -469,22 +469,22 @@ namespace Xml
 	//
 	// Utf8IteratorsReader implementation.
 	//
-	template <typename InputIterator>
-	inline Utf8IteratorsReader<InputIterator>::Utf8IteratorsReader(
-		InputIterator first, InputIterator last)
+	template <typename TInputIterator>
+	inline Utf8IteratorsReader<TInputIterator>::Utf8IteratorsReader(
+		TInputIterator first, TInputIterator last)
 	{
 		iterBegin = first;
 		iterEnd = last;
 	}
 
-	template <typename InputIterator>
-	inline Utf8IteratorsReader<InputIterator>::~Utf8IteratorsReader()
+	template <typename TInputIterator>
+	inline Utf8IteratorsReader<TInputIterator>::~Utf8IteratorsReader()
 	{
 	
 	}
 
-	template <typename InputIterator>
-	inline int Utf8IteratorsReader<InputIterator>::ReadCharacter(char32_t& result)
+	template <typename TInputIterator>
+	inline int Utf8IteratorsReader<TInputIterator>::ReadCharacter(char32_t& result)
 	{
 		if (iterBegin != iterEnd)
 		{
@@ -564,21 +564,21 @@ namespace Xml
 		return 0;
 	}
 
-	template <typename InputIterator>
-	inline InputIterator Utf8IteratorsReader<InputIterator>::GetFirstIterator() const
+	template <typename TInputIterator>
+	inline TInputIterator Utf8IteratorsReader<TInputIterator>::GetFirstIterator() const
 	{
 		return iterBegin;
 	}
 
-	template <typename InputIterator>
-	inline InputIterator Utf8IteratorsReader<InputIterator>::GetLastIterator() const
+	template <typename TInputIterator>
+	inline TInputIterator Utf8IteratorsReader<TInputIterator>::GetLastIterator() const
 	{
 		return iterEnd;
 	}
 
-	template <typename InputIterator>
-	inline void Utf8IteratorsReader<InputIterator>::ResetIterators(
-		InputIterator first, InputIterator last)
+	template <typename TInputIterator>
+	inline void Utf8IteratorsReader<TInputIterator>::ResetIterators(
+		TInputIterator first, TInputIterator last)
 	{
 		iterBegin = first;
 		iterEnd = last;
