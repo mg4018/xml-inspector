@@ -68,9 +68,30 @@ namespace Xml
 	};
 
 	/**
+		@brief Abstract UTF-8 characters reader base class.
+	*/
+	class Utf8ReaderBase : public CharactersReader
+	{
+	protected:
+		/**
+			@brief Gets the bytes count of UTF-8 encoded character.
+
+			@param[in] leadingByte First byte of character sequence.
+			@return Bytes count of UTF-8 encoded character or 0 if
+				character is invalid.
+		*/
+		static unsigned int GetBytesCount(unsigned char leadingByte);
+	public:
+		/**
+			@brief Destructor.
+		*/
+		virtual ~Utf8ReaderBase();
+	};
+
+	/**
 		@brief UTF-8 characters reader from input stream.
 	*/
-	class Utf8StreamReader : public CharactersReader
+	class Utf8StreamReader : public Utf8ReaderBase
 	{
 	private:
 		std::istream* in;
@@ -111,6 +132,68 @@ namespace Xml
 			@brief Replaces the pointer to input stream.
 		*/
 		void ResetInputStream(std::istream* inputStream);
+	};
+
+	/**
+		@brief UTF-8 characters reader from iterators.
+	*/
+	template <typename InputIterator>
+	class Utf8IteratorsReader : public Utf8ReaderBase
+	{
+	private:
+		InputIterator iterBegin;
+		InputIterator iterEnd;
+	public:
+		/**
+			@brief Constructor.
+
+			@param[in] first,last Input iterators to the initial
+				and final positions in a sequence. The range used
+				is [first,last), which contains all the elements
+				between first and last, including the element pointed
+				by first but not the element pointed by last.
+		*/
+		Utf8IteratorsReader(InputIterator first, InputIterator last);
+
+		/**
+			@brief Destructor.
+		*/
+		virtual ~Utf8IteratorsReader();
+
+		/**
+			@brief Reads one Unicode character.
+
+			Depending on the character there could be from 1 to 4
+			bytes per one Unicode character.
+
+			@param[out] result Unicode character.
+			@return @b 1 if the character was read successfully.
+				@b 0 if there are no more characters to read.
+				@b -1 if character is not allowed in XML document.
+				@b -2 if there was an error while reading character.
+		*/
+		virtual int ReadCharacter(char32_t& result);
+
+		/**
+			@brief Gets the first iterator.
+		*/
+		InputIterator GetFirstIterator() const;
+		
+		/**
+			@brief Gets the last iterator.
+		*/
+		InputIterator GetLastIterator() const;
+
+		/**
+			@brief Replaces the iterators.
+
+			@param[in] first,last Input iterators to the initial
+				and final positions in a sequence. The range used
+				is [first,last), which contains all the elements
+				between first and last, including the element pointed
+				by first but not the element pointed by last.
+		*/
+		void ResetIterators(InputIterator first, InputIterator last);
 	};
 
 	/**
@@ -206,6 +289,40 @@ namespace Xml
 	};
 
 	//
+	// Utf8ReaderBase implementation.
+	//
+	
+	inline unsigned int Utf8ReaderBase::GetBytesCount(unsigned char leadingByte)
+	{
+		// 0 means invalid leading byte.
+		static const unsigned char BytesCount[256] =
+		{
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+			3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+			4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+		};
+		return BytesCount[leadingByte];
+	}
+
+	inline Utf8ReaderBase::~Utf8ReaderBase()
+	{
+	
+	}
+
+	//
 	// CharactersReader implementation.
 	//
 	
@@ -245,27 +362,6 @@ namespace Xml
 
 	inline int Utf8StreamReader::ReadCharacter(char32_t& result)
 	{
-		// 0 means invalid leading byte.
-		static const unsigned char BytesCount[256] =
-		{
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-			3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-			4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-		};
-		
 		if (in != nullptr)
 		{
 			// Try to read the first code unit (leading byte).
@@ -274,7 +370,7 @@ namespace Xml
 			// If not failbit.
 			if (leadingByte != std::char_traits<char>::eof())
 			{
-				unsigned int bytesCount = BytesCount[static_cast<unsigned int>(leadingByte)];
+				unsigned int bytesCount = GetBytesCount(static_cast<unsigned char>(leadingByte));
 
 				if (bytesCount == 1)
 				{
@@ -368,6 +464,124 @@ namespace Xml
 	inline void Utf8StreamReader::ResetInputStream(std::istream* inputStream)
 	{
 		in = inputStream;
+	}
+
+	//
+	// Utf8IteratorsReader implementation.
+	//
+	template <typename InputIterator>
+	inline Utf8IteratorsReader<InputIterator>::Utf8IteratorsReader(
+		InputIterator first, InputIterator last)
+	{
+		iterBegin = first;
+		iterEnd = last;
+	}
+
+	template <typename InputIterator>
+	inline Utf8IteratorsReader<InputIterator>::~Utf8IteratorsReader()
+	{
+	
+	}
+
+	template <typename InputIterator>
+	inline int Utf8IteratorsReader<InputIterator>::ReadCharacter(char32_t& result)
+	{
+		if (iterBegin != iterEnd)
+		{
+			unsigned char leadingByte = static_cast<unsigned char>(*iterBegin);
+			unsigned int bytesCount = GetBytesCount(leadingByte);
+
+			++iterBegin;
+			if (bytesCount == 1)
+			{
+				result = static_cast<char32_t>(leadingByte);
+				return 1; // The character was read successfully.
+			}
+
+			if (bytesCount != 0) // 2, 3 or 4.
+			{
+				result = 0;
+				char32_t continuationByte = 0;
+				unsigned char codeUnit;
+				for (unsigned int i = 1; i < bytesCount; ++i, ++iterBegin)
+				{
+					if (iterBegin == iterEnd)
+					{
+						// End of the sequence, but the leading byte told us
+						// there should be the continuation byte, so we treat
+						// this like invalid character.
+						result = static_cast<char32_t>(leadingByte);
+						return -1; // Invalid character.
+					}
+					codeUnit = static_cast<unsigned char>(*iterBegin);
+
+					if ((codeUnit & 0xC0) != 0x80)
+					{
+						// Two most significant bits in continuation byte should be 1 followed by 0.
+						result = static_cast<char32_t>(leadingByte);
+						return -1; // Invalid character.
+					}
+
+					continuationByte = static_cast<char32_t>(codeUnit);
+					continuationByte &= 0x3F; // Hide 2 most significant bits.
+					continuationByte <<= ((bytesCount - i - 1) * 6);
+					result |= continuationByte;
+				}
+
+				if (bytesCount == 2)
+				{
+					continuationByte = static_cast<char32_t>(leadingByte);
+					continuationByte = (continuationByte & 0x1F) << 6;
+					result |= continuationByte;
+					if (result > 0x7F)
+						return 1;
+					return -1;
+				}
+
+				if (bytesCount == 3)
+				{
+					continuationByte = static_cast<char32_t>(leadingByte);
+					continuationByte = (continuationByte & 0x0F) << 12;
+					result |= continuationByte;
+					if ((result > 0x07FF && result < 0xD800) ||
+						(result > 0xDFFF && result <= 0xFFFD))
+						return 1;
+					return -1;
+				}
+
+				// bytesCount == 4.
+				continuationByte = static_cast<char32_t>(leadingByte);
+				continuationByte = (continuationByte & 0x07) << 18;
+				result |= continuationByte;
+				if (result > 0xFFFF && result <= 0x10FFFF)
+					return 1;
+				return -1;
+			}
+
+			result = static_cast<char32_t>(leadingByte);
+			return -1; // Invalid character.
+		}
+		return 0;
+	}
+
+	template <typename InputIterator>
+	inline InputIterator Utf8IteratorsReader<InputIterator>::GetFirstIterator() const
+	{
+		return iterBegin;
+	}
+
+	template <typename InputIterator>
+	inline InputIterator Utf8IteratorsReader<InputIterator>::GetLastIterator() const
+	{
+		return iterEnd;
+	}
+
+	template <typename InputIterator>
+	inline void Utf8IteratorsReader<InputIterator>::ResetIterators(
+		InputIterator first, InputIterator last)
+	{
+		iterBegin = first;
+		iterEnd = last;
 	}
 
 	//

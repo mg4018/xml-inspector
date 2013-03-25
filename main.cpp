@@ -36,6 +36,7 @@ public:
 		Utf8StreamReaderTest();
 		Utf16StreamReaderTest();
 		Utf32StreamReaderTest();
+		Utf8IteratorsReaderTest();
 		Utf8FinalEncodingTest();
 		Utf16FinalEncodingTest();
 		Utf32FinalEncodingTest();
@@ -123,6 +124,24 @@ public:
 		while ((result = reader.ReadCharacter(c)) == 1)
 			destination.push_back(c);
 
+		assert(result == 0);
+		assert(destination == U"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi");
+
+		std::cout << "OK\n";
+	}
+
+	void Utf8IteratorsReaderTest()
+	{
+		std::cout << "UTF-8 iterator reader test... ";
+
+		std::string source = u8"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi";
+		Xml::Utf8IteratorsReader<std::string::const_iterator> reader(source.cbegin(), source.cend());
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+		
 		assert(result == 0);
 		assert(destination == U"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi");
 
