@@ -42,6 +42,7 @@ public:
 		Utf16FinalEncodingTest();
 		Utf32FinalEncodingTest();
 		InspectorConstructorsTest();
+		InspectorResetTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -220,6 +221,38 @@ public:
 		std::string content = u8"<root>abc</root>";
 		Xml::Utf8IteratorsReader<std::string::const_iterator> reader(content.cbegin(), content.cend());
 		Xml::Inspector<Xml::Utf32FinalEncoding> i5(&reader);
+
+		std::cout << "OK\n";
+	}
+
+	void InspectorResetTest()
+	{
+		std::cout << "Inspector reset test... ";
+
+		Xml::Inspector<Xml::Utf32FinalEncoding> inspector;
+
+		// File path from const char*
+		inspector.Reset("test.xml");
+
+		// Nothing.
+		inspector.Reset();
+
+		// File path from const std::string&
+		std::string path = "test.xml";
+		inspector.Reset(path);
+
+		// From input stream.
+		std::ifstream ifs("test.xml");
+		inspector.Reset(&ifs);
+	
+		// From bytes.
+		char bytes[] = u8"<root>bytes test</root>";
+		inspector.Reset(bytes, bytes + sizeof(bytes));
+
+		// From reader interface.
+		std::string content = u8"<root>abc</root>";
+		Xml::Utf8IteratorsReader<std::string::const_iterator> reader(content.cbegin(), content.cend());
+		inspector.Reset(&reader);
 
 		std::cout << "OK\n";
 	}

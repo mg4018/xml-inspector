@@ -186,44 +186,91 @@ namespace Xml
 			@sa GetLineNumber() and GetLinePosition().
 		*/
 		SizeType GetDepth() const;
+
+		/**
+			@brief Removes the association with the source and clears
+				the state of Inspector object.
+		*/
+		void Reset();
+
+		/**
+			@brief Clears the state of Inspector object and assign
+				the source to the specified file path.
+		*/
+		void Reset(const char* filePath);
+
+		/**
+			@brief Clears the state of Inspector object and assign
+				the source to the specified file path.
+		*/
+		void Reset(const std::string& filePath);
+
+		/**
+			@brief Clears the state of Inspector object and assign
+				the source to the specified stream.
+
+			TODO: warning - stream from this pointer must exist while reading nodes.
+		*/
+		void Reset(std::istream* inputStream);
+
+		/**
+			@brief Clears the state of Inspector object and assign
+				the source to the specified iterators.
+
+			@param[in] first,last Input iterators to the initial
+				and final positions in a sequence. The range used
+				is [first,last), which contains all the elements
+				between first and last, including the element pointed
+				by first but not the element pointed by last.
+		*/
+		template <typename TInputIterator>
+		void Reset(TInputIterator first, TInputIterator last);
+
+		/**
+			@brief Clears the state of Inspector object and assign
+				the source to the specified characters reader interface.
+
+			TODO: warning message about BOM.
+		*/
+		void Reset(CharactersReader* reader);
 	};
 
 	template <typename TFinalEncoding>
 	inline Inspector<TFinalEncoding>::Inspector()
 	{
-	
+		Reset();
 	}
 
 	template <typename TFinalEncoding>
-	inline Inspector<TFinalEncoding>::Inspector(const char* /* filePath */)
+	inline Inspector<TFinalEncoding>::Inspector(const char* filePath)
 	{
-	
+		Reset(filePath);
 	}
 
 	template <typename TFinalEncoding>
-	inline Inspector<TFinalEncoding>::Inspector(const std::string& /* filePath */)
+	inline Inspector<TFinalEncoding>::Inspector(const std::string& filePath)
 	{
-	
+		Reset(filePath);
 	}
 
 	template <typename TFinalEncoding>
-	inline Inspector<TFinalEncoding>::Inspector(std::istream* /* inputStream */)
+	inline Inspector<TFinalEncoding>::Inspector(std::istream* inputStream)
 	{
-	
+		Reset(inputStream);
 	}
 
 	template <typename TFinalEncoding>
 	template <typename TInputIterator>
 	inline Inspector<TFinalEncoding>::Inspector(
-		TInputIterator /* first */, TInputIterator /* last */)
+		TInputIterator first, TInputIterator last)
 	{
-	
+		Reset(first, last);
 	}
 
 	template <typename TFinalEncoding>
-	inline Inspector<TFinalEncoding>::Inspector(CharactersReader* /* reader */)
+	inline Inspector<TFinalEncoding>::Inspector(CharactersReader* reader)
 	{
-	
+		Reset(reader);
 	}
 
 	template <typename TFinalEncoding>
@@ -236,7 +283,7 @@ namespace Xml
 	template <typename TFinalEncoding>
 	inline bool Inspector<TFinalEncoding>::ReadNode()
 	{
-		// FIXME:
+		// TODO:
 		return false;
 	}
 
@@ -258,8 +305,46 @@ namespace Xml
 	inline typename Inspector<TFinalEncoding>::SizeType
 		Inspector<TFinalEncoding>::GetDepth() const
 	{
-		// FIXME:
+		// TODO:
 		return 0;
+	}
+
+	template <typename TFinalEncoding>
+	inline void Inspector<TFinalEncoding>::Reset()
+	{
+		// TODO:
+	}
+
+	template <typename TFinalEncoding>
+	inline void Inspector<TFinalEncoding>::Reset(const char* /* filePath */)
+	{
+		// TODO:
+	}
+
+	template <typename TFinalEncoding>
+	inline void Inspector<TFinalEncoding>::Reset(const std::string& /* filePath */)
+	{
+		// TODO:
+	}
+
+	template <typename TFinalEncoding>
+	inline void Inspector<TFinalEncoding>::Reset(std::istream* /* inputStream */)
+	{
+		// TODO:
+	}
+
+	template <typename TFinalEncoding>
+	template <typename TInputIterator>
+	inline void Inspector<TFinalEncoding>::Reset(
+		TInputIterator /* first */, TInputIterator /* last */)
+	{
+		// TODO:
+	}
+
+	template <typename TFinalEncoding>
+	inline void Inspector<TFinalEncoding>::Reset(CharactersReader* /* reader */)
+	{
+		// TODO:
 	}
 }
 
