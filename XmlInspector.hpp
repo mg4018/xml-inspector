@@ -24,7 +24,7 @@
 #define XML_INSPECTOR_HPP__f66b9cdaf20734ef11086d0851a9c563
 
 #include "CharactersReader.hpp"
-#include "FinalEncoding.hpp"
+#include "CharactersWriter.hpp"
 #include <string>
 #include <istream>
 #include <cstdint>
@@ -39,29 +39,40 @@
 namespace Xml
 {
 	/**
+		@brief Specifies the type of node.
+	*/
+	enum class NodeType
+	{
+		/**
+			@brief This is returned by the Inspector if a ReadNode method has not been called.
+		*/
+		None
+	};
+
+	/**
 		@brief Primary XML parser class.
 
 		TODO: detailed description...
 
-		@tparam TFinalEncoding Desired encoding. You don't need to care how XML file is encoded.
-			You can choose how you want to read XML strings between Utf8FinalEncoding, Utf16FinalEncoding
-			and Utf32FinalEncoding class from FinalEncoding.hpp file. They respectively store the strings in
+		@tparam TCharactersWriter Desired encoding. You don't need to care how XML file is encoded.
+			You can choose how you want to read XML strings between Utf8CharactersWriter, Utf16CharactersWriter
+			and Utf32CharactersWriter class from CharactersWriter.hpp file. They respectively store the strings in
 			@a std::string, @a std::u16string and @a std::u32string. You can also write your own fancy way of
 			storing strings. For example you may want to use @a std::wstring and even other than Unicode encoding.
 	*/
-	template <typename TFinalEncoding>
+	template <typename TCharactersWriter>
 	class Inspector
 	{
 	public:
 		/**
 			@brief Alias of encoding type that is used to write strings.
 		*/
-		typedef TFinalEncoding FinalEncodingType;
+		typedef TCharactersWriter CharactersWriterType;
 
 		/**
-			@brief String type provided by FinalEncodingType.
+			@brief String type provided by CharactersWriterType.
 		*/
-		typedef typename TFinalEncoding::StringType StringType;
+		typedef typename TCharactersWriter::StringType StringType;
 
 		/**
 			@brief Unsigned integer type definition for determining location in XML document.
@@ -235,114 +246,114 @@ namespace Xml
 		void Reset(CharactersReader* reader);
 	};
 
-	template <typename TFinalEncoding>
-	inline Inspector<TFinalEncoding>::Inspector()
+	template <typename TCharactersWriter>
+	inline Inspector<TCharactersWriter>::Inspector()
 	{
 		Reset();
 	}
 
-	template <typename TFinalEncoding>
-	inline Inspector<TFinalEncoding>::Inspector(const char* filePath)
+	template <typename TCharactersWriter>
+	inline Inspector<TCharactersWriter>::Inspector(const char* filePath)
 	{
 		Reset(filePath);
 	}
 
-	template <typename TFinalEncoding>
-	inline Inspector<TFinalEncoding>::Inspector(const std::string& filePath)
+	template <typename TCharactersWriter>
+	inline Inspector<TCharactersWriter>::Inspector(const std::string& filePath)
 	{
 		Reset(filePath);
 	}
 
-	template <typename TFinalEncoding>
-	inline Inspector<TFinalEncoding>::Inspector(std::istream* inputStream)
+	template <typename TCharactersWriter>
+	inline Inspector<TCharactersWriter>::Inspector(std::istream* inputStream)
 	{
 		Reset(inputStream);
 	}
 
-	template <typename TFinalEncoding>
+	template <typename TCharactersWriter>
 	template <typename TInputIterator>
-	inline Inspector<TFinalEncoding>::Inspector(
+	inline Inspector<TCharactersWriter>::Inspector(
 		TInputIterator first, TInputIterator last)
 	{
 		Reset(first, last);
 	}
 
-	template <typename TFinalEncoding>
-	inline Inspector<TFinalEncoding>::Inspector(CharactersReader* reader)
+	template <typename TCharactersWriter>
+	inline Inspector<TCharactersWriter>::Inspector(CharactersReader* reader)
 	{
 		Reset(reader);
 	}
 
-	template <typename TFinalEncoding>
-	inline void Inspector<TFinalEncoding>::SaveNumbers()
+	template <typename TCharactersWriter>
+	inline void Inspector<TCharactersWriter>::SaveNumbers()
 	{
 		SizeType lastLineNumber = currentLineNumber;
 		SizeType lastLinePosition = currentLinePosition;
 	}
 
-	template <typename TFinalEncoding>
-	inline bool Inspector<TFinalEncoding>::ReadNode()
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::ReadNode()
 	{
 		// TODO:
 		return false;
 	}
 
-	template <typename TFinalEncoding>
-	inline typename Inspector<TFinalEncoding>::SizeType
-		Inspector<TFinalEncoding>::GetLineNumber() const
+	template <typename TCharactersWriter>
+	inline typename Inspector<TCharactersWriter>::SizeType
+		Inspector<TCharactersWriter>::GetLineNumber() const
 	{
 		return lastLineNumber;
 	}
 
-	template <typename TFinalEncoding>
-	inline typename Inspector<TFinalEncoding>::SizeType
-		Inspector<TFinalEncoding>::GetLinePosition() const
+	template <typename TCharactersWriter>
+	inline typename Inspector<TCharactersWriter>::SizeType
+		Inspector<TCharactersWriter>::GetLinePosition() const
 	{
 		return lastLinePosition;
 	}
 
-	template <typename TFinalEncoding>
-	inline typename Inspector<TFinalEncoding>::SizeType
-		Inspector<TFinalEncoding>::GetDepth() const
+	template <typename TCharactersWriter>
+	inline typename Inspector<TCharactersWriter>::SizeType
+		Inspector<TCharactersWriter>::GetDepth() const
 	{
 		// TODO:
 		return 0;
 	}
 
-	template <typename TFinalEncoding>
-	inline void Inspector<TFinalEncoding>::Reset()
+	template <typename TCharactersWriter>
+	inline void Inspector<TCharactersWriter>::Reset()
 	{
 		// TODO:
 	}
 
-	template <typename TFinalEncoding>
-	inline void Inspector<TFinalEncoding>::Reset(const char* /* filePath */)
+	template <typename TCharactersWriter>
+	inline void Inspector<TCharactersWriter>::Reset(const char* /* filePath */)
 	{
 		// TODO:
 	}
 
-	template <typename TFinalEncoding>
-	inline void Inspector<TFinalEncoding>::Reset(const std::string& /* filePath */)
+	template <typename TCharactersWriter>
+	inline void Inspector<TCharactersWriter>::Reset(const std::string& /* filePath */)
 	{
 		// TODO:
 	}
 
-	template <typename TFinalEncoding>
-	inline void Inspector<TFinalEncoding>::Reset(std::istream* /* inputStream */)
+	template <typename TCharactersWriter>
+	inline void Inspector<TCharactersWriter>::Reset(std::istream* /* inputStream */)
 	{
 		// TODO:
 	}
 
-	template <typename TFinalEncoding>
+	template <typename TCharactersWriter>
 	template <typename TInputIterator>
-	inline void Inspector<TFinalEncoding>::Reset(
+	inline void Inspector<TCharactersWriter>::Reset(
 		TInputIterator /* first */, TInputIterator /* last */)
 	{
 		// TODO:
 	}
 
-	template <typename TFinalEncoding>
-	inline void Inspector<TFinalEncoding>::Reset(CharactersReader* /* reader */)
+	template <typename TCharactersWriter>
+	inline void Inspector<TCharactersWriter>::Reset(CharactersReader* /* reader */)
 	{
 		// TODO:
 	}

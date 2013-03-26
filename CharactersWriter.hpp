@@ -26,7 +26,7 @@
 #include <string>
 
 /**
-	@file FinalEncoding.hpp
+	@file CharactersWriter.hpp
 */
 
 namespace Xml
@@ -36,9 +36,9 @@ namespace Xml
 
 		TODO: detailed description...
 
-		@sa Utf16FinalEncoding, Utf32FinalEncoding and Inspector.
+		@sa Utf16CharactersWriter, Utf32CharactersWriter and Inspector.
 	*/
-	class Utf8FinalEncoding
+	class Utf8CharactersWriter
 	{
 	public:
 		/**
@@ -62,9 +62,9 @@ namespace Xml
 
 		TODO: detailed description...
 
-		@sa Utf8FinalEncoding, Utf32FinalEncoding and Inspector.
+		@sa Utf8CharactersWriter, Utf32CharactersWriter and Inspector.
 	*/
-	class Utf16FinalEncoding
+	class Utf16CharactersWriter
 	{
 	public:
 		/**
@@ -88,9 +88,9 @@ namespace Xml
 
 		TODO: detailed description...
 
-		@sa Utf8FinalEncoding, Utf16FinalEncoding and Inspector.
+		@sa Utf8CharactersWriter, Utf16CharactersWriter and Inspector.
 	*/
-	class Utf32FinalEncoding
+	class Utf32CharactersWriter
 	{
 	public:
 		/**
@@ -109,7 +109,7 @@ namespace Xml
 		static void PutCharacter(StringType& stringDestination, char32_t codePoint);
 	};
 
-	inline void Utf8FinalEncoding::PutCharacter(
+	inline void Utf8CharactersWriter::PutCharacter(
 		StringType& stringDestination, char32_t codePoint)
 	{
 		if (codePoint <= 0x7F)
@@ -174,7 +174,7 @@ namespace Xml
 		}
 	}
 
-	inline void Utf16FinalEncoding::PutCharacter(
+	inline void Utf16CharactersWriter::PutCharacter(
 		StringType& stringDestination, char32_t codePoint)
 	{
 		if ((codePoint <= 0xD7FF) || (codePoint >= 0xE000 && codePoint <= 0xFFFF))
@@ -192,7 +192,7 @@ namespace Xml
 		}
 	}
 
-	inline void Utf32FinalEncoding::PutCharacter(
+	inline void Utf32CharactersWriter::PutCharacter(
 		StringType& stringDestination, char32_t codePoint)
 	{
 		stringDestination.push_back(static_cast<StringType::value_type>(codePoint));
