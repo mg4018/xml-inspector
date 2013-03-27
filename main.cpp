@@ -43,6 +43,7 @@ public:
 		Utf32CharactersWriterTest();
 		InspectorConstructorsTest();
 		InspectorResetTest();
+		BeforeParsingTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -253,6 +254,19 @@ public:
 		std::string content = u8"<root>abc</root>";
 		Xml::Utf8IteratorsReader<std::string::const_iterator> reader(content.cbegin(), content.cend());
 		inspector.Reset(&reader);
+
+		std::cout << "OK\n";
+	}
+
+	void BeforeParsingTest()
+	{
+		std::cout << "Before parsing test... ";
+
+		Xml::Inspector<Xml::Utf16CharactersWriter> inspector("test.xml");
+
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
 
 		std::cout << "OK\n";
 	}

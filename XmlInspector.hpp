@@ -49,6 +49,14 @@ namespace Xml
 		None
 	};
 
+	enum class ErrorCode
+	{
+		/**
+			@brief There is no error.
+		*/
+		None
+	};
+
 	/**
 		@brief Primary XML parser class.
 
@@ -85,6 +93,8 @@ namespace Xml
 		SizeType lastLinePosition;
 		SizeType currentLineNumber;
 		SizeType currentLinePosition;
+		NodeType node;
+		ErrorCode err;
 
 		// Last numbers <= current numbers.
 		void SaveNumbers();
@@ -144,6 +154,21 @@ namespace Xml
 				False if there are no more nodes to read.
 		*/
 		bool ReadNode();
+
+		/**
+			@brief Gets the type of the current node.
+		*/
+		NodeType GetNodeType() const;
+
+		/**
+			@brief Gets the last error message.
+		*/
+		const char* GetErrorMessage() const;
+
+		/**
+			@brief Gets the last error code.
+		*/
+		ErrorCode GetErrorCode() const;
 
 		/**
 			@brief Gets the current line number.
@@ -248,24 +273,28 @@ namespace Xml
 
 	template <typename TCharactersWriter>
 	inline Inspector<TCharactersWriter>::Inspector()
+		: node(NodeType::None), err(ErrorCode::None)
 	{
 		Reset();
 	}
 
 	template <typename TCharactersWriter>
 	inline Inspector<TCharactersWriter>::Inspector(const char* filePath)
+		: Inspector<TCharactersWriter>()
 	{
 		Reset(filePath);
 	}
 
 	template <typename TCharactersWriter>
 	inline Inspector<TCharactersWriter>::Inspector(const std::string& filePath)
+		: Inspector<TCharactersWriter>()
 	{
 		Reset(filePath);
 	}
 
 	template <typename TCharactersWriter>
 	inline Inspector<TCharactersWriter>::Inspector(std::istream* inputStream)
+		: Inspector<TCharactersWriter>()
 	{
 		Reset(inputStream);
 	}
@@ -274,12 +303,14 @@ namespace Xml
 	template <typename TInputIterator>
 	inline Inspector<TCharactersWriter>::Inspector(
 		TInputIterator first, TInputIterator last)
+			: Inspector<TCharactersWriter>()
 	{
 		Reset(first, last);
 	}
 
 	template <typename TCharactersWriter>
 	inline Inspector<TCharactersWriter>::Inspector(CharactersReader* reader)
+		: Inspector<TCharactersWriter>()
 	{
 		Reset(reader);
 	}
@@ -296,6 +327,28 @@ namespace Xml
 	{
 		// TODO:
 		return false;
+	}
+
+	template <typename TCharactersWriter>
+	inline NodeType Inspector<TCharactersWriter>::GetNodeType() const
+	{
+		return node;
+	}
+
+	template <typename TCharactersWriter>
+	inline const char* Inspector<TCharactersWriter>::GetErrorMessage() const
+	{
+		if (err != ErrorCode::None)
+		{
+		
+		}
+		return nullptr;
+	}
+
+	template <typename TCharactersWriter>
+	inline ErrorCode Inspector<TCharactersWriter>::GetErrorCode() const
+	{
+		return err;
 	}
 
 	template <typename TCharactersWriter>
