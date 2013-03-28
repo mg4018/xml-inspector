@@ -44,6 +44,7 @@ public:
 		InspectorConstructorsTest();
 		InspectorResetTest();
 		BeforeParsingTest();
+		NoSourceTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -267,6 +268,23 @@ public:
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetNodeType() == Xml::NodeType::None);
+
+		std::cout << "OK\n";
+	}
+
+	void NoSourceTest()
+	{
+		std::cout << "No source test... ";
+
+		Xml::Inspector<Xml::Utf16CharactersWriter> inspector;
+		bool foundNode = inspector.ReadNode();
+
+		assert(!foundNode);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::StreamError);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetLineNumber() == 0);
+		assert(inspector.GetLinePosition() == 0);
+		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
 	}

@@ -27,7 +27,9 @@
 #include "CharactersWriter.hpp"
 #include <string>
 #include <istream>
+#include <fstream>
 #include <cstdint>
+#include <cassert>
 
 /**
 	@file XmlInspector.hpp
@@ -49,13 +51,44 @@ namespace Xml
 		None
 	};
 
+	/**
+		@brief Error code.
+	*/
 	enum class ErrorCode
 	{
 		/**
 			@brief There is no error.
 		*/
-		None
+		None,
+
+		/**
+			@brief Stream error has occurred.
+		*/
+		StreamError,
+
+		/**
+			@brief Invalid byte sequence in specified encoding.
+				For example alone surrogate halve in Unicode.
+		*/
+		InvalidByteSequence
 	};
+
+	/// @cond DETAILS
+	namespace Details
+	{
+		enum class Bom
+		{
+			None,
+			StreamError,
+			Invalid
+		};
+
+		Bom ReadBom(std::istream* inputStream);
+
+		template <typename TInputIterator>
+		Bom ReadBom(TInputIterator& first, TInputIterator& last);
+	}
+	/// @endcond
 
 	/**
 		@brief Primary XML parser class.
@@ -95,9 +128,18 @@ namespace Xml
 		SizeType currentLinePosition;
 		NodeType node;
 		ErrorCode err;
+		const char* errMsg;
+		std::string fPath;
+		std::ifstream fileStream;
+		std::istream* externalStream;
+		CharactersReader* reader;
+		bool isExternalReader;
+		bool afterBom;
 
 		// Last numbers <= current numbers.
 		void SaveNumbers();
+
+		void SetError(ErrorCode errorCode);
 	public:
 		/**
 			@brief Initializes a new instance of the Inspector class.
@@ -273,9 +315,21 @@ namespace Xml
 
 	template <typename TCharactersWriter>
 	inline Inspector<TCharactersWriter>::Inspector()
-		: node(NodeType::None), err(ErrorCode::None)
+		: lastLineNumber(0),
+		lastLinePosition(0),
+		currentLineNumber(0),
+		currentLinePosition(0),
+		node(NodeType::None),
+		err(ErrorCode::None),
+		errMsg(nullptr),
+		fPath(),
+		fileStream(),
+		externalStream(nullptr),
+		reader(nullptr),
+		isExternalReader(false),
+		afterBom(false)
 	{
-		Reset();
+
 	}
 
 	template <typename TCharactersWriter>
@@ -323,10 +377,91 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
+	inline void Inspector<TCharactersWriter>::SetError(ErrorCode errorCode)
+	{
+		err = errorCode;
+		if (errorCode != ErrorCode::None)
+		{
+			switch (errorCode)
+			{
+				case ErrorCode::StreamError:
+					errMsg = "Stream error has occurred.";
+					return;
+				case ErrorCode::InvalidByteSequence:
+					errMsg = "Invalid byte sequence in specified encoding. "
+						"For example alone surrogate halve in Unicode.";
+					return;
+				default:
+					errMsg = nullptr;
+					return;
+			}
+		}
+		errMsg = nullptr;
+	}
+
+	template <typename TCharactersWriter>
 	inline bool Inspector<TCharactersWriter>::ReadNode()
 	{
+		if (!afterBom)
+		{
+			if (!fPath.empty())
+			{
+				fileStream.open(fPath.c_str());
+				if (!fileStream.is_open())
+				{
+					fileStream.clear();
+					SetError(ErrorCode::StreamError);
+					return false;
+				}
+
+				Details::Bom bom = Details::ReadBom(&fileStream);
+				if (bom == Details::Bom::StreamError)
+				{
+					fileStream.close();
+					fileStream.clear();
+					SetError(ErrorCode::StreamError);
+					return false;
+				}
+
+				if (bom == Details::Bom::Invalid)
+				{
+					fileStream.close();
+					fileStream.clear();
+					SetError(ErrorCode::InvalidByteSequence);
+					return false;
+				}
+
+				// We have a BOM.
+				// TODO:
+				assert(false && "Not implemented yet.");
+			}
+			else if (externalStream != nullptr)
+			{
+				// TODO:
+				assert(false && "Not implemented yet.");
+			}
+			else if (isExternalReader)
+			{
+				// TODO:
+				assert(false && "Not implemented yet.");
+			}
+			else if (reader != nullptr) // from iterators.
+			{
+				// TODO:
+				assert(false && "Not implemented yet.");
+			}
+			else
+			{
+				SetError(ErrorCode::StreamError);
+				return false;
+			}
+		}
+
+		if (err != ErrorCode::None)
+			return false;
 		// TODO:
-		return false;
+		assert(false && "Not implemented yet.");
+		return true;
 	}
 
 	template <typename TCharactersWriter>
@@ -338,11 +473,7 @@ namespace Xml
 	template <typename TCharactersWriter>
 	inline const char* Inspector<TCharactersWriter>::GetErrorMessage() const
 	{
-		if (err != ErrorCode::None)
-		{
-		
-		}
-		return nullptr;
+		return errMsg;
 	}
 
 	template <typename TCharactersWriter>
@@ -376,40 +507,90 @@ namespace Xml
 	template <typename TCharactersWriter>
 	inline void Inspector<TCharactersWriter>::Reset()
 	{
-		// TODO:
+		lastLineNumber = 0;
+		lastLinePosition = 0;
+		currentLineNumber = 0;
+		currentLinePosition = 0;
+		node = NodeType::None;
+		err = ErrorCode::None;
+		errMsg = nullptr;
+		if (!fPath.empty())
+		{
+			fPath.clear();
+			if (fileStream.is_open())
+				fileStream.close();
+			fileStream.clear();
+			delete reader;
+			reader = nullptr;
+		}
+		else if (isExternalReader)
+		{
+			reader = nullptr;
+			isExternalReader = false;
+		}
+		else // pointer to external stream.
+		{
+			externalStream = nullptr;
+			delete reader;
+			reader = nullptr;
+		}
 	}
 
 	template <typename TCharactersWriter>
-	inline void Inspector<TCharactersWriter>::Reset(const char* /* filePath */)
+	inline void Inspector<TCharactersWriter>::Reset(const char* filePath)
 	{
-		// TODO:
+		Reset();
+		fPath = filePath;
 	}
 
 	template <typename TCharactersWriter>
-	inline void Inspector<TCharactersWriter>::Reset(const std::string& /* filePath */)
+	inline void Inspector<TCharactersWriter>::Reset(const std::string& filePath)
 	{
-		// TODO:
+		Reset();
+		fPath = filePath;
 	}
 
 	template <typename TCharactersWriter>
-	inline void Inspector<TCharactersWriter>::Reset(std::istream* /* inputStream */)
+	inline void Inspector<TCharactersWriter>::Reset(std::istream* inputStream)
 	{
-		// TODO:
+		Reset();
+		externalStream = inputStream;
 	}
 
 	template <typename TCharactersWriter>
 	template <typename TInputIterator>
 	inline void Inspector<TCharactersWriter>::Reset(
-		TInputIterator /* first */, TInputIterator /* last */)
+		TInputIterator first, TInputIterator last)
 	{
-		// TODO:
+		Reset();
+		reader = new Utf8IteratorsReader<TInputIterator>(first, last);
 	}
 
 	template <typename TCharactersWriter>
-	inline void Inspector<TCharactersWriter>::Reset(CharactersReader* /* reader */)
+	inline void Inspector<TCharactersWriter>::Reset(CharactersReader* r)
 	{
-		// TODO:
+		Reset();
+		reader = r;
+		isExternalReader = (r != nullptr);
 	}
+
+	/// @cond DETAILS
+	namespace Details
+	{
+		inline Bom ReadBom(std::istream* /* inputStream */)
+		{
+			// TODO:
+			return Bom::None;
+		}
+		
+		template <typename TInputIterator>
+		inline Bom ReadBom(TInputIterator& /* first */, TInputIterator& /* last */)
+		{
+			// TODO:
+			return Bom::None;
+		}
+	}
+	/// @endcond
 }
 
 #endif
