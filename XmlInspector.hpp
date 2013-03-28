@@ -67,8 +67,9 @@ namespace Xml
 		StreamError,
 
 		/**
-			@brief Invalid byte sequence in specified encoding.
-				For example alone surrogate halve in Unicode.
+			@brief Invalid byte sequence. For example
+				invalid byte order mark (BOM) or alone
+				surrogate halve in UTF-16.
 		*/
 		InvalidByteSequence
 	};
@@ -388,8 +389,9 @@ namespace Xml
 					errMsg = "Stream error has occurred.";
 					return;
 				case ErrorCode::InvalidByteSequence:
-					errMsg = "Invalid byte sequence in specified encoding. "
-						"For example alone surrogate halve in Unicode.";
+					errMsg = "Invalid byte sequence. For example "
+						"invalid byte order mark (BOM) "
+						"or alone surrogate halve in UTF-16.";
 					return;
 				default:
 					errMsg = nullptr;
