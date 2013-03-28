@@ -516,6 +516,7 @@ namespace Xml
 		node = NodeType::None;
 		err = ErrorCode::None;
 		errMsg = nullptr;
+		afterBom = false;
 		if (!fPath.empty())
 		{
 			fPath.clear();
