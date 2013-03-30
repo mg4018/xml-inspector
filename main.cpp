@@ -2,10 +2,10 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
-#include <streambuf>
 #include <fstream>
 #include <cstddef>
 #include <algorithm>
+#include <list>
 #include <cassert>
 
 // For test.
@@ -45,6 +45,7 @@ public:
 		InspectorResetTest();
 		BeforeParsingTest();
 		NoSourceTest();
+		IteratorsToIstreamTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -285,6 +286,29 @@ public:
 		assert(inspector.GetLineNumber() == 0);
 		assert(inspector.GetLinePosition() == 0);
 		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void IteratorsToIstreamTest()
+	{
+		std::cout << "Iterators to istream test... ";
+	
+		char source[] = u8"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi";
+		std::list<char> listSource(source, source + sizeof(source) - 1);
+		Xml::Details::BasicIteratorsBuf<std::list<char>::const_iterator, char>
+			buf(listSource.cbegin(), listSource.cend());
+		std::istream is(&buf);
+
+		Xml::Utf8StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination == U"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi");
 
 		std::cout << "OK\n";
 	}

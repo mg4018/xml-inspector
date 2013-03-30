@@ -26,6 +26,8 @@
 #include "CharactersReader.hpp"
 #include "CharactersWriter.hpp"
 #include <string>
+#include <ios>
+#include <streambuf>
 #include <istream>
 #include <fstream>
 #include <cstdint>
@@ -81,13 +83,51 @@ namespace Xml
 		{
 			None,
 			StreamError,
-			Invalid
+			Invalid,
+			Utf8,
+			Utf16BE,
+			Utf16LE,
+			Utf32BE,
+			Utf32LE
 		};
 
 		Bom ReadBom(std::istream* inputStream);
 
 		template <typename TInputIterator>
 		Bom ReadBom(TInputIterator& first, TInputIterator& last);
+
+		template <
+			typename TInputIterator,
+			typename TCharacterType,
+			typename TTraits = std::char_traits<TCharacterType>>
+		class BasicIteratorsBuf
+			: public std::basic_streambuf<TCharacterType, TTraits>
+		{
+		public:
+			typedef TInputIterator IteratorType;
+			typedef std::basic_streambuf<TCharacterType, TTraits> StreambufType;
+
+			typedef TCharacterType char_type;
+			typedef TTraits traits_type;
+			typedef typename traits_type::int_type int_type;
+			typedef typename traits_type::pos_type pos_type;
+			typedef typename traits_type::off_type off_type;
+		protected:
+			IteratorType curIter;
+			IteratorType endIter;
+
+			virtual int_type underflow();
+
+			virtual int_type uflow();
+
+			virtual std::streamsize showmanyc();
+		public:
+			BasicIteratorsBuf(IteratorType first, IteratorType last)
+				: StreambufType(), curIter(first), endIter(last)
+			{
+			
+			}
+		};
 	}
 	/// @endcond
 
@@ -141,6 +181,8 @@ namespace Xml
 		void SaveNumbers();
 
 		void SetError(ErrorCode errorCode);
+
+		void ParseBom();
 	public:
 		/**
 			@brief Initializes a new instance of the Inspector class.
@@ -402,65 +444,110 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
+	inline void Inspector<TCharactersWriter>::ParseBom()
+	{
+		// TODO:
+		if (!fPath.empty())
+		{
+			fileStream.open(fPath.c_str());
+			if (!fileStream.is_open())
+			{
+				fileStream.clear();
+				SetError(ErrorCode::StreamError);
+				return;
+			}
+
+			Details::Bom bom = Details::ReadBom(&fileStream);
+			if (bom == Details::Bom::None)
+			{
+				try
+				{
+					reader = new Utf8StreamReader(&fileStream);
+				}
+				catch (...)
+				{
+					fileStream.close();
+					fileStream.clear();
+					throw;
+				}
+				err = ErrorCode::None;
+				afterBom = true;
+				return;
+			}
+
+			if (bom == Details::Bom::StreamError)
+			{
+				fileStream.close();
+				fileStream.clear();
+				SetError(ErrorCode::StreamError);
+				return;
+			}
+
+			if (bom == Details::Bom::Invalid)
+			{
+				fileStream.close();
+				fileStream.clear();
+				SetError(ErrorCode::InvalidByteSequence);
+				return;
+			}
+
+			// We have a BOM.
+			// TODO:
+			assert(false && "Not implemented yet.");
+		}
+		else if (externalStream != nullptr)
+		{
+			Details::Bom bom = Details::ReadBom(externalStream);
+			if (bom == Details::Bom::None)
+			{
+				reader = new Utf8StreamReader(externalStream);
+				err = ErrorCode::None;
+				afterBom = true;
+				return;
+			}
+
+			if (bom == Details::Bom::StreamError)
+			{
+				SetError(ErrorCode::StreamError);
+				return;
+			}
+
+			if (bom == Details::Bom::Invalid)
+			{
+				SetError(ErrorCode::InvalidByteSequence);
+				return;
+			}
+
+			// We have a BOM.
+			// TODO:
+			assert(false && "Not implemented yet.");
+		}
+		else if (isExternalReader)
+		{
+			err = ErrorCode::None;
+			afterBom = true;
+		}
+		else if (reader != nullptr) // from iterators.
+		{
+			// We have reader already.
+			// TODO:
+			assert(false && "Not implemented yet.");
+		}
+		else
+		{
+			SetError(ErrorCode::StreamError);
+		}
+	}
+
+	template <typename TCharactersWriter>
 	inline bool Inspector<TCharactersWriter>::ReadNode()
 	{
 		if (!afterBom)
-		{
-			if (!fPath.empty())
-			{
-				fileStream.open(fPath.c_str());
-				if (!fileStream.is_open())
-				{
-					fileStream.clear();
-					SetError(ErrorCode::StreamError);
-					return false;
-				}
-
-				Details::Bom bom = Details::ReadBom(&fileStream);
-				if (bom == Details::Bom::StreamError)
-				{
-					fileStream.close();
-					fileStream.clear();
-					SetError(ErrorCode::StreamError);
-					return false;
-				}
-
-				if (bom == Details::Bom::Invalid)
-				{
-					fileStream.close();
-					fileStream.clear();
-					SetError(ErrorCode::InvalidByteSequence);
-					return false;
-				}
-
-				// We have a BOM.
-				// TODO:
-				assert(false && "Not implemented yet.");
-			}
-			else if (externalStream != nullptr)
-			{
-				// TODO:
-				assert(false && "Not implemented yet.");
-			}
-			else if (isExternalReader)
-			{
-				// TODO:
-				assert(false && "Not implemented yet.");
-			}
-			else if (reader != nullptr) // from iterators.
-			{
-				// TODO:
-				assert(false && "Not implemented yet.");
-			}
-			else
-			{
-				SetError(ErrorCode::StreamError);
-				return false;
-			}
-		}
+			ParseBom();
 
 		if (err != ErrorCode::None)
 			return false;
+
 		// TODO:
 		assert(false && "Not implemented yet.");
 		return true;
@@ -591,6 +678,44 @@ namespace Xml
 		{
 			// TODO:
 			return Bom::None;
+		}
+
+		template <
+			typename TInputIterator,
+			typename TCharacterType,
+			typename TTraits>
+		inline typename BasicIteratorsBuf<TInputIterator, TCharacterType, TTraits>::int_type
+			BasicIteratorsBuf<TInputIterator, TCharacterType, TTraits>::underflow()
+		{
+			if (curIter == endIter)
+				return traits_type::eof();
+
+			return traits_type::to_int_type(*curIter);
+		}
+
+		template <
+			typename TInputIterator,
+			typename TCharacterType,
+			typename TTraits>
+		inline typename BasicIteratorsBuf<TInputIterator, TCharacterType, TTraits>::int_type
+			BasicIteratorsBuf<TInputIterator, TCharacterType, TTraits>::uflow()
+		{
+			if (curIter == endIter)
+				return traits_type::eof();
+
+			return traits_type::to_int_type(*curIter++);
+		}
+
+		template <
+			typename TInputIterator,
+			typename TCharacterType,
+			typename TTraits>
+		inline std::streamsize
+			BasicIteratorsBuf<TInputIterator, TCharacterType, TTraits>::showmanyc()
+		{
+			return (curIter != endIter)
+					? 1
+					: 0;
 		}
 	}
 	/// @endcond
