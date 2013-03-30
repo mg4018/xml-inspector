@@ -32,6 +32,7 @@
 #include <fstream>
 #include <cstdint>
 #include <cassert>
+#include <memory>
 
 /**
 	@file XmlInspector.hpp
@@ -172,8 +173,9 @@ namespace Xml
 		const char* errMsg;
 		std::string fPath;
 		std::ifstream fileStream;
-		std::istream* externalStream;
+		std::istream* inputStreamPtr;
 		CharactersReader* reader;
+		bool isExternalStream;
 		bool isExternalReader;
 		bool afterBom;
 
@@ -229,6 +231,11 @@ namespace Xml
 			TODO: warning message about BOM.
 		*/
 		Inspector(CharactersReader* reader);
+
+		/**
+			@brief Destructor.
+		*/
+		~Inspector();
 
 		/**
 			@brief Reads the next node from the stream.
@@ -367,8 +374,9 @@ namespace Xml
 		errMsg(nullptr),
 		fPath(),
 		fileStream(),
-		externalStream(nullptr),
+		inputStreamPtr(nullptr),
 		reader(nullptr),
+		isExternalStream(false),
 		isExternalReader(false),
 		afterBom(false)
 	{
@@ -410,6 +418,12 @@ namespace Xml
 		: Inspector<TCharactersWriter>()
 	{
 		Reset(reader);
+	}
+
+	template <typename TCharactersWriter>
+	inline Inspector<TCharactersWriter>::~Inspector()
+	{
+		Reset();
 	}
 
 	template <typename TCharactersWriter>
@@ -495,12 +509,12 @@ namespace Xml
 			// TODO:
 			assert(false && "Not implemented yet.");
 		}
-		else if (externalStream != nullptr)
+		else if (inputStreamPtr != nullptr)
 		{
-			Details::Bom bom = Details::ReadBom(externalStream);
+			Details::Bom bom = Details::ReadBom(inputStreamPtr);
 			if (bom == Details::Bom::None)
 			{
-				reader = new Utf8StreamReader(externalStream);
+				reader = new Utf8StreamReader(inputStreamPtr);
 				err = ErrorCode::None;
 				afterBom = true;
 				return;
@@ -526,12 +540,6 @@ namespace Xml
 		{
 			err = ErrorCode::None;
 			afterBom = true;
-		}
-		else if (reader != nullptr) // from iterators.
-		{
-			// We have reader already.
-			// TODO:
-			assert(false && "Not implemented yet.");
 		}
 		else
 		{
@@ -618,9 +626,21 @@ namespace Xml
 			reader = nullptr;
 			isExternalReader = false;
 		}
-		else // pointer to external stream.
+		else if (isExternalStream)
 		{
-			externalStream = nullptr;
+			inputStreamPtr = nullptr;
+			isExternalStream = false;
+			delete reader;
+			reader = nullptr;
+		}
+		else
+		{
+			if (inputStreamPtr != nullptr)
+			{
+				delete inputStreamPtr->rdbuf();
+				delete inputStreamPtr;
+				inputStreamPtr = nullptr;
+			}
 			delete reader;
 			reader = nullptr;
 		}
@@ -644,7 +664,8 @@ namespace Xml
 	inline void Inspector<TCharactersWriter>::Reset(std::istream* inputStream)
 	{
 		Reset();
-		externalStream = inputStream;
+		inputStreamPtr = inputStream;
+		isExternalStream = true;
 	}
 
 	template <typename TCharactersWriter>
@@ -653,7 +674,10 @@ namespace Xml
 		TInputIterator first, TInputIterator last)
 	{
 		Reset();
-		reader = new Utf8IteratorsReader<TInputIterator>(first, last);
+		std::unique_ptr<Details::BasicIteratorsBuf<TInputIterator, char>> buf(
+			new Details::BasicIteratorsBuf<TInputIterator, char>(first, last));
+		inputStreamPtr = new std::istream(buf.get());
+		buf.release();
 	}
 
 	template <typename TCharactersWriter>
