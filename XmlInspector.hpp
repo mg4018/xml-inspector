@@ -74,7 +74,149 @@ namespace Xml
 				invalid byte order mark (BOM) or alone
 				surrogate halve in UTF-16.
 		*/
-		InvalidByteSequence
+		InvalidByteSequence,
+
+		/**
+			@brief Not allowed characters. For example some characters
+				outside the root element, where a white spaces are the
+				only characters allowed.
+		*/
+		InvalidSyntax,
+
+		/**
+			@brief Check www.w3.org/TR/REC-xml/#NT-XMLDecl.
+		*/
+		InvalidXmlDeclarationLocation,
+
+		/**
+			@brief Check www.w3.org/TR/REC-xml/#NT-XMLDecl.
+		*/
+		InvalidXmlDeclarationSyntax,
+
+		/**
+			@brief Check www.w3.org/TR/REC-xml/#NT-Comment.
+		*/
+		InvalidCommentSyntax,
+
+		/**
+			@brief CDATA section is outside the root element.
+				Check www.w3.org/TR/REC-xml/#NT-CDSect.
+		*/
+		CDataSectionOutside,
+
+		/**
+			@brief Check www.w3.org/TR/REC-xml/#NT-doctypedecl.
+		*/
+		InvalidDoctypeDeclarationLocation,
+
+		/**
+			@brief Check www.w3.org/TR/REC-xml/#NT-doctypedecl.
+		*/
+		DoubleDoctypeDeclaration,
+
+		/**
+			@brief Check www.w3.org/TR/REC-xml/#NT-PI.
+		*/
+		InvalidProcessingInstructionSyntax,
+
+		/**
+			@brief Check www.w3.org/TR/xml-names/#NT-QName.
+		*/
+		InvalidTagName,
+
+		/**
+			@brief Check www.w3.org/TR/xml-names/#NT-QName.
+		*/
+		InvalidAttributeName,
+
+		/**
+			@brief We should get '=' character now, but we have got other, not allowed character.
+		*/
+		EqualsSignExpected,
+
+		/**
+			@brief For example it's not allowed in XML: <tagName attrName=value>,
+				but this is OK: <tagName attrName="value">.
+		*/
+		QuotationMarkExpected,
+
+		/**
+			@brief For example <tagname attr[end of document].
+		*/
+		UnclosedToken,
+
+		/**
+			@brief Invalid syntax of Reference.
+				Check www.w3.org/TR/REC-xml/#NT-Reference.
+		*/
+		InvalidReferenceSyntax,
+
+		/**
+			@brief Undeclared entity.
+				Check http://www.w3.org/TR/REC-xml/#NT-EntityRef.
+		*/
+		UndeclaredEntity,
+
+		/**
+			@brief Code point in character reference doesn't match
+				the valid character in ISO/IEC 10646 character set.
+				Check www.w3.org/TR/REC-xml/#NT-CharRef.
+		*/
+		InvalidCharacterReference,
+
+		/**
+			@brief We should get the greater than sign now, but we have got other,
+				not allowed character.
+		*/
+		GreaterThanSignExpected,
+
+		/**
+			@brief For example: "<a>text</b>". "</a>" expected, but "</b>" found.
+				Another example: "</b>". Found closing tag, but there is no start tag of "b".
+				Both examples are not allowed in XML files.
+		*/
+		UnexpectedEndTag,
+
+		/**
+			@brief For example: "<a><b><c></c></b>". Unclosed "a" tag.
+		*/
+		UnclosedTag,
+
+		/**
+			@brief There is no root element in document.
+		*/
+		NoElement,
+
+		/**
+			@brief More than one attribute name in the same start-tag or empty-element tag.
+		*/
+		DoubleAttributeName,
+
+		/**
+			@brief There is some name prefix which is not bound to any namespace URI.
+		*/
+		PrefixWithoutAssignedNamespace,
+
+		/**
+			@brief Namespace declaration with prefix cannot have empty value.
+		*/
+		PrefixWithEmptyNamespace,
+
+		/**
+			@brief Reserved xmlns prefix cannot be declared or set to empty value.
+		*/
+		XmlnsDeclared,
+
+		/**
+			@brief Prefix is bound to reserved namespace.
+		*/
+		PrefixBoundToReservedNamespace,
+
+		/**
+			@brief Prefix 'xml' is reserved for use by XML and has a fixed
+				namespace URI http://www.w3.org/XML/1998/namespace.
+		*/
+		InvalidXmlPrefixDeclaration
 	};
 
 	/// @cond DETAILS
@@ -140,8 +282,8 @@ namespace Xml
 		@tparam TCharactersWriter Desired encoding. You don't need to care how XML file is encoded.
 			You can choose how you want to read XML strings between Utf8CharactersWriter, Utf16CharactersWriter
 			and Utf32CharactersWriter class from CharactersWriter.hpp file. They respectively store the strings in
-			@a std::string, @a std::u16string and @a std::u32string. You can also write your own fancy way of
-			storing strings. For example you may want to use @a std::wstring and even other than Unicode encoding.
+			@c std::string, @c std::u16string and @c std::u32string. You can also write your own fancy way of
+			storing strings. For example you may want to use @c std::wstring and even other than Unicode encoding.
 	*/
 	template <typename TCharactersWriter>
 	class Inspector
@@ -274,7 +416,7 @@ namespace Xml
 			   </b>
 			</root>
 			@endverbatim
-			Line number of @a bbb is 4.
+			Line number of @c bbb is 4.
 
 			@sa GetLinePosition() and GetDepth().
 		*/
@@ -289,7 +431,7 @@ namespace Xml
 			abcdef<mytag />
 			</root>
 			@endverbatim
-			Line position of &lt;@a mytag /&gt; is 7.
+			Line position of &lt;@c mytag /&gt; is 7.
 
 			@warning Carriage return characters (U+000D) are ignored.
 			@sa GetLineNumber() and GetDepth().
@@ -308,8 +450,8 @@ namespace Xml
 			   </b>
 			</root>
 			@endverbatim
-			Depth of @a aaa is 2, the same as depth of @a bbb.
-			Depht of &lt;@a a&gt; tag, the same as closing tag &lt;/@a a&gt; is 1.
+			Depth of @c aaa is 2, the same as depth of @c bbb.
+			Depht of &lt;@c a&gt; tag, the same as closing tag &lt;/@c a&gt; is 1.
 
 			@sa GetLineNumber() and GetLinePosition().
 		*/
@@ -445,12 +587,91 @@ namespace Xml
 					errMsg = "Stream error has occurred.";
 					return;
 				case ErrorCode::InvalidByteSequence:
-					errMsg = "Invalid byte sequence. For example "
-						"invalid byte order mark (BOM) "
-						"or alone surrogate halve in UTF-16.";
+					errMsg = "Invalid byte sequence.";
+					return;
+				case ErrorCode::InvalidSyntax:
+					errMsg = "Invalid syntax.";
+					return;
+				case ErrorCode::InvalidXmlDeclarationLocation:
+					errMsg = "Invalid location of XML declaration.";
+					return;
+				case ErrorCode::InvalidXmlDeclarationSyntax:
+					errMsg = "Invalid syntax of XML declaration.";
+					return;
+				case ErrorCode::InvalidCommentSyntax:
+					errMsg = "Invalid syntax of comment.";
+					return;
+				case ErrorCode::CDataSectionOutside:
+					errMsg = "CDATA section is outside the root element.";
+					return;
+				case ErrorCode::InvalidDoctypeDeclarationLocation:
+					errMsg = "Invalid location of document type declaration.";
+					return;
+				case ErrorCode::DoubleDoctypeDeclaration:
+					errMsg = "There should be exactly one document type declaration.";
+					return;
+				case ErrorCode::InvalidProcessingInstructionSyntax:
+					errMsg = "Invalid syntax of processing instruction.";
+					return;
+				case ErrorCode::InvalidTagName:
+					errMsg = "Invalid tag name.";
+					return;
+				case ErrorCode::InvalidAttributeName:
+					errMsg = "Invalid attribute name.";
+					return;
+				case ErrorCode::EqualsSignExpected:
+					errMsg = "Equals sign expected.";
+					return;
+				case ErrorCode::QuotationMarkExpected:
+					errMsg = "Quotation mark expected.";
+					return;
+				case ErrorCode::UnclosedToken:
+					errMsg = "Unclosed token.";
+					return;
+				case ErrorCode::InvalidReferenceSyntax:
+					errMsg = "Invalid syntax of reference.";
+					return;
+				case ErrorCode::UndeclaredEntity:
+					errMsg = "Undeclared entity.";
+					return;
+				case ErrorCode::InvalidCharacterReference:
+					errMsg = "Code point in character reference doesn\'t match "
+						"the valid character in ISO/IEC 10646 character set.";
+					return;
+				case ErrorCode::GreaterThanSignExpected:
+					errMsg = "Greater than sign expected.";
+					return;
+				case ErrorCode::UnexpectedEndTag:
+					errMsg = "Unexpected end tag.";
+					return;
+				case ErrorCode::UnclosedTag:
+					errMsg = "Unclosed tag.";
+					return;
+				case ErrorCode::NoElement:
+					errMsg = "Cannot find an element.";
+					return;
+				case ErrorCode::DoubleAttributeName:
+					errMsg = "An attribute name must not appear more than "
+						"once in the same start-tag or empty-element tag.";
+					return;
+				case ErrorCode::PrefixWithoutAssignedNamespace:
+					errMsg = "Name prefix must bound to the namespace URI.";
+					return;
+				case ErrorCode::PrefixWithEmptyNamespace:
+					errMsg = "Namespace declaration with prefix cannot have empty value.";
+					return;
+				case ErrorCode::XmlnsDeclared:
+					errMsg = "Reserved xmlns prefix cannot be declared or set to empty value.";
+					return;
+				case ErrorCode::PrefixBoundToReservedNamespace:
+					errMsg = "Prefix is bound to reserved namespace.";
+					return;
+				case ErrorCode::InvalidXmlPrefixDeclaration:
+					errMsg = "Prefix \'xml\' is reserved for use by XML and has a fixed "
+						"namespace URI http://www.w3.org/XML/1998/namespace.";
 					return;
 				default:
-					errMsg = nullptr;
+					errMsg = "XML error has occurred.";
 					return;
 			}
 		}
