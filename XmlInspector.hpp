@@ -54,17 +54,17 @@ namespace Xml
 		None,
 
 		/**
-			@brief A start element tag (for example @c <mytag> ).
+			@brief A start element tag (for example <tt>&lt;mytag&gt;</tt> ).
 		*/
 		StartElement,
 
 		/**
-			@brief An end element tag (for example @c </mytag> ).
+			@brief An end element tag (for example <tt>&lt;/mytag&gt;</tt> ).
 		*/
 		EndElement,
 
 		/**
-			@brief En empty element (for example @c <mytag /> ).
+			@brief En empty element (for example <tt>&lt;mytag /&gt;</tt> ).
 		*/
 		EmptyElement,
 
@@ -74,32 +74,32 @@ namespace Xml
 		Text,
 
 		/**
-			@brief A CDATA section (for example <![CDATA[don't touch]]> ).
+			@brief A CDATA section (for example <tt>&lt;![CDATA[don't touch]]&gt;</tt> ).
 		*/
 		CDATA,
 
 		/**
-			@brief The XML declaration (for example <?xml version='1.0'?> ).
+			@brief The XML declaration (for example <tt>&lt;?xml version='1.0'?&gt;</tt> ).
 		*/
 		XmlDeclaration,
 
 		/**
-			@brief A comment (for example <!-- my comment --> ).
+			@brief A comment (for example <tt>&lt;!-- my comment --&gt;</tt> ).
 		*/
 		Comment,
 
 		/**
-			@brief A processing instruction (for example <?php echo "Hello, world!"; ?> ).
+			@brief A processing instruction (for example <tt>&lt;?php echo "Hello, world!"; ?&gt;</tt> ).
 		*/
 		ProcessingInstruction,
 
 		/**
-			@brief A reference to an entity (for example &myref; ).
+			@brief A reference to an entity (for example <tt>&amp;myref;</tt> ).
 		*/
 		EntityReference,
 
 		/**
-			@brief A document type declaration (for example <!DOCTYPE...> ).
+			@brief A document type declaration (for example <tt>&lt;!DOCTYPE...&gt;</tt> ).
 		*/
 		DocumentType,
 
@@ -139,48 +139,48 @@ namespace Xml
 		InvalidSyntax,
 
 		/**
-			@brief Check www.w3.org/TR/REC-xml/#NT-XMLDecl.
+			@brief Check http://www.w3.org/TR/REC-xml/#NT-XMLDecl.
 		*/
 		InvalidXmlDeclarationLocation,
 
 		/**
-			@brief Check www.w3.org/TR/REC-xml/#NT-XMLDecl.
+			@brief Check http://www.w3.org/TR/REC-xml/#NT-XMLDecl.
 		*/
 		InvalidXmlDeclarationSyntax,
 
 		/**
-			@brief Check www.w3.org/TR/REC-xml/#NT-Comment.
+			@brief Check http://www.w3.org/TR/REC-xml/#NT-Comment.
 		*/
 		InvalidCommentSyntax,
 
 		/**
 			@brief CDATA section is outside the root element.
-				Check www.w3.org/TR/REC-xml/#NT-CDSect.
+				Check http://www.w3.org/TR/REC-xml/#NT-CDSect.
 		*/
 		CDataSectionOutside,
 
 		/**
-			@brief Check www.w3.org/TR/REC-xml/#NT-doctypedecl.
+			@brief Check http://www.w3.org/TR/REC-xml/#NT-doctypedecl.
 		*/
 		InvalidDoctypeDeclarationLocation,
 
 		/**
-			@brief Check www.w3.org/TR/REC-xml/#NT-doctypedecl.
+			@brief Check http://www.w3.org/TR/REC-xml/#NT-doctypedecl.
 		*/
 		DoubleDoctypeDeclaration,
 
 		/**
-			@brief Check www.w3.org/TR/REC-xml/#NT-PI.
+			@brief Check http://www.w3.org/TR/REC-xml/#NT-PI.
 		*/
 		InvalidProcessingInstructionSyntax,
 
 		/**
-			@brief Check www.w3.org/TR/xml-names/#NT-QName.
+			@brief Check http://www.w3.org/TR/xml-names/#NT-QName.
 		*/
 		InvalidTagName,
 
 		/**
-			@brief Check www.w3.org/TR/xml-names/#NT-QName.
+			@brief Check http://www.w3.org/TR/xml-names/#NT-QName.
 		*/
 		InvalidAttributeName,
 
@@ -190,19 +190,19 @@ namespace Xml
 		EqualsSignExpected,
 
 		/**
-			@brief For example it's not allowed in XML: <tagName attrName=value>,
-				but this is OK: <tagName attrName="value">.
+			@brief For example it's not allowed in XML: <tt>&lt;tagName attrName=value&gt;</tt>,
+				but this is OK: <tt>&lt;tagName attrName="value"&gt;</tt>.
 		*/
 		QuotationMarkExpected,
 
 		/**
-			@brief For example <tagname attr[end of document].
+			@brief For example: <tt>&lt;tagname attr[end of document]</tt>.
 		*/
 		UnclosedToken,
 
 		/**
 			@brief Invalid syntax of Reference.
-				Check www.w3.org/TR/REC-xml/#NT-Reference.
+				Check http://www.w3.org/TR/REC-xml/#NT-Reference.
 		*/
 		InvalidReferenceSyntax,
 
@@ -215,7 +215,7 @@ namespace Xml
 		/**
 			@brief Code point in character reference doesn't match
 				the valid character in ISO/IEC 10646 character set.
-				Check www.w3.org/TR/REC-xml/#NT-CharRef.
+				Check http://www.w3.org/TR/REC-xml/#NT-CharRef.
 		*/
 		InvalidCharacterReference,
 
@@ -226,14 +226,14 @@ namespace Xml
 		GreaterThanSignExpected,
 
 		/**
-			@brief For example: "<a>text</b>". "</a>" expected, but "</b>" found.
-				Another example: "</b>". Found closing tag, but there is no start tag of "b".
+			@brief For example: <tt>&lt;a&gt;text&lt;/b&gt;</tt>. <tt>&lt;/a&gt;</tt> expected, but <tt>&lt;/b&gt;</tt> found.
+				Another example: <tt>&lt;/b&gt;</tt>. Found closing tag, but there is no start tag of @c b.
 				Both examples are not allowed in XML files.
 		*/
 		UnexpectedEndTag,
 
 		/**
-			@brief For example: "<a><b><c></c></b>". Unclosed "a" tag.
+			@brief For example: <tt>&lt;a&gt;&lt;b&gt;&lt;c&gt;&lt;/c&gt;&lt;/b&gt;</tt>. Unclosed @c a tag.
 		*/
 		UnclosedTag,
 
@@ -345,7 +345,7 @@ namespace Xml
 	{
 	public:
 		/**
-			@brief Alias of encoding type that is used to write strings.
+			@brief Alias of characters writer type that is used to write strings.
 		*/
 		typedef TCharactersWriter CharactersWriterType;
 
@@ -511,7 +511,7 @@ namespace Xml
 			abcdef<mytag />
 			</root>
 			@endverbatim
-			Line position of &lt;@c mytag /&gt; is 7.
+			Line position of <tt>&lt;@c mytag /&gt;</tt> is 7.
 
 			@warning Carriage return characters (U+000D) are ignored.
 			@sa GetLineNumber() and GetDepth().
