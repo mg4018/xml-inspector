@@ -306,10 +306,8 @@ namespace Xml
 		*/
 		typedef uint_least64_t SizeType;
 	private:
-		SizeType lastLineNumber;
-		SizeType lastLinePosition;
-		SizeType currentLineNumber;
-		SizeType currentLinePosition;
+		SizeType lineNumber;
+		SizeType linePosition;
 		NodeType node;
 		ErrorCode err;
 		const char* errMsg;
@@ -320,9 +318,6 @@ namespace Xml
 		bool isExternalStream;
 		bool isExternalReader;
 		bool afterBom;
-
-		// Last numbers <= current numbers.
-		void SaveNumbers();
 
 		void SetError(ErrorCode errorCode);
 
@@ -507,10 +502,8 @@ namespace Xml
 
 	template <typename TCharactersWriter>
 	inline Inspector<TCharactersWriter>::Inspector()
-		: lastLineNumber(0),
-		lastLinePosition(0),
-		currentLineNumber(0),
-		currentLinePosition(0),
+		: lineNumber(0),
+		linePosition(0),
 		node(NodeType::None),
 		err(ErrorCode::None),
 		errMsg(nullptr),
@@ -566,13 +559,6 @@ namespace Xml
 	inline Inspector<TCharactersWriter>::~Inspector()
 	{
 		Reset();
-	}
-
-	template <typename TCharactersWriter>
-	inline void Inspector<TCharactersWriter>::SaveNumbers()
-	{
-		SizeType lastLineNumber = currentLineNumber;
-		SizeType lastLinePosition = currentLinePosition;
 	}
 
 	template <typename TCharactersWriter>
@@ -804,14 +790,14 @@ namespace Xml
 	inline typename Inspector<TCharactersWriter>::SizeType
 		Inspector<TCharactersWriter>::GetLineNumber() const
 	{
-		return lastLineNumber;
+		return lineNumber;
 	}
 
 	template <typename TCharactersWriter>
 	inline typename Inspector<TCharactersWriter>::SizeType
 		Inspector<TCharactersWriter>::GetLinePosition() const
 	{
-		return lastLinePosition;
+		return linePosition;
 	}
 
 	template <typename TCharactersWriter>
@@ -825,10 +811,8 @@ namespace Xml
 	template <typename TCharactersWriter>
 	inline void Inspector<TCharactersWriter>::Reset()
 	{
-		lastLineNumber = 0;
-		lastLinePosition = 0;
-		currentLineNumber = 0;
-		currentLinePosition = 0;
+		lineNumber = 0;
+		linePosition = 0;
 		node = NodeType::None;
 		err = ErrorCode::None;
 		errMsg = nullptr;
