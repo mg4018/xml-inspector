@@ -51,7 +51,62 @@ namespace Xml
 		/**
 			@brief This is returned by the Inspector if a ReadNode method has not been called.
 		*/
-		None
+		None,
+
+		/**
+			@brief A start element tag (for example @c <mytag> ).
+		*/
+		StartElement,
+
+		/**
+			@brief An end element tag (for example @c </mytag> ).
+		*/
+		EndElement,
+
+		/**
+			@brief En empty element (for example @c <mytag /> ).
+		*/
+		EmptyElement,
+
+		/**
+			@brief A text content of a node.
+		*/
+		Text,
+
+		/**
+			@brief A CDATA section (for example <![CDATA[don't touch]]> ).
+		*/
+		CDATA,
+
+		/**
+			@brief The XML declaration (for example <?xml version='1.0'?> ).
+		*/
+		XmlDeclaration,
+
+		/**
+			@brief A comment (for example <!-- my comment --> ).
+		*/
+		Comment,
+
+		/**
+			@brief A processing instruction (for example <?php echo "Hello, world!"; ?> ).
+		*/
+		ProcessingInstruction,
+
+		/**
+			@brief A reference to an entity (for example &myref; ).
+		*/
+		EntityReference,
+
+		/**
+			@brief A document type declaration (for example <!DOCTYPE...> ).
+		*/
+		DocumentType,
+
+		/**
+			@brief White space between markup. 
+		*/
+		Whitespace
 	};
 
 	/**
@@ -318,6 +373,11 @@ namespace Xml
 		bool isExternalStream;
 		bool isExternalReader;
 		bool afterBom;
+		StringType name;
+		StringType value;
+		StringType localName;
+		StringType prefix;
+		StringType namespaceUri;
 
 		void SetError(ErrorCode errorCode);
 
@@ -388,6 +448,31 @@ namespace Xml
 			@brief Gets the type of the current node.
 		*/
 		NodeType GetNodeType() const;
+
+		/**
+			@brief Gets the qualified name of the node.
+		*/
+		const StringType& GetName() const;
+
+		/**
+			@brief Gets the value of the node.
+		*/
+		const StringType& GetValue() const;
+
+		/**
+			@brief Gets the local name of the node.
+		*/
+		const StringType& GetLocalName() const;
+
+		/**
+			@brief Gets the namespace prefix of the node.
+		*/
+		const StringType& GetPrefix() const;
+
+		/**
+			@brief Gets the namespace URI of the node.
+		*/
+		const StringType& GetNamespaceUri() const;
 
 		/**
 			@brief Gets the last error message.
@@ -513,7 +598,12 @@ namespace Xml
 		reader(nullptr),
 		isExternalStream(false),
 		isExternalReader(false),
-		afterBom(false)
+		afterBom(false),
+		name(),
+		value(),
+		localName(),
+		prefix(),
+		namespaceUri()
 	{
 
 	}
@@ -775,6 +865,41 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
+	inline const typename Inspector<TCharactersWriter>::StringType&
+		Inspector<TCharactersWriter>::GetName() const
+	{
+		return name;
+	}
+
+	template <typename TCharactersWriter>
+	inline const typename Inspector<TCharactersWriter>::StringType&
+		Inspector<TCharactersWriter>::GetValue() const
+	{
+		return value;
+	}
+
+	template <typename TCharactersWriter>
+	inline const typename Inspector<TCharactersWriter>::StringType&
+		Inspector<TCharactersWriter>::GetLocalName() const
+	{
+		return localName;
+	}
+
+	template <typename TCharactersWriter>
+	inline const typename Inspector<TCharactersWriter>::StringType&
+		Inspector<TCharactersWriter>::GetPrefix() const
+	{
+		return prefix;
+	}
+
+	template <typename TCharactersWriter>
+	inline const typename Inspector<TCharactersWriter>::StringType&
+		Inspector<TCharactersWriter>::GetNamespaceUri() const
+	{
+		return namespaceUri;
+	}
+
+	template <typename TCharactersWriter>
 	inline const char* Inspector<TCharactersWriter>::GetErrorMessage() const
 	{
 		return errMsg;
@@ -817,6 +942,11 @@ namespace Xml
 		err = ErrorCode::None;
 		errMsg = nullptr;
 		afterBom = false;
+		name.clear();
+		value.clear();
+		localName.clear();
+		prefix.clear();
+		namespaceUri.clear();
 		if (!fPath.empty())
 		{
 			fPath.clear();
