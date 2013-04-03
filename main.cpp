@@ -62,7 +62,7 @@ public:
 		MemBuf buf(source, sizeof(source) - 1);
 		std::istream is(&buf);
 
-		Xml::Utf8StreamReader reader(&is);
+		Xml::Encoding::Utf8StreamReader reader(&is);
 		char32_t c;
 		std::u32string destination;
 		int result;
@@ -93,7 +93,7 @@ public:
 		MemBuf buf(source, sizeof(source) - sizeof(char16_t));
 		std::istream is(&buf);
 
-		Xml::Utf16BEStreamReader reader(&is);
+		Xml::Encoding::Utf16BEStreamReader reader(&is);
 		char32_t c;
 		std::u32string destination;
 		int result;
@@ -124,7 +124,7 @@ public:
 		MemBuf buf(source, sizeof(source) - sizeof(char16_t));
 		std::istream is(&buf);
 
-		Xml::Utf16LEStreamReader reader(&is);
+		Xml::Encoding::Utf16LEStreamReader reader(&is);
 		char32_t c;
 		std::u32string destination;
 		int result;
@@ -157,7 +157,7 @@ public:
 		MemBuf buf(source, sizeof(source) - sizeof(char32_t));
 		std::istream is(&buf);
 
-		Xml::Utf32BEStreamReader reader(&is);
+		Xml::Encoding::Utf32BEStreamReader reader(&is);
 		char32_t c;
 		std::u32string destination;
 		int result;
@@ -190,7 +190,7 @@ public:
 		MemBuf buf(source, sizeof(source) - sizeof(char32_t));
 		std::istream is(&buf);
 
-		Xml::Utf32LEStreamReader reader(&is);
+		Xml::Encoding::Utf32LEStreamReader reader(&is);
 		char32_t c;
 		std::u32string destination;
 		int result;
@@ -208,7 +208,7 @@ public:
 		std::cout << "UTF-8 iterator reader test... ";
 
 		std::string source = u8"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi";
-		Xml::Utf8IteratorsReader<std::string::const_iterator> reader(source.cbegin(), source.cend());
+		Xml::Encoding::Utf8IteratorsReader<std::string::const_iterator> reader(source.cbegin(), source.cend());
 		char32_t c;
 		std::u32string destination;
 		int result;
@@ -229,7 +229,7 @@ public:
 		std::string destination;
 		std::string pattern = u8"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi";
 		for (auto i = source.cbegin(); i != source.cend(); ++i)
-			Xml::Utf8CharactersWriter::PutCharacter(destination, *i);
+			Xml::Encoding::Utf8CharactersWriter::PutCharacter(destination, *i);
 
 		assert(destination == pattern);
 
@@ -244,7 +244,7 @@ public:
 		std::u16string destination;
 		std::u16string pattern = u"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi";
 		for (auto i = source.cbegin(); i != source.cend(); ++i)
-			Xml::Utf16CharactersWriter::PutCharacter(destination, *i);
+			Xml::Encoding::Utf16CharactersWriter::PutCharacter(destination, *i);
 
 		assert(destination == pattern);
 
@@ -258,7 +258,7 @@ public:
 		std::u32string source = U"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi";
 		std::u32string destination;
 		for (auto i = source.cbegin(); i != source.cend(); ++i)
-			Xml::Utf32CharactersWriter::PutCharacter(destination, *i);
+			Xml::Encoding::Utf32CharactersWriter::PutCharacter(destination, *i);
 
 		assert(destination == source);
 
@@ -270,27 +270,27 @@ public:
 		std::cout << "Inspector constructors test... ";
 
 		// Defaul constructor.
-		Xml::Inspector<Xml::Utf32CharactersWriter> i0;
+		Xml::Inspector<Xml::Encoding::Utf32CharactersWriter> i0;
 
 		// File path from const char*
-		Xml::Inspector<Xml::Utf8CharactersWriter> i1("test.xml");
+		Xml::Inspector<Xml::Encoding::Utf8CharactersWriter> i1("test.xml");
 
 		// File path from const std::string&
 		std::string path = "test.xml";
-		Xml::Inspector<Xml::Utf16CharactersWriter> i2(path);
+		Xml::Inspector<Xml::Encoding::Utf16CharactersWriter> i2(path);
 
 		// From input stream.
 		std::ifstream ifs("test.xml");
-		Xml::Inspector<Xml::Utf32CharactersWriter> i3(&ifs);
+		Xml::Inspector<Xml::Encoding::Utf32CharactersWriter> i3(&ifs);
 	
 		// From bytes.
 		char bytes[] = u8"<root>bytes test</root>";
-		Xml::Inspector<Xml::Utf16CharactersWriter> i4(bytes, bytes + sizeof(bytes));
+		Xml::Inspector<Xml::Encoding::Utf16CharactersWriter> i4(bytes, bytes + sizeof(bytes));
 
 		// From reader interface.
 		std::string content = u8"<root>abc</root>";
-		Xml::Utf8IteratorsReader<std::string::const_iterator> reader(content.cbegin(), content.cend());
-		Xml::Inspector<Xml::Utf32CharactersWriter> i5(&reader);
+		Xml::Encoding::Utf8IteratorsReader<std::string::const_iterator> reader(content.cbegin(), content.cend());
+		Xml::Inspector<Xml::Encoding::Utf32CharactersWriter> i5(&reader);
 
 		std::cout << "OK\n";
 	}
@@ -299,7 +299,7 @@ public:
 	{
 		std::cout << "Inspector reset test... ";
 
-		Xml::Inspector<Xml::Utf32CharactersWriter> inspector;
+		Xml::Inspector<Xml::Encoding::Utf32CharactersWriter> inspector;
 
 		// File path from const char*
 		inspector.Reset("test.xml");
@@ -321,7 +321,7 @@ public:
 
 		// From reader interface.
 		std::string content = u8"<root>abc</root>";
-		Xml::Utf8IteratorsReader<std::string::const_iterator> reader(content.cbegin(), content.cend());
+		Xml::Encoding::Utf8IteratorsReader<std::string::const_iterator> reader(content.cbegin(), content.cend());
 		inspector.Reset(&reader);
 
 		std::cout << "OK\n";
@@ -331,7 +331,7 @@ public:
 	{
 		std::cout << "Before parsing test... ";
 
-		Xml::Inspector<Xml::Utf16CharactersWriter> inspector("test.xml");
+		Xml::Inspector<Xml::Encoding::Utf16CharactersWriter> inspector("test.xml");
 
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
@@ -344,7 +344,7 @@ public:
 	{
 		std::cout << "No source test... ";
 
-		Xml::Inspector<Xml::Utf16CharactersWriter> inspector;
+		Xml::Inspector<Xml::Encoding::Utf16CharactersWriter> inspector;
 		bool foundNode = inspector.ReadNode();
 
 		assert(!foundNode);
@@ -367,7 +367,7 @@ public:
 			buf(listSource.cbegin(), listSource.cend());
 		std::istream is(&buf);
 
-		Xml::Utf8StreamReader reader(&is);
+		Xml::Encoding::Utf8StreamReader reader(&is);
 		char32_t c;
 		std::u32string destination;
 		int result;

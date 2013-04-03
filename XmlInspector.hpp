@@ -39,7 +39,7 @@
 */
 
 /**
-	@brief Main namespace for XML solutions like XML parser and some encoding stuff.
+	@brief Main namespace for XML solutions.
 */
 namespace Xml
 {
@@ -369,7 +369,7 @@ namespace Xml
 		std::string fPath;
 		std::ifstream fileStream;
 		std::istream* inputStreamPtr;
-		CharactersReader* reader;
+		Encoding::CharactersReader* reader;
 		bool isExternalStream;
 		bool isExternalReader;
 		bool afterBom;
@@ -428,7 +428,7 @@ namespace Xml
 
 			TODO: warning message about BOM.
 		*/
-		Inspector(CharactersReader* reader);
+		Inspector(Encoding::CharactersReader* reader);
 
 		/**
 			@brief Destructor.
@@ -583,7 +583,7 @@ namespace Xml
 
 			TODO: warning message about BOM.
 		*/
-		void Reset(CharactersReader* reader);
+		void Reset(Encoding::CharactersReader* reader);
 	};
 
 	template <typename TCharactersWriter>
@@ -641,7 +641,7 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
-	inline Inspector<TCharactersWriter>::Inspector(CharactersReader* reader)
+	inline Inspector<TCharactersWriter>::Inspector(Encoding::CharactersReader* reader)
 		: Inspector<TCharactersWriter>()
 	{
 		Reset(reader);
@@ -775,7 +775,7 @@ namespace Xml
 			{
 				try
 				{
-					reader = new Utf8StreamReader(&fileStream);
+					reader = new Encoding::Utf8StreamReader(&fileStream);
 				}
 				catch (...)
 				{
@@ -813,7 +813,7 @@ namespace Xml
 			Details::Bom bom = Details::ReadBom(inputStreamPtr);
 			if (bom == Details::Bom::None)
 			{
-				reader = new Utf8StreamReader(inputStreamPtr);
+				reader = new Encoding::Utf8StreamReader(inputStreamPtr);
 				err = ErrorCode::None;
 				afterBom = true;
 				return;
@@ -1019,7 +1019,7 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
-	inline void Inspector<TCharactersWriter>::Reset(CharactersReader* r)
+	inline void Inspector<TCharactersWriter>::Reset(Encoding::CharactersReader* r)
 	{
 		Reset();
 		reader = r;
