@@ -36,8 +36,10 @@ public:
 		std::cout << "--START TEST--\n";
 
 		Utf8StreamReaderTest();
-		Utf16StreamReaderTest();
-		Utf32StreamReaderTest();
+		Utf16BEStreamReaderTest();
+		Utf16LEStreamReaderTest();
+		Utf32BEStreamReaderTest();
+		Utf32LEStreamReaderTest();
 		Utf8IteratorsReaderTest();
 		Utf8CharactersWriterTest();
 		Utf16CharactersWriterTest();
@@ -73,9 +75,9 @@ public:
 		std::cout << "OK\n";
 	}
 
-	void Utf16StreamReaderTest()
+	void Utf16BEStreamReaderTest()
 	{
-		std::cout << "UTF-16 stream reader test... ";
+		std::cout << "UTF-16 (big endian) stream reader test... ";
 
 		// Memory buffer to istream.
 		char16_t source[] = u"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi";
@@ -91,7 +93,7 @@ public:
 		MemBuf buf(source, sizeof(source) - sizeof(char16_t));
 		std::istream is(&buf);
 
-		Xml::Utf16StreamReader reader(&is);
+		Xml::Utf16BEStreamReader reader(&is);
 		char32_t c;
 		std::u32string destination;
 		int result;
@@ -104,9 +106,40 @@ public:
 		std::cout << "OK\n";
 	}
 
-	void Utf32StreamReaderTest()
+	void Utf16LEStreamReaderTest()
 	{
-		std::cout << "UTF-32 stream reader test... ";
+		std::cout << "UTF-16 (little endian) stream reader test... ";
+
+		// Memory buffer to istream.
+		char16_t source[] = u"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi";
+		if (IsBigEndian())
+		{
+			for (unsigned i = 0; i < (sizeof(source) - sizeof(char16_t)) / 2; ++i)
+			{
+				char16_t sw = source[i] << 8;
+				sw |= (source[i] >> 8);
+				source[i] = sw;
+			}
+		}
+		MemBuf buf(source, sizeof(source) - sizeof(char16_t));
+		std::istream is(&buf);
+
+		Xml::Utf16LEStreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination == U"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi");
+
+		std::cout << "OK\n";
+	}
+
+	void Utf32BEStreamReaderTest()
+	{
+		std::cout << "UTF-32 (big endian) stream reader test... ";
 
 		// Memory buffer to istream.
 		char32_t source[] = U"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi";
@@ -124,7 +157,40 @@ public:
 		MemBuf buf(source, sizeof(source) - sizeof(char32_t));
 		std::istream is(&buf);
 
-		Xml::Utf32StreamReader reader(&is);
+		Xml::Utf32BEStreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination == U"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi");
+
+		std::cout << "OK\n";
+	}
+
+	void Utf32LEStreamReaderTest()
+	{
+		std::cout << "UTF-32 (little endian) stream reader test... ";
+
+		// Memory buffer to istream.
+		char32_t source[] = U"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi";
+		if (IsBigEndian())
+		{
+			for (unsigned i = 0; i < (sizeof(source) - sizeof(char32_t)) / 4; ++i)
+			{
+				char32_t sw = source[i] << 24;
+				sw |= (source[i] & 0x0000FF00) << 8;
+				sw |= (source[i] & 0x00FF0000) >> 8;
+				sw |= source[i] >> 24;
+				source[i] = sw;
+			}
+		}
+		MemBuf buf(source, sizeof(source) - sizeof(char32_t));
+		std::istream is(&buf);
+
+		Xml::Utf32LEStreamReader reader(&is);
 		char32_t c;
 		std::u32string destination;
 		int result;

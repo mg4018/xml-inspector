@@ -378,6 +378,7 @@ namespace Xml
 		StringType localName;
 		StringType prefix;
 		StringType namespaceUri;
+		char32_t currentCharacter;
 
 		void SetError(ErrorCode errorCode);
 
@@ -603,7 +604,8 @@ namespace Xml
 		value(),
 		localName(),
 		prefix(),
-		namespaceUri()
+		namespaceUri(),
+		currentCharacter(0)
 	{
 
 	}
@@ -947,6 +949,7 @@ namespace Xml
 		localName.clear();
 		prefix.clear();
 		namespaceUri.clear();
+		currentCharacter = 0;
 		if (!fPath.empty())
 		{
 			fPath.clear();

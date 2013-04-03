@@ -197,9 +197,9 @@ namespace Xml
 	};
 
 	/**
-		@brief UTF-16 characters reader from input stream.
+		@brief UTF-16 (big endian) characters reader from input stream.
 	*/
-	class Utf16StreamReader : public CharactersReader
+	class Utf16BEStreamReader : public CharactersReader
 	{
 	private:
 		std::istream* in;
@@ -210,18 +210,18 @@ namespace Xml
 			@param[in,out] inputStream Input stream from which
 				a Unicode characters will be extracted.
 		*/
-		Utf16StreamReader(std::istream* inputStream);
+		Utf16BEStreamReader(std::istream* inputStream);
 
 		/**
 			@brief Destructor.
 		*/
-		virtual ~Utf16StreamReader();
+		virtual ~Utf16BEStreamReader();
 
 		/**
 			@brief Reads one Unicode character.
 
 			Depending on the character there could be a 2 or 4
-			bytes needed to read from the UTF-16 encoded stream.
+			bytes needed to read from the UTF-16 (big endian) encoded stream.
 
 			@param[out] result Unicode character.
 			@return @b 1 if the character was read successfully.
@@ -243,9 +243,9 @@ namespace Xml
 	};
 
 	/**
-		@brief UTF-32 characters reader from input stream.
+		@brief UTF-16 (little endian) characters reader from input stream.
 	*/
-	class Utf32StreamReader : public CharactersReader
+	class Utf16LEStreamReader : public CharactersReader
 	{
 	private:
 		std::istream* in;
@@ -256,18 +256,110 @@ namespace Xml
 			@param[in,out] inputStream Input stream from which
 				a Unicode characters will be extracted.
 		*/
-		Utf32StreamReader(std::istream* inputStream);
+		Utf16LEStreamReader(std::istream* inputStream);
 
 		/**
 			@brief Destructor.
 		*/
-		virtual ~Utf32StreamReader();
+		virtual ~Utf16LEStreamReader();
+
+		/**
+			@brief Reads one Unicode character.
+
+			Depending on the character there could be a 2 or 4
+			bytes needed to read from the UTF-16 (little endian) encoded stream.
+
+			@param[out] result Unicode character.
+			@return @b 1 if the character was read successfully.
+				@b 0 if there are no more characters to read.
+				@b -1 if character is not allowed in XML document.
+				@b -2 if there was an error while reading character.
+		*/
+		virtual int ReadCharacter(char32_t& result);
+
+		/**
+			@brief Gets the pointer to input stream.
+		*/
+		std::istream* GetInputStream() const;
+
+		/**
+			@brief Replaces the pointer to input stream.
+		*/
+		void ResetInputStream(std::istream* inputStream);
+	};
+
+	/**
+		@brief UTF-32 (big endian) characters reader from input stream.
+	*/
+	class Utf32BEStreamReader : public CharactersReader
+	{
+	private:
+		std::istream* in;
+	public:
+		/**
+			@brief Constructor.
+
+			@param[in,out] inputStream Input stream from which
+				a Unicode characters will be extracted.
+		*/
+		Utf32BEStreamReader(std::istream* inputStream);
+
+		/**
+			@brief Destructor.
+		*/
+		virtual ~Utf32BEStreamReader();
 
 		/**
 			@brief Reads one Unicode character.
 
 			There are 4 bytes needed to read per one character
-			from the UTF-32 encoded stream.
+			from the UTF-32 (big endian) encoded stream.
+
+			@param[out] result Unicode character.
+			@return @b 1 if the character was read successfully.
+				@b 0 if there are no more characters to read.
+				@b -1 if character is not allowed in XML document.
+				@b -2 if there was an error while reading character.
+		*/
+		virtual int ReadCharacter(char32_t& result);
+
+		/**
+			@brief Gets the pointer to input stream.
+		*/
+		std::istream* GetInputStream() const;
+
+		/**
+			@brief Replaces the pointer to input stream.
+		*/
+		void ResetInputStream(std::istream* inputStream);
+	};
+
+	/**
+		@brief UTF-32 (little endian) characters reader from input stream.
+	*/
+	class Utf32LEStreamReader : public CharactersReader
+	{
+	private:
+		std::istream* in;
+	public:
+		/**
+			@brief Constructor.
+
+			@param[in,out] inputStream Input stream from which
+				a Unicode characters will be extracted.
+		*/
+		Utf32LEStreamReader(std::istream* inputStream);
+
+		/**
+			@brief Destructor.
+		*/
+		virtual ~Utf32LEStreamReader();
+
+		/**
+			@brief Reads one Unicode character.
+
+			There are 4 bytes needed to read per one character
+			from the UTF-32 (little endian) encoded stream.
 
 			@param[out] result Unicode character.
 			@return @b 1 if the character was read successfully.
@@ -585,21 +677,21 @@ namespace Xml
 	}
 
 	//
-	// Utf16StreamReader implementation.
+	// Utf16BEStreamReader implementation.
 	//
 
-	inline Utf16StreamReader::Utf16StreamReader(std::istream* inputStream)
+	inline Utf16BEStreamReader::Utf16BEStreamReader(std::istream* inputStream)
 		: in(inputStream)
 	{
 	
 	}
 
-	inline Utf16StreamReader::~Utf16StreamReader()
+	inline Utf16BEStreamReader::~Utf16BEStreamReader()
 	{
 	
 	}
 
-	inline int Utf16StreamReader::ReadCharacter(char32_t& result)
+	inline int Utf16BEStreamReader::ReadCharacter(char32_t& result)
 	{
 		if (in != nullptr)
 		{
@@ -686,32 +778,142 @@ namespace Xml
 		return -2; // Something terrible with the stream.
 	}
 
-	inline std::istream* Utf16StreamReader::GetInputStream() const
+	inline std::istream* Utf16BEStreamReader::GetInputStream() const
 	{
 		return in;
 	}
 
-	inline void Utf16StreamReader::ResetInputStream(std::istream* inputStream)
+	inline void Utf16BEStreamReader::ResetInputStream(std::istream* inputStream)
 	{
 		in = inputStream;
 	}
 
 	//
-	// Utf32StreamReader implementation.
+	// Utf16LEStreamReader implementation.
 	//
 
-	inline Utf32StreamReader::Utf32StreamReader(std::istream* inputStream)
+	inline Utf16LEStreamReader::Utf16LEStreamReader(std::istream* inputStream)
 		: in(inputStream)
 	{
 	
 	}
 
-	inline Utf32StreamReader::~Utf32StreamReader()
+	inline Utf16LEStreamReader::~Utf16LEStreamReader()
 	{
 	
 	}
 
-	inline int Utf32StreamReader::ReadCharacter(char32_t& result)
+	inline int Utf16LEStreamReader::ReadCharacter(char32_t& result)
+	{
+		if (in != nullptr)
+		{
+			// First byte.
+			int oneByte = in->get();
+
+			// If not failbit.
+			if (oneByte != std::char_traits<char>::eof())
+			{
+				result = static_cast<char32_t>(static_cast<unsigned char>(oneByte));
+
+				// Second byte.
+				oneByte = in->get();
+
+				if (oneByte == std::char_traits<char>::eof())
+				{
+					if ((in->rdstate() & std::istream::eofbit) != 0)
+						return -1; // Invalid character.
+					return -2; // Something terrible with the stream.
+				}
+
+				result |= (static_cast<char32_t>(static_cast<unsigned char>(oneByte)) << 8);
+
+				if (result < 0xD800)
+				{
+					if (result >= 0x20 ||
+						result == 0x09 ||
+						result == 0x0A ||
+						result == 0x0D)
+						return 1;
+					return -1;
+				}
+				if (result > 0xDFFF)
+				{
+					if (result <= 0xFFFD)
+						return 1;
+					return -1;
+				}
+
+				// We have lead surrogate, so next code unit should be a trail surrogate.
+
+				// Third byte (second of trail surrogate in little endian).
+				oneByte = in->get();
+
+				if (oneByte == std::char_traits<char>::eof())
+				{
+					if ((in->rdstate() & std::istream::eofbit) != 0)
+						return -1; // Invalid character.
+					return -2; // Something terrible with the stream.
+				}
+
+				char32_t trailSurrogate =
+					static_cast<char32_t>(static_cast<unsigned char>(oneByte));
+
+				// Fourth byte (second of trail surrogate).
+				oneByte = in->get();
+
+				if (oneByte == std::char_traits<char>::eof())
+				{
+					if ((in->rdstate() & std::istream::eofbit) != 0)
+						return -1; // Invalid character.
+					return -2; // Something terrible with the stream.
+				}
+
+				trailSurrogate |= (static_cast<char32_t>(static_cast<unsigned char>(oneByte)) << 8);
+
+				if (trailSurrogate >= 0xDC00 && trailSurrogate <= 0xDFFF)
+				{
+					result -= 0xD800;
+					result <<= 10;
+					result |= (trailSurrogate - 0xDC00);
+					result += 0x10000;
+					return 1;
+				}
+				return -1;
+			}
+			else if ((in->rdstate() & std::istream::eofbit) != 0)
+			{
+				return 0; // End of the stream.
+			}
+		}
+		return -2; // Something terrible with the stream.
+	}
+
+	inline std::istream* Utf16LEStreamReader::GetInputStream() const
+	{
+		return in;
+	}
+
+	inline void Utf16LEStreamReader::ResetInputStream(std::istream* inputStream)
+	{
+		in = inputStream;
+	}
+
+	//
+	// Utf32BEStreamReader implementation.
+	//
+
+	inline Utf32BEStreamReader::Utf32BEStreamReader(std::istream* inputStream)
+		: in(inputStream)
+	{
+	
+	}
+
+	inline Utf32BEStreamReader::~Utf32BEStreamReader()
+	{
+	
+	}
+
+	inline int Utf32BEStreamReader::ReadCharacter(char32_t& result)
 	{
 		if (in != nullptr)
 		{
@@ -777,12 +979,102 @@ namespace Xml
 		return -2; // Something terrible with the stream.
 	}
 
-	inline std::istream* Utf32StreamReader::GetInputStream() const
+	inline std::istream* Utf32BEStreamReader::GetInputStream() const
 	{
 		return in;
 	}
 
-	inline void Utf32StreamReader::ResetInputStream(std::istream* inputStream)
+	inline void Utf32BEStreamReader::ResetInputStream(std::istream* inputStream)
+	{
+		in = inputStream;
+	}
+
+	//
+	// Utf32LEStreamReader implementation.
+	//
+
+	inline Utf32LEStreamReader::Utf32LEStreamReader(std::istream* inputStream)
+		: in(inputStream)
+	{
+	
+	}
+
+	inline Utf32LEStreamReader::~Utf32LEStreamReader()
+	{
+	
+	}
+
+	inline int Utf32LEStreamReader::ReadCharacter(char32_t& result)
+	{
+		if (in != nullptr)
+		{
+			char32_t codePoint, temp;
+
+			// First byte.
+			int oneByte = in->get();
+
+			if (oneByte == std::char_traits<char>::eof())
+			{
+				if ((in->rdstate() & std::istream::eofbit) != 0)
+					return 0; // End of the stream.
+				return -2;
+			}
+
+			codePoint = static_cast<char32_t>(static_cast<unsigned char>(oneByte));
+
+			// Second byte.
+			oneByte = in->get();
+
+			if (oneByte == std::char_traits<char>::eof())
+			{
+				if ((in->rdstate() & std::istream::eofbit) != 0)
+					return -1;
+				return -2;
+			}
+
+			temp = static_cast<char32_t>(static_cast<unsigned char>(oneByte));
+			temp <<= 8;
+			codePoint |= temp;
+
+			// Third byte.
+			oneByte = in->get();
+
+			if (oneByte == std::char_traits<char>::eof())
+			{
+				if ((in->rdstate() & std::istream::eofbit) != 0)
+					return -1;
+				return -2;
+			}
+
+			temp = static_cast<char32_t>(static_cast<unsigned char>(oneByte));
+			temp <<= 16;
+			codePoint |= temp;
+
+			// Fourth byte.
+			oneByte = in->get();
+
+			if (oneByte == std::char_traits<char>::eof())
+			{
+				if ((in->rdstate() & std::istream::eofbit) != 0)
+					return -1;
+				return -2;
+			}
+
+			codePoint |= (static_cast<char32_t>(static_cast<unsigned char>(oneByte)) << 24);
+			result = codePoint;
+			if (IsAllowed(result))
+				return 1;
+			return -1;
+		}
+		return -2; // Something terrible with the stream.
+	}
+
+	inline std::istream* Utf32LEStreamReader::GetInputStream() const
+	{
+		return in;
+	}
+
+	inline void Utf32LEStreamReader::ResetInputStream(std::istream* inputStream)
 	{
 		in = inputStream;
 	}
