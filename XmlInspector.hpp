@@ -373,6 +373,7 @@ namespace Xml
 		bool isExternalStream;
 		bool isExternalReader;
 		bool afterBom;
+		Details::Bom bom;
 		StringType name;
 		StringType value;
 		StringType localName;
@@ -600,6 +601,7 @@ namespace Xml
 		isExternalStream(false),
 		isExternalReader(false),
 		afterBom(false),
+		bom(Details::Bom::None),
 		name(),
 		value(),
 		localName(),
@@ -769,8 +771,8 @@ namespace Xml
 				return;
 			}
 
-			Details::Bom bom = Details::ReadBom(&fileStream);
-			if (bom == Details::Bom::None || bom == Details::Bom::Utf8)
+			Details::Bom tempBom = Details::ReadBom(&fileStream);
+			if (tempBom == Details::Bom::None || tempBom == Details::Bom::Utf8)
 			{
 				try
 				{
@@ -784,10 +786,11 @@ namespace Xml
 				}
 				err = ErrorCode::None;
 				afterBom = true;
+				bom = tempBom;
 				return;
 			}
 
-			if (bom == Details::Bom::StreamError)
+			if (tempBom == Details::Bom::StreamError)
 			{
 				fileStream.close();
 				fileStream.clear();
@@ -795,7 +798,7 @@ namespace Xml
 				return;
 			}
 
-			if (bom == Details::Bom::Invalid)
+			if (tempBom == Details::Bom::Invalid)
 			{
 				fileStream.close();
 				fileStream.clear();
@@ -803,7 +806,7 @@ namespace Xml
 				return;
 			}
 
-			if (bom == Details::Bom::Utf16BE)
+			if (tempBom == Details::Bom::Utf16BE)
 			{
 				try
 				{
@@ -817,9 +820,9 @@ namespace Xml
 				}
 				err = ErrorCode::None;
 				afterBom = true;
-				return;
+				bom = tempBom;
 			}
-			else if (bom == Details::Bom::Utf16LE)
+			else if (tempBom == Details::Bom::Utf16LE)
 			{
 				try
 				{
@@ -833,9 +836,9 @@ namespace Xml
 				}
 				err = ErrorCode::None;
 				afterBom = true;
-				return;
+				bom = tempBom;
 			}
-			else if (bom == Details::Bom::Utf32BE)
+			else if (tempBom == Details::Bom::Utf32BE)
 			{
 				try
 				{
@@ -849,9 +852,9 @@ namespace Xml
 				}
 				err = ErrorCode::None;
 				afterBom = true;
-				return;
+				bom = tempBom;
 			}
-			else if (bom == Details::Bom::Utf32LE)
+			else if (tempBom == Details::Bom::Utf32LE)
 			{
 				try
 				{
@@ -865,59 +868,60 @@ namespace Xml
 				}
 				err = ErrorCode::None;
 				afterBom = true;
-				return;
+				bom = tempBom;
 			}
 		}
 		else if (inputStreamPtr != nullptr)
 		{
-			Details::Bom bom = Details::ReadBom(inputStreamPtr);
-			if (bom == Details::Bom::None || bom == Details::Bom::Utf8)
+			Details::Bom tempBom = Details::ReadBom(inputStreamPtr);
+			if (tempBom == Details::Bom::None || tempBom == Details::Bom::Utf8)
 			{
 				reader = new Encoding::Utf8StreamReader(inputStreamPtr);
 				err = ErrorCode::None;
 				afterBom = true;
+				bom = tempBom;
 				return;
 			}
 
-			if (bom == Details::Bom::StreamError)
+			if (tempBom == Details::Bom::StreamError)
 			{
 				SetError(ErrorCode::StreamError);
 				return;
 			}
 
-			if (bom == Details::Bom::Invalid)
+			if (tempBom == Details::Bom::Invalid)
 			{
 				SetError(ErrorCode::InvalidByteSequence);
 				return;
 			}
 
-			if (bom == Details::Bom::Utf16BE)
+			if (tempBom == Details::Bom::Utf16BE)
 			{
 				reader = new Encoding::Utf16BEStreamReader(inputStreamPtr);
 				err = ErrorCode::None;
 				afterBom = true;
-				return;
+				bom = tempBom;
 			}
-			else if (bom == Details::Bom::Utf16LE)
+			else if (tempBom == Details::Bom::Utf16LE)
 			{
 				reader = new Encoding::Utf16LEStreamReader(inputStreamPtr);
 				err = ErrorCode::None;
 				afterBom = true;
-				return;
+				bom = tempBom;
 			}
-			else if (bom == Details::Bom::Utf32BE)
+			else if (tempBom == Details::Bom::Utf32BE)
 			{
 				reader = new Encoding::Utf32BEStreamReader(inputStreamPtr);
 				err = ErrorCode::None;
 				afterBom = true;
-				return;
+				bom = tempBom;
 			}
-			else if (bom == Details::Bom::Utf32LE)
+			else if (tempBom == Details::Bom::Utf32LE)
 			{
 				reader = new Encoding::Utf32LEStreamReader(inputStreamPtr);
 				err = ErrorCode::None;
 				afterBom = true;
-				return;
+				bom = tempBom;
 			}
 		}
 		else if (isExternalReader)
@@ -1029,6 +1033,7 @@ namespace Xml
 		err = ErrorCode::None;
 		errMsg = nullptr;
 		afterBom = false;
+		bom = Details::Bom::None;
 		name.clear();
 		value.clear();
 		localName.clear();
