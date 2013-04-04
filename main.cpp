@@ -1,3 +1,4 @@
+/// @cond TEST
 #include "XmlInspector.hpp"
 #include <cstdlib>
 #include <iostream>
@@ -9,7 +10,6 @@
 #include <list>
 #include <cassert>
 
-// For test.
 class MemBuf : public std::streambuf
 {
 public:
@@ -624,4 +624,5 @@ int main()
 	test.Start();
 	return EXIT_SUCCESS;
 }
+/// @endcond
 
