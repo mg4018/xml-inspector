@@ -759,7 +759,6 @@ namespace Xml
 	template <typename TCharactersWriter>
 	inline void Inspector<TCharactersWriter>::ParseBom()
 	{
-		// TODO:
 		if (!fPath.empty())
 		{
 			fileStream.open(fPath.c_str());
@@ -771,7 +770,7 @@ namespace Xml
 			}
 
 			Details::Bom bom = Details::ReadBom(&fileStream);
-			if (bom == Details::Bom::None)
+			if (bom == Details::Bom::None || bom == Details::Bom::Utf8)
 			{
 				try
 				{
@@ -804,14 +803,75 @@ namespace Xml
 				return;
 			}
 
-			// We have a BOM.
-			// TODO:
-			assert(false && "Not implemented yet.");
+			if (bom == Details::Bom::Utf16BE)
+			{
+				try
+				{
+					reader = new Encoding::Utf16BEStreamReader(&fileStream);
+				}
+				catch (...)
+				{
+					fileStream.close();
+					fileStream.clear();
+					throw;
+				}
+				err = ErrorCode::None;
+				afterBom = true;
+				return;
+			}
+			else if (bom == Details::Bom::Utf16LE)
+			{
+				try
+				{
+					reader = new Encoding::Utf16LEStreamReader(&fileStream);
+				}
+				catch (...)
+				{
+					fileStream.close();
+					fileStream.clear();
+					throw;
+				}
+				err = ErrorCode::None;
+				afterBom = true;
+				return;
+			}
+			else if (bom == Details::Bom::Utf32BE)
+			{
+				try
+				{
+					reader = new Encoding::Utf32BEStreamReader(&fileStream);
+				}
+				catch (...)
+				{
+					fileStream.close();
+					fileStream.clear();
+					throw;
+				}
+				err = ErrorCode::None;
+				afterBom = true;
+				return;
+			}
+			else if (bom == Details::Bom::Utf32LE)
+			{
+				try
+				{
+					reader = new Encoding::Utf32LEStreamReader(&fileStream);
+				}
+				catch (...)
+				{
+					fileStream.close();
+					fileStream.clear();
+					throw;
+				}
+				err = ErrorCode::None;
+				afterBom = true;
+				return;
+			}
 		}
 		else if (inputStreamPtr != nullptr)
 		{
 			Details::Bom bom = Details::ReadBom(inputStreamPtr);
-			if (bom == Details::Bom::None)
+			if (bom == Details::Bom::None || bom == Details::Bom::Utf8)
 			{
 				reader = new Encoding::Utf8StreamReader(inputStreamPtr);
 				err = ErrorCode::None;
@@ -831,9 +891,34 @@ namespace Xml
 				return;
 			}
 
-			// We have a BOM.
-			// TODO:
-			assert(false && "Not implemented yet.");
+			if (bom == Details::Bom::Utf16BE)
+			{
+				reader = new Encoding::Utf16BEStreamReader(inputStreamPtr);
+				err = ErrorCode::None;
+				afterBom = true;
+				return;
+			}
+			else if (bom == Details::Bom::Utf16LE)
+			{
+				reader = new Encoding::Utf16LEStreamReader(inputStreamPtr);
+				err = ErrorCode::None;
+				afterBom = true;
+				return;
+			}
+			else if (bom == Details::Bom::Utf32BE)
+			{
+				reader = new Encoding::Utf32BEStreamReader(inputStreamPtr);
+				err = ErrorCode::None;
+				afterBom = true;
+				return;
+			}
+			else if (bom == Details::Bom::Utf32LE)
+			{
+				reader = new Encoding::Utf32LEStreamReader(inputStreamPtr);
+				err = ErrorCode::None;
+				afterBom = true;
+				return;
+			}
 		}
 		else if (isExternalReader)
 		{
@@ -1029,17 +1114,238 @@ namespace Xml
 	/// @cond DETAILS
 	namespace Details
 	{
-		inline Bom ReadBom(std::istream* /* inputStream */)
+		inline Bom ReadBom(std::istream* inputStream)
 		{
-			// TODO:
-			return Bom::None;
+			// UTF-8          EF BB BF
+			// UTF-16 (BE)    FE FF
+			// UTF-16 (LE)    FF FE
+			// UTF-32 (BE)    00 00 FE FF
+			// UTF-32 (LE)    FF FE 00 00
+
+			if (inputStream != nullptr)
+			{
+				// Check first byte.
+				int oneByte = inputStream->peek();
+
+				if (oneByte == std::char_traits<char>::eof())
+				{
+					if ((inputStream->rdstate() & std::istream::eofbit) != 0)
+						return Bom::None; // End of the stream.
+					return Bom::StreamError;
+				}
+
+				if (oneByte == 0xEF) // Should be UTF-8
+				{
+					// Extract first byte.
+					inputStream->get();
+
+					// Extract second byte.
+					oneByte = inputStream->get();
+					if (oneByte == std::char_traits<char>::eof())
+					{
+						if ((inputStream->rdstate() & std::istream::eofbit) != 0)
+							return Bom::Invalid;
+						return Bom::StreamError;
+					}
+					if (oneByte != 0xBB)
+						return Bom::Invalid;
+
+					// Extract third byte.
+					oneByte = inputStream->get();
+					if (oneByte == std::char_traits<char>::eof())
+					{
+						if ((inputStream->rdstate() & std::istream::eofbit) != 0)
+							return Bom::Invalid;
+						return Bom::StreamError;
+					}
+					if (oneByte != 0xBF)
+						return Bom::Invalid;
+
+					return Bom::Utf8;
+				}
+				else if (oneByte == 0xFE) // Should be UTF-16 (BE)
+				{
+					// Extract first byte.
+					inputStream->get();
+
+					// Extract second byte.
+					oneByte = inputStream->get();
+					if (oneByte == std::char_traits<char>::eof())
+					{
+						if ((inputStream->rdstate() & std::istream::eofbit) != 0)
+							return Bom::Invalid;
+						return Bom::StreamError;
+					}
+					if (oneByte != 0xFF)
+						return Bom::Invalid;
+
+					return Bom::Utf16BE;
+				}
+				else if (oneByte == 0xFF) // Should be UTF-16 (LE) of UTF-32 (LE)
+				{
+					// Extract first byte.
+					inputStream->get();
+
+					// Extract second byte.
+					oneByte = inputStream->get();
+					if (oneByte == std::char_traits<char>::eof())
+					{
+						if ((inputStream->rdstate() & std::istream::eofbit) != 0)
+							return Bom::Invalid;
+						return Bom::StreamError;
+					}
+					if (oneByte != 0xFE)
+						return Bom::Invalid;
+
+					// Check third byte.
+					oneByte = inputStream->peek();
+					if (oneByte == std::char_traits<char>::eof())
+					{
+						if ((inputStream->rdstate() & std::istream::eofbit) != 0)
+							return Bom::Utf16LE;
+						return Bom::StreamError;
+					}
+					if (oneByte != 0x00)
+						return Bom::Utf16LE;
+
+					// Should be UTF-32 (LE)
+					// Extract third byte.
+					inputStream->get();
+
+					// Extract fourth byte.
+					oneByte = inputStream->get();
+					if (oneByte == std::char_traits<char>::eof())
+					{
+						if ((inputStream->rdstate() & std::istream::eofbit) != 0)
+							return Bom::Invalid;
+						return Bom::StreamError;
+					}
+					if (oneByte != 0x00)
+						return Bom::Invalid;
+
+					return Bom::Utf32LE;
+				}
+				else if (oneByte == 0x00) // Should be UTF-32 (BE)
+				{
+					// Extract first byte.
+					inputStream->get();
+
+					// Extract second byte.
+					oneByte = inputStream->get();
+					if (oneByte == std::char_traits<char>::eof())
+					{
+						if ((inputStream->rdstate() & std::istream::eofbit) != 0)
+							return Bom::Invalid;
+						return Bom::StreamError;
+					}
+					if (oneByte != 0x00)
+						return Bom::Invalid;
+
+					// Extract third byte.
+					oneByte = inputStream->get();
+					if (oneByte == std::char_traits<char>::eof())
+					{
+						if ((inputStream->rdstate() & std::istream::eofbit) != 0)
+							return Bom::Invalid;
+						return Bom::StreamError;
+					}
+					if (oneByte != 0xFE)
+						return Bom::Invalid;
+
+					// Extract fourth byte.
+					oneByte = inputStream->get();
+					if (oneByte == std::char_traits<char>::eof())
+					{
+						if ((inputStream->rdstate() & std::istream::eofbit) != 0)
+							return Bom::Invalid;
+						return Bom::StreamError;
+					}
+					if (oneByte != 0xFF)
+						return Bom::Invalid;
+
+					return Bom::Utf32BE;
+				}
+				else
+				{
+					return Bom::None;
+				}
+			}
+			return Bom::StreamError;
 		}
 		
 		template <typename TInputIterator>
-		inline Bom ReadBom(TInputIterator& /* first */, TInputIterator& /* last */)
+		inline Bom ReadBom(TInputIterator& first, TInputIterator& last)
 		{
-			// TODO:
-			return Bom::None;
+			// UTF-8          EF BB BF
+			// UTF-16 (BE)    FE FF
+			// UTF-16 (LE)    FF FE
+			// UTF-32 (BE)    00 00 FE FF
+			// UTF-32 (LE)    FF FE 00 00
+
+			if (first == last)
+				return Bom::None;
+
+			if (*first == 0xEF) // Should be UTF-8
+			{
+				++first;
+				if (first == last || *first != 0xBB)
+					return Bom::Invalid;
+
+				++first;
+				if (first == last || *first != 0xBF)
+					return Bom::Invalid;
+
+				++first;
+				return Bom::Utf8;
+			}
+			else if (*first == 0xFE) // Should be UTF-16 (BE)
+			{
+				++first;
+				if (first == last || *first != 0xFF)
+					return Bom::Invalid;
+
+				++first;
+				return Bom::Utf16BE;
+			}
+			else if (*first == 0xFF) // Should be UTF-16 (LE) of UTF-32 (LE)
+			{
+				++first;
+				if (first == last || *first != 0xFE)
+					return Bom::Invalid;
+
+				++first;
+				if (first == last || *first != 0x00)
+					return Bom::Utf16LE;
+
+				// Should be UTF-32 (LE)
+				++first;
+				if (first == last || *first != 0x00)
+					return Bom::Invalid;
+
+				++first;
+				return Bom::Utf32LE;
+			}
+			else if (*first == 0x00) // Should be UTF-32 (BE)
+			{
+				++first;
+				if (first == last || *first != 0x00)
+					return Bom::Invalid;
+
+				++first;
+				if (first == last || *first != 0xFE)
+					return Bom::Invalid;
+
+				++first;
+				if (first == last || *first != 0xFF)
+					return Bom::Invalid;
+
+				++first;
+				return Bom::Utf32BE;
+			}
+			else
+			{
+				return Bom::None;
+			}
 		}
 
 		template <

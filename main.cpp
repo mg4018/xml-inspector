@@ -49,6 +49,18 @@ public:
 		BeforeParsingTest();
 		NoSourceTest();
 		IteratorsToIstreamTest();
+		NoBomStreamTest();
+		BomUtf8StreamTest();
+		BomUtf16BEStreamTest();
+		BomUtf16LEStreamTest();
+		BomUtf32BEStreamTest();
+		BomUtf32LEStreamTest();
+		NoBomIteratorsTest();
+		BomUtf8IteratorsTest();
+		BomUtf16BEIteratorsTest();
+		BomUtf16LEIteratorsTest();
+		BomUtf32BEIteratorsTest();
+		BomUtf32LEIteratorsTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -376,6 +388,231 @@ public:
 
 		assert(result == 0);
 		assert(destination == U"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi");
+
+		std::cout << "OK\n";
+	}
+
+	void NoBomStreamTest()
+	{
+		std::cout << "No BOM in stream test... ";
+
+		unsigned char source[3];
+		source[0] = 0xA1; source[1] = 0xA2; source[2] = 0xA3; // random
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Details::Bom bom = Xml::Details::ReadBom(&is);
+		assert(bom == Xml::Details::Bom::None);
+		int next = is.get();
+		assert(next == 0xA1);
+
+		MemBuf buf2(source, 0);
+		std::istream is2(&buf2);
+		bom = Xml::Details::ReadBom(&is2);
+		assert(bom == Xml::Details::Bom::None);
+	
+		std::cout << "OK\n";
+	}
+
+	void BomUtf8StreamTest()
+	{
+		std::cout << "BOM UTF-8 in stream test... ";
+	
+		unsigned char source[4];
+		source[0] = 0xEF; source[1] = 0xBB; source[2] = 0xBF;
+		source[3] = 0x04; // <= random number.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Details::Bom bom = Xml::Details::ReadBom(&is);
+		assert(bom == Xml::Details::Bom::Utf8);
+		int next = is.get();
+		assert(next == 0x04);
+
+		std::cout << "OK\n";
+	}
+
+	void BomUtf16BEStreamTest()
+	{
+		std::cout << "BOM UTF-16 (big endian) in stream test... ";
+	
+		unsigned char source[3];
+		source[0] = 0xFE; source[1] = 0xFF;
+		source[2] = 0x04; // <= random number.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Details::Bom bom = Xml::Details::ReadBom(&is);
+		assert(bom == Xml::Details::Bom::Utf16BE);
+		int next = is.get();
+		assert(next == 0x04);
+
+		std::cout << "OK\n";
+	}
+
+	void BomUtf16LEStreamTest()
+	{
+		std::cout << "BOM UTF-16 (little endian) in stream test... ";
+	
+		unsigned char source[3];
+		source[0] = 0xFF; source[1] = 0xFE;
+		source[2] = 0x04; // <= random number.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Details::Bom bom = Xml::Details::ReadBom(&is);
+		assert(bom == Xml::Details::Bom::Utf16LE);
+		int next = is.get();
+		assert(next == 0x04);
+
+		std::cout << "OK\n";
+	}
+
+	void BomUtf32BEStreamTest()
+	{
+		std::cout << "BOM UTF-32 (big endian) in stream test... ";
+	
+		unsigned char source[5];
+		source[0] = 0x00; source[1] = 0x00; source[2] = 0xFE; source[3] = 0xFF;
+		source[4] = 0x04; // <= random number.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Details::Bom bom = Xml::Details::ReadBom(&is);
+		assert(bom == Xml::Details::Bom::Utf32BE);
+		int next = is.get();
+		assert(next == 0x04);
+
+		std::cout << "OK\n";
+	}
+
+	void BomUtf32LEStreamTest()
+	{
+		std::cout << "BOM UTF-32 (little endian) in stream test... ";
+	
+		unsigned char source[5];
+		source[0] = 0xFF; source[1] = 0xFE; source[2] = 0x00; source[3] = 0x00;
+		source[4] = 0x04; // <= random number.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Details::Bom bom = Xml::Details::ReadBom(&is);
+		assert(bom == Xml::Details::Bom::Utf32LE);
+		int next = is.get();
+		assert(next == 0x04);
+
+		std::cout << "OK\n";
+	}
+
+	void NoBomIteratorsTest()
+	{
+		std::cout << "No BOM in iterators test... ";
+
+		unsigned char source[3];
+		source[0] = 0xA1; source[1] = 0xA2; source[2] = 0xA3; // random
+		unsigned char* begin = source;
+		unsigned char* end = source + sizeof(source);
+
+		Xml::Details::Bom bom = Xml::Details::ReadBom(begin, end);
+		assert(bom == Xml::Details::Bom::None);
+		assert(begin == source);
+		assert(end == source + sizeof(source));
+
+		end = begin;
+		bom = Xml::Details::ReadBom(begin, end);
+		assert(bom == Xml::Details::Bom::None);
+		assert(begin == source);
+		assert(end == source);
+	
+		std::cout << "OK\n";
+	}
+
+	void BomUtf8IteratorsTest()
+	{
+		std::cout << "BOM UTF-8 in iterators test... ";
+	
+		unsigned char source[4];
+		source[0] = 0xEF; source[1] = 0xBB; source[2] = 0xBF;
+		source[3] = 0x04; // <= random number.
+		unsigned char* begin = source;
+		unsigned char* end = source + sizeof(source);
+
+		Xml::Details::Bom bom = Xml::Details::ReadBom(begin, end);
+		assert(bom == Xml::Details::Bom::Utf8);
+		assert(begin == (source + sizeof(source) - 1));
+		assert(end == source + sizeof(source));
+
+		std::cout << "OK\n";
+	}
+
+	void BomUtf16BEIteratorsTest()
+	{
+		std::cout << "BOM UTF-16 (big endian) in iterators test... ";
+	
+		unsigned char source[3];
+		source[0] = 0xFE; source[1] = 0xFF;
+		source[2] = 0x04; // <= random number.
+		unsigned char* begin = source;
+		unsigned char* end = source + sizeof(source);
+
+		Xml::Details::Bom bom = Xml::Details::ReadBom(begin, end);
+		assert(bom == Xml::Details::Bom::Utf16BE);
+		assert(begin == (source + sizeof(source) - 1));
+		assert(end == source + sizeof(source));
+
+		std::cout << "OK\n";
+	}
+
+	void BomUtf16LEIteratorsTest()
+	{
+		std::cout << "BOM UTF-16 (little endian) in iterators test... ";
+	
+		unsigned char source[3];
+		source[0] = 0xFF; source[1] = 0xFE;
+		source[2] = 0x04; // <= random number.
+		unsigned char* begin = source;
+		unsigned char* end = source + sizeof(source);
+
+		Xml::Details::Bom bom = Xml::Details::ReadBom(begin, end);
+		assert(bom == Xml::Details::Bom::Utf16LE);
+		assert(begin == (source + sizeof(source) - 1));
+		assert(end == source + sizeof(source));
+
+		std::cout << "OK\n";
+	}
+
+	void BomUtf32BEIteratorsTest()
+	{
+		std::cout << "BOM UTF-32 (big endian) in iterators test... ";
+	
+		unsigned char source[5];
+		source[0] = 0x00; source[1] = 0x00; source[2] = 0xFE; source[3] = 0xFF;
+		source[4] = 0x04; // <= random number.
+		unsigned char* begin = source;
+		unsigned char* end = source + sizeof(source);
+
+		Xml::Details::Bom bom = Xml::Details::ReadBom(begin, end);
+		assert(bom == Xml::Details::Bom::Utf32BE);
+		assert(begin == (source + sizeof(source) - 1));
+		assert(end == source + sizeof(source));
+
+		std::cout << "OK\n";
+	}
+
+	void BomUtf32LEIteratorsTest()
+	{
+		std::cout << "BOM UTF-32 (little endian) in iterators test... ";
+	
+		unsigned char source[5];
+		source[0] = 0xFF; source[1] = 0xFE; source[2] = 0x00; source[3] = 0x00;
+		source[4] = 0x04; // <= random number.
+		unsigned char* begin = source;
+		unsigned char* end = source + sizeof(source);
+
+		Xml::Details::Bom bom = Xml::Details::ReadBom(begin, end);
+		assert(bom == Xml::Details::Bom::Utf32LE);
+		assert(begin == (source + sizeof(source) - 1));
+		assert(end == source + sizeof(source));
 
 		std::cout << "OK\n";
 	}
