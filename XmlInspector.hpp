@@ -361,8 +361,14 @@ namespace Xml
 		*/
 		typedef uint_least64_t SizeType;
 	private:
+		static const char32_t Space = 0x20;
+		static const char32_t LineFeed = 0x0A;
+		static const char32_t CarriageReturn = 0x0D;
+
 		SizeType lineNumber;
 		SizeType linePosition;
+		SizeType currentLineNumber;
+		SizeType currentLinePosition;
 		NodeType node;
 		ErrorCode err;
 		const char* errMsg;
@@ -380,8 +386,24 @@ namespace Xml
 		StringType prefix;
 		StringType namespaceUri;
 		char32_t currentCharacter;
+		char32_t bufferedCharacter;
+		bool foundElement;
+		bool eof;
+
+		// We don't need to check carriage return
+		// while NextCharBad method removes them for us.
+		// That's why I use this method instead of
+		// Xml::Encoding::CharactersReader::IsWhiteSpace.
+		static bool IsWhiteSpace(char32_t codePoint);
 
 		void SetError(ErrorCode errorCode);
+
+		void SavePosition();
+
+		// Extracts the next character and sets the error flag
+		// if eof (only if insideTag flag), invalid character or stream error.
+		// Returns true if error or eof (insideTag == false) happened.
+		bool NextCharBad(bool insideTag);
 
 		void ParseBom();
 	public:
@@ -588,9 +610,17 @@ namespace Xml
 	};
 
 	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsWhiteSpace(char32_t codePoint)
+	{
+		return (codePoint == 0x20 || codePoint == 0x0A || codePoint == 0x09);
+	}
+
+	template <typename TCharactersWriter>
 	inline Inspector<TCharactersWriter>::Inspector()
 		: lineNumber(0),
 		linePosition(0),
+		currentLineNumber(0),
+		currentLinePosition(0),
 		node(NodeType::None),
 		err(ErrorCode::None),
 		errMsg(nullptr),
@@ -607,7 +637,10 @@ namespace Xml
 		localName(),
 		prefix(),
 		namespaceUri(),
-		currentCharacter(0)
+		currentCharacter(0),
+		bufferedCharacter(0),
+		foundElement(false),
+		eof(false)
 	{
 
 	}
@@ -787,6 +820,7 @@ namespace Xml
 				err = ErrorCode::None;
 				afterBom = true;
 				bom = tempBom;
+				eof = ((fileStream.rdstate() & std::istream::eofbit) != 0);
 				return;
 			}
 
@@ -803,6 +837,7 @@ namespace Xml
 				fileStream.close();
 				fileStream.clear();
 				SetError(ErrorCode::InvalidByteSequence);
+				eof = ((fileStream.rdstate() & std::istream::eofbit) != 0);
 				return;
 			}
 
@@ -880,6 +915,7 @@ namespace Xml
 				err = ErrorCode::None;
 				afterBom = true;
 				bom = tempBom;
+				eof = ((inputStreamPtr->rdstate() & std::istream::eofbit) != 0);
 				return;
 			}
 
@@ -892,6 +928,7 @@ namespace Xml
 			if (tempBom == Details::Bom::Invalid)
 			{
 				SetError(ErrorCode::InvalidByteSequence);
+				eof = ((inputStreamPtr->rdstate() & std::istream::eofbit) != 0);
 				return;
 			}
 
@@ -936,13 +973,241 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
+	inline void Inspector<TCharactersWriter>::SavePosition()
+	{
+		lineNumber = currentLineNumber;
+		linePosition = currentLinePosition;
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::NextCharBad(bool insideTag)
+	{
+		// x, CR, LF, y => x, LF, y
+		// x, CR, y => x, LF, y
+		// x, LF, CR, y => x, LF, LF, y
+		// Check http://www.w3.org/TR/REC-xml/#sec-line-ends.
+
+		SizeType tempLineNumber;
+		SizeType tempLinePosition;
+
+		if (currentCharacter == LineFeed)
+		{
+			++currentLineNumber;
+			currentLinePosition = 1;
+		}
+		else
+		{
+			++currentLinePosition;
+		}
+
+		if (bufferedCharacter != 0)
+		{
+			if (bufferedCharacter > 3) // Allowed character.
+			{
+				currentCharacter = bufferedCharacter;
+				bufferedCharacter = 0;
+				return false;
+			}
+
+			if (bufferedCharacter == 1) // No more characters to read.
+			{
+				if (insideTag)
+				{
+					// Start token position.
+					tempLineNumber = lineNumber;
+					tempLinePosition = linePosition;
+					Reset();
+					lineNumber = tempLineNumber;
+					linePosition = tempLinePosition;
+					SetError(ErrorCode::UnclosedToken);
+					eof = true;
+				}
+				else
+				{
+					// eof position.
+					eof = true;
+					bufferedCharacter = 0;
+				}
+			}
+			else if (bufferedCharacter == 2) // Character is not allowed in XML document.
+			{
+				// Invalid character position.
+				tempLineNumber = currentLineNumber;
+				tempLinePosition = currentLinePosition;
+				Reset();
+				lineNumber = tempLineNumber;
+				linePosition = tempLinePosition;
+				SetError(ErrorCode::InvalidByteSequence);
+			}
+			else // bufferedCharacter == 3 // Stream error.
+			{
+				// Character at stream error position.
+				tempLineNumber = currentLineNumber;
+				tempLinePosition = currentLinePosition;
+				Reset();
+				lineNumber = tempLineNumber;
+				linePosition = tempLinePosition;
+				SetError(ErrorCode::StreamError);
+			}
+			return true;
+		}
+
+		int result = reader->ReadCharacter(currentCharacter);
+
+		if (result == 1) // Character was read successfully.
+		{
+			if (currentCharacter == CarriageReturn) // We don't like CR.
+			{
+				result = reader->ReadCharacter(currentCharacter);
+				if (result == 1) // Second character was read successfully.
+				{
+					if (currentCharacter != LineFeed)
+					{
+						// CR, x => LF, x
+						bufferedCharacter = currentCharacter;
+						currentCharacter = LineFeed;
+					}
+					// else CR, LF => LF
+				}
+				else if (result == 0) // No more characters to read.
+				{
+					// CR, [end of document] => LF, [end of document]
+					bufferedCharacter = 1;
+					currentCharacter = LineFeed;
+				}
+				else if (result == -1) // Character is not allowed in XML document.
+				{
+					// CR, [not allowed character] => LF, [not allowed character]
+					bufferedCharacter = 2;
+					currentCharacter = LineFeed;
+				}
+				else // result == -2 // Stream error.
+				{
+					// CR, [stream error] => LF, [stream error]
+					bufferedCharacter = 3;
+					currentCharacter = LineFeed;
+				}
+			}
+			return false;
+		}
+
+		if (result == 0) // No more characters to read.
+		{
+			if (insideTag)
+			{
+				// Start token position.
+				tempLineNumber = lineNumber;
+				tempLinePosition = linePosition;
+				Reset();
+				lineNumber = tempLineNumber;
+				linePosition = tempLinePosition;
+				SetError(ErrorCode::UnclosedToken);
+				eof = true;
+			}
+			else
+			{
+				// eof position.
+				eof = true;
+			}
+		}
+		else if (result == -1) // Character is not allowed in XML document.
+		{
+			// Invalid character position.
+			tempLineNumber = currentLineNumber;
+			tempLinePosition = currentLinePosition;
+			Reset();
+			lineNumber = tempLineNumber;
+			linePosition = tempLinePosition;
+			SetError(ErrorCode::InvalidByteSequence);
+		}
+		else // result == -2 // Stream error.
+		{
+			// Character at stream error position.
+			tempLineNumber = currentLineNumber;
+			tempLinePosition = currentLinePosition;
+			Reset();
+			lineNumber = tempLineNumber;
+			linePosition = tempLinePosition;
+			SetError(ErrorCode::StreamError);
+		}
+		return true;
+	}
+
+	template <typename TCharactersWriter>
 	inline bool Inspector<TCharactersWriter>::ReadNode()
 	{
-		if (!afterBom)
+		SizeType tempLineNumber;
+		SizeType tempLinePosition;
+		if (!afterBom) // First call of ReadNode method...
+		{
+			// ...or after error while BOM parsing. Let's try to parse it again.
 			ParseBom();
+			if (err != ErrorCode::None)
+				return false;
+			lineNumber = 1;
+			linePosition = 1;
+			if (eof)
+			{
+				SetError(ErrorCode::NoElement);
+				return false;
+			}
+			currentLineNumber = 1;
+			currentLinePosition = 0; // Don't worry,
+			// it will be 1 after first call of NextCharBad method.
+
+			// First character.
+			if (NextCharBad(false))
+			{
+				if (eof)
+				{
+					SetError(ErrorCode::NoElement);
+					return false;
+				}
+			}
+
+			if (IsWhiteSpace(currentCharacter))
+			{
+				do
+				{
+					CharactersWriterType::PutCharacter(value, currentCharacter);
+					if (NextCharBad(false))
+					{
+						if (eof) // White spaces followed by end of file.
+						{
+							node = NodeType::Whitespace;
+							return true;
+						}
+						else // White spaces followed by invalid character or stream error.
+						{
+							// Error is set already.
+							return false;
+						}
+					}
+				}
+				while (IsWhiteSpace(currentCharacter));
+			}
+
+			// TODO:
+			assert(false && "Not implemented yet.");
+		}
 
 		if (err != ErrorCode::None)
 			return false;
+
+		if (eof)
+		{
+			if (!foundElement)
+			{
+				tempLineNumber = currentLineNumber;
+				tempLinePosition = currentLinePosition;
+				Reset();
+				SetError(ErrorCode::NoElement);
+				lineNumber = tempLineNumber;
+				linePosition = tempLinePosition;
+				eof = true;
+			}
+			return false;
+		}
 
 		// TODO:
 		assert(false && "Not implemented yet.");
@@ -1029,6 +1294,8 @@ namespace Xml
 	{
 		lineNumber = 0;
 		linePosition = 0;
+		currentLineNumber = 0;
+		currentLinePosition = 0;
 		node = NodeType::None;
 		err = ErrorCode::None;
 		errMsg = nullptr;
@@ -1040,6 +1307,9 @@ namespace Xml
 		prefix.clear();
 		namespaceUri.clear();
 		currentCharacter = 0;
+		bufferedCharacter = 0;
+		foundElement = false;
+		eof = false;
 		if (!fPath.empty())
 		{
 			fPath.clear();

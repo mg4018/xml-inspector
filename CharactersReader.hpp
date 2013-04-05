@@ -57,6 +57,14 @@ namespace Xml
 			static bool IsAllowed(char32_t codePoint);
 
 			/**
+				@brief Checks if character is white space.
+
+				@param[in] codePoint Code point of Unicode character.
+				@return True if character is either space, carriage return, line feed, or tab.
+			*/
+			static bool IsWhiteSpace(char32_t codePoint);
+
+			/**
 				@brief Reads one character from the specifically encoded source
 					and translates it to Unicode character.
 
@@ -386,6 +394,35 @@ namespace Xml
 		};
 
 		//
+		// CharactersReader implementation.
+		//
+		
+		inline CharactersReader::~CharactersReader()
+		{
+		
+		}
+
+		inline bool CharactersReader::IsAllowed(char32_t codePoint)
+		{
+			if (codePoint < 0xD800)
+			{
+				return (codePoint >= 0x20 ||
+					codePoint == 0x09 ||
+					codePoint == 0x0A ||
+					codePoint == 0x0D);
+			}
+
+			return ((codePoint >= 0xE000 && codePoint <= 0xFFFD) ||
+				(codePoint >= 0x10000 && codePoint <= 0x10FFFF));
+		}
+
+		inline bool CharactersReader::IsWhiteSpace(char32_t codePoint)
+		{
+			return (codePoint == 0x20 || codePoint == 0x0A ||
+				codePoint == 0x09 || codePoint == 0x0D);
+		}
+
+		//
 		// Utf8ReaderBase implementation.
 		//
 		
@@ -417,29 +454,6 @@ namespace Xml
 		inline Utf8ReaderBase::~Utf8ReaderBase()
 		{
 		
-		}
-
-		//
-		// CharactersReader implementation.
-		//
-		
-		inline CharactersReader::~CharactersReader()
-		{
-		
-		}
-
-		inline bool CharactersReader::IsAllowed(char32_t codePoint)
-		{
-			if (codePoint < 0xD800)
-			{
-				return (codePoint >= 0x20 ||
-					codePoint == 0x09 ||
-					codePoint == 0x0A ||
-					codePoint == 0x0D);
-			}
-
-			return ((codePoint >= 0xE000 && codePoint <= 0xFFFD) ||
-				(codePoint >= 0x10000 && codePoint <= 0x10FFFF));
 		}
 
 		//

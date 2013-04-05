@@ -61,6 +61,8 @@ public:
 		BomUtf16LEIteratorsTest();
 		BomUtf32BEIteratorsTest();
 		BomUtf32LEIteratorsTest();
+		EmptyDocumentTest();
+		WhitespaceTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -614,6 +616,74 @@ public:
 		assert(begin == (source + sizeof(source) - 1));
 		assert(end == source + sizeof(source));
 
+		std::cout << "OK\n";
+	}
+
+	void EmptyDocumentTest()
+	{
+		std::cout << "Empty document test... ";
+
+		std::string docString = "";
+		Xml::Inspector<Xml::Encoding::Utf8CharactersWriter> inspector(
+			docString.begin(), docString.end());
+
+		bool result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::NoElement);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetDepth() == 0);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+	
+		std::cout << "OK\n";
+	}
+
+	void WhitespaceTest()
+	{
+		std::cout << "Whitespace test... ";
+
+		unsigned char source[] = { 0x0D, 0x09, 0x0D, 0x0A, 0x20, 0x0A, 0x0D, 0x20, 0x0D };
+		const char* pattern = u8"\n\t\n \n\n \n"; // Check http://www.w3.org/TR/REC-xml/#sec-line-ends.
+		Xml::Inspector<Xml::Encoding::Utf8CharactersWriter> inspector(
+			source, source + sizeof(source));
+
+		bool result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetDepth() == 0);
+		assert(inspector.GetNodeType() == Xml::NodeType::Whitespace);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue() == pattern);
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+
+		result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::NoElement);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetLineNumber() == 6);
+		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetDepth() == 0);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+	
 		std::cout << "OK\n";
 	}
 };
