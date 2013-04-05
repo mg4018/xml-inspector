@@ -20,8 +20,8 @@
   THE SOFTWARE.
 */
 
-#ifndef XML_FINAL_ENCODING_HPP__f66b9cdaf20734ef11086d0851a9c563
-#define XML_FINAL_ENCODING_HPP__f66b9cdaf20734ef11086d0851a9c563
+#ifndef XML_CHARACTERS_WRITER_HPP__f66b9cdaf20734ef11086d0851a9c563
+#define XML_CHARACTERS_WRITER_HPP__f66b9cdaf20734ef11086d0851a9c563
 
 #include <string>
 
@@ -38,9 +38,9 @@ namespace Xml
 
 			TODO: detailed description...
 
-			@sa Utf16CharactersWriter, Utf32CharactersWriter and Inspector.
+			@sa Utf16Writer, Utf32Writer and Inspector.
 		*/
-		class Utf8CharactersWriter
+		class Utf8Writer
 		{
 		public:
 			/**
@@ -56,7 +56,7 @@ namespace Xml
 				@param[out] stringDestination String where the character should be inserted.
 				@param[in] codePoint Code point of Unicode character to write.
 			*/
-			static void PutCharacter(StringType& stringDestination, char32_t codePoint);
+			static void WriteCharacter(StringType& stringDestination, char32_t codePoint);
 		};
 
 		/**
@@ -64,9 +64,9 @@ namespace Xml
 
 			TODO: detailed description...
 
-			@sa Utf8CharactersWriter, Utf32CharactersWriter and Inspector.
+			@sa Utf8Writer, Utf32Writer and Inspector.
 		*/
-		class Utf16CharactersWriter
+		class Utf16Writer
 		{
 		public:
 			/**
@@ -82,7 +82,7 @@ namespace Xml
 				@param[out] stringDestination String where the character should be inserted.
 				@param[in] codePoint Code point of Unicode character to write.
 			*/
-			static void PutCharacter(StringType& stringDestination, char32_t codePoint);
+			static void WriteCharacter(StringType& stringDestination, char32_t codePoint);
 		};
 
 		/**
@@ -90,9 +90,9 @@ namespace Xml
 
 			TODO: detailed description...
 
-			@sa Utf8CharactersWriter, Utf16CharactersWriter and Inspector.
+			@sa Utf8Writer, Utf16Writer and Inspector.
 		*/
-		class Utf32CharactersWriter
+		class Utf32Writer
 		{
 		public:
 			/**
@@ -108,10 +108,10 @@ namespace Xml
 				@param[out] stringDestination String where the character should be inserted.
 				@param[in] codePoint Code point of Unicode character to write.
 			*/
-			static void PutCharacter(StringType& stringDestination, char32_t codePoint);
+			static void WriteCharacter(StringType& stringDestination, char32_t codePoint);
 		};
 
-		inline void Utf8CharactersWriter::PutCharacter(
+		inline void Utf8Writer::WriteCharacter(
 			StringType& stringDestination, char32_t codePoint)
 		{
 			if (codePoint <= 0x7F)
@@ -176,7 +176,7 @@ namespace Xml
 			}
 		}
 
-		inline void Utf16CharactersWriter::PutCharacter(
+		inline void Utf16Writer::WriteCharacter(
 			StringType& stringDestination, char32_t codePoint)
 		{
 			if ((codePoint <= 0xD7FF) || (codePoint >= 0xE000 && codePoint <= 0xFFFF))
@@ -194,7 +194,7 @@ namespace Xml
 			}
 		}
 
-		inline void Utf32CharactersWriter::PutCharacter(
+		inline void Utf32Writer::WriteCharacter(
 			StringType& stringDestination, char32_t codePoint)
 		{
 			stringDestination.push_back(static_cast<StringType::value_type>(codePoint));

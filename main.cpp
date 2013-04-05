@@ -41,9 +41,9 @@ public:
 		Utf32BEStreamReaderTest();
 		Utf32LEStreamReaderTest();
 		Utf8IteratorsReaderTest();
-		Utf8CharactersWriterTest();
-		Utf16CharactersWriterTest();
-		Utf32CharactersWriterTest();
+		Utf8WriterTest();
+		Utf16WriterTest();
+		Utf32WriterTest();
 		InspectorConstructorsTest();
 		InspectorResetTest();
 		BeforeParsingTest();
@@ -235,7 +235,7 @@ public:
 		std::cout << "OK\n";
 	}
 
-	void Utf8CharactersWriterTest()
+	void Utf8WriterTest()
 	{
 		std::cout << "UTF-8 final encoding test... ";
 
@@ -243,14 +243,14 @@ public:
 		std::string destination;
 		std::string pattern = u8"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi";
 		for (auto i = source.cbegin(); i != source.cend(); ++i)
-			Xml::Encoding::Utf8CharactersWriter::PutCharacter(destination, *i);
+			Xml::Encoding::Utf8Writer::WriteCharacter(destination, *i);
 
 		assert(destination == pattern);
 
 		std::cout << "OK\n";
 	}
 
-	void Utf16CharactersWriterTest()
+	void Utf16WriterTest()
 	{
 		std::cout << "UTF-16 final encoding test... ";
 
@@ -258,21 +258,21 @@ public:
 		std::u16string destination;
 		std::u16string pattern = u"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi";
 		for (auto i = source.cbegin(); i != source.cend(); ++i)
-			Xml::Encoding::Utf16CharactersWriter::PutCharacter(destination, *i);
+			Xml::Encoding::Utf16Writer::WriteCharacter(destination, *i);
 
 		assert(destination == pattern);
 
 		std::cout << "OK\n";
 	}
 
-	void Utf32CharactersWriterTest()
+	void Utf32WriterTest()
 	{
 		std::cout << "UTF-32 final encoding test... ";
 
 		std::u32string source = U"abc def\U00000024\U000000A2\U000020AC\U00024B62ghi";
 		std::u32string destination;
 		for (auto i = source.cbegin(); i != source.cend(); ++i)
-			Xml::Encoding::Utf32CharactersWriter::PutCharacter(destination, *i);
+			Xml::Encoding::Utf32Writer::WriteCharacter(destination, *i);
 
 		assert(destination == source);
 
@@ -284,27 +284,27 @@ public:
 		std::cout << "Inspector constructors test... ";
 
 		// Defaul constructor.
-		Xml::Inspector<Xml::Encoding::Utf32CharactersWriter> i0;
+		Xml::Inspector<Xml::Encoding::Utf32Writer> i0;
 
 		// File path from const char*
-		Xml::Inspector<Xml::Encoding::Utf8CharactersWriter> i1("test.xml");
+		Xml::Inspector<Xml::Encoding::Utf8Writer> i1("test.xml");
 
 		// File path from const std::string&
 		std::string path = "test.xml";
-		Xml::Inspector<Xml::Encoding::Utf16CharactersWriter> i2(path);
+		Xml::Inspector<Xml::Encoding::Utf16Writer> i2(path);
 
 		// From input stream.
 		std::ifstream ifs("test.xml");
-		Xml::Inspector<Xml::Encoding::Utf32CharactersWriter> i3(&ifs);
+		Xml::Inspector<Xml::Encoding::Utf32Writer> i3(&ifs);
 	
 		// From bytes.
 		char bytes[] = u8"<root>bytes test</root>";
-		Xml::Inspector<Xml::Encoding::Utf16CharactersWriter> i4(bytes, bytes + sizeof(bytes));
+		Xml::Inspector<Xml::Encoding::Utf16Writer> i4(bytes, bytes + sizeof(bytes));
 
 		// From reader interface.
 		std::string content = u8"<root>abc</root>";
 		Xml::Encoding::Utf8IteratorsReader<std::string::const_iterator> reader(content.cbegin(), content.cend());
-		Xml::Inspector<Xml::Encoding::Utf32CharactersWriter> i5(&reader);
+		Xml::Inspector<Xml::Encoding::Utf32Writer> i5(&reader);
 
 		std::cout << "OK\n";
 	}
@@ -313,7 +313,7 @@ public:
 	{
 		std::cout << "Inspector reset test... ";
 
-		Xml::Inspector<Xml::Encoding::Utf32CharactersWriter> inspector;
+		Xml::Inspector<Xml::Encoding::Utf32Writer> inspector;
 
 		// File path from const char*
 		inspector.Reset("test.xml");
@@ -345,7 +345,7 @@ public:
 	{
 		std::cout << "Before parsing test... ";
 
-		Xml::Inspector<Xml::Encoding::Utf16CharactersWriter> inspector("test.xml");
+		Xml::Inspector<Xml::Encoding::Utf16Writer> inspector("test.xml");
 
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
@@ -358,7 +358,7 @@ public:
 	{
 		std::cout << "No source test... ";
 
-		Xml::Inspector<Xml::Encoding::Utf16CharactersWriter> inspector;
+		Xml::Inspector<Xml::Encoding::Utf16Writer> inspector;
 		bool foundNode = inspector.ReadNode();
 
 		assert(!foundNode);
@@ -624,7 +624,7 @@ public:
 		std::cout << "Empty document test... ";
 
 		std::string docString = "";
-		Xml::Inspector<Xml::Encoding::Utf8CharactersWriter> inspector(
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
 			docString.begin(), docString.end());
 
 		bool result = inspector.ReadNode();
@@ -651,7 +651,7 @@ public:
 
 		unsigned char source[] = { 0x0D, 0x09, 0x0D, 0x0A, 0x20, 0x0A, 0x0D, 0x20, 0x0D };
 		const char* pattern = u8"\n\t\n \n\n \n"; // Check http://www.w3.org/TR/REC-xml/#sec-line-ends.
-		Xml::Inspector<Xml::Encoding::Utf8CharactersWriter> inspector(
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
 			source, source + sizeof(source));
 
 		bool result = inspector.ReadNode();

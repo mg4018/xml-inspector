@@ -1169,7 +1169,7 @@ namespace Xml
 			{
 				do
 				{
-					CharactersWriterType::PutCharacter(value, currentCharacter);
+					CharactersWriterType::WriteCharacter(value, currentCharacter);
 					if (NextCharBad(false))
 					{
 						if (eof) // White spaces followed by end of file.
