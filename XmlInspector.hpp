@@ -1024,7 +1024,6 @@ namespace Xml
 				}
 				else
 				{
-					// eof position.
 					eof = true;
 					bufferedCharacter = 0;
 				}
@@ -1106,7 +1105,6 @@ namespace Xml
 			}
 			else
 			{
-				// eof position.
 				eof = true;
 			}
 		}
