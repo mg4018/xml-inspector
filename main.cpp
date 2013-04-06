@@ -65,6 +65,13 @@ public:
 		WhitespaceTest();
 		InvalidByteSequenceTest();
 		InvalidSyntaxTest();
+		IsCharTest();
+		IsWhiteSpaceTest();
+		IsNameStartCharTest();
+		IsNameCharTest();
+		IsEncNameStartCharTest();
+		IsEncNameCharTest();
+		GetHexDigitValueTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -738,6 +745,157 @@ public:
 		assert(inspector.GetPrefix().empty());
 		assert(inspector.GetNamespaceUri().empty());
 	
+		std::cout << "OK\n";
+	}
+
+	void IsCharTest()
+	{
+		std::cout << "Is char test... ";
+
+		char32_t allowed[] = {
+			0x9, 0xA, 0xD, 0x20, 0xABC, 0xD7FF, 0xE000,
+			0xEFAB, 0xFFFD, 0x10000, 0xABCDE, 0x10FFFF };
+
+		char32_t notAllowed[] = {
+			0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7,
+			0x8, 0xB, 0xC, 0xE, 0xF, 0x10, 0x15, 0x19,
+			0xD800, 0xDFFF, 0xFFFE, 0xFFFF, 0x110000,
+			0xFFFFFF, ~((char32_t)0) };
+
+		for (std::size_t i = 0; i < sizeof(allowed) / sizeof(char32_t); ++i)
+			assert(Xml::Encoding::CharactersReader::IsChar(allowed[i]));
+
+		for (std::size_t i = 0; i < sizeof(notAllowed) / sizeof(char32_t); ++i)
+			assert(!Xml::Encoding::CharactersReader::IsChar(notAllowed[i]));
+
+		std::cout << "OK\n";
+	}
+
+	void IsWhiteSpaceTest()
+	{
+		std::cout << "Is white space test... ";
+
+		char32_t allowed[] = { 0x20, 0x9, 0xD, 0xA };
+
+		char32_t notAllowed[] = {
+			0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0xB, 0xC, 0xE,
+			0xF, 0xFF, 0xFFF, 0xFFFF, 0xFFFFF, ~((char32_t)0) };
+
+		for (std::size_t i = 0; i < sizeof(allowed) / sizeof(char32_t); ++i)
+			assert(Xml::Encoding::CharactersReader::IsWhiteSpace(allowed[i]));
+
+		for (std::size_t i = 0; i < sizeof(notAllowed) / sizeof(char32_t); ++i)
+			assert(!Xml::Encoding::CharactersReader::IsWhiteSpace(notAllowed[i]));
+
+		std::cout << "OK\n";
+	}
+
+	void IsNameStartCharTest()
+	{
+		std::cout << "Is name start char test... ";
+
+		char32_t allowed[] = {
+			0x3A, 0x41, 0x4B, 0x5A, 0x5F, 0x61, 0x6B, 0x7A,
+			0xC0, 0xCB, 0xD6, 0xD8, 0xE1, 0xF6, 0xF8, 0x100,
+			0x2FF, 0x370, 0x377, 0x37D, 0x37F, 0x1000, 0x1FFF, 0x200C,
+			0x200D, 0x2070, 0x2111, 0x218F, 0x2C00, 0x2DDD, 0x2FEF, 0x3001,
+			0xAAAA, 0xD7FF, 0xF900, 0xFABC, 0xFDCF, 0xFDF0, 0xFEEE, 0xFFFD,
+			0x10000, 0xAAAAA, 0xEFFFF };
+
+		char32_t notAllowed[] = {
+			0x0, 0x1, 0x9, 0xA, 0xD, 0x20, 0x30, 0x37, 0x39, 0x5B, 0x60, 0x7B,
+			0xBF, 0xD7, 0xF7, 0x300, 0x36F, 0x37E, 0x2000, 0x200B, 0x200E, 0x206F,
+			0x2190, 0x2BFF, 0x2FF0, 0x2FFF, 0x3000, 0xD800, 0xF8FF, 0xFDD0, 0xFDEF,
+			0xFFFE, 0xFFFF, 0xF0000, 0xFFFFF, ~((char32_t)0) };
+
+		for (std::size_t i = 0; i < sizeof(allowed) / sizeof(char32_t); ++i)
+			assert(Xml::Encoding::CharactersReader::IsNameStartChar(allowed[i]));
+
+		for (std::size_t i = 0; i < sizeof(notAllowed) / sizeof(char32_t); ++i)
+			assert(!Xml::Encoding::CharactersReader::IsNameStartChar(notAllowed[i]));
+
+		std::cout << "OK\n";
+	}
+
+	void IsNameCharTest()
+	{
+		std::cout << "Is name char test... ";
+
+		char32_t allowed[] = {
+			0x3A, 0x41, 0x4B, 0x5A, 0x5F, 0x61, 0x6B, 0x7A,
+			0xC0, 0xCB, 0xD6, 0xD8, 0xE1, 0xF6, 0xF8, 0x100,
+			0x2FF, 0x370, 0x377, 0x37D, 0x37F, 0x1000, 0x1FFF, 0x200C,
+			0x200D, 0x2070, 0x2111, 0x218F, 0x2C00, 0x2DDD, 0x2FEF, 0x3001,
+			0xAAAA, 0xD7FF, 0xF900, 0xFABC, 0xFDCF, 0xFDF0, 0xFEEE, 0xFFFD,
+			0x10000, 0xAAAAA, 0xEFFFF, 0x2D, 0x2E, 0x30, 0x35, 0x39, 0xB7,
+			0x300, 0x333, 0x36F, 0x203F, 0x2040 };
+
+		char32_t notAllowed[] = {
+			0x0, 0x1, 0x9, 0xA, 0xD, 0x20, 0x2F, 0x3B, 0x5B, 0x60, 0x7B,
+			0xBF, 0xD7, 0xF7, 0x37E, 0x2000, 0x200B, 0x200E, 0x206F,
+			0x2190, 0x2BFF, 0x2FF0, 0x2FFF, 0x3000, 0xD800, 0xF8FF, 0xFDD0, 0xFDEF,
+			0xFFFE, 0xFFFF, 0xF0000, 0xFFFFF, ~((char32_t)0) };
+
+		for (std::size_t i = 0; i < sizeof(allowed) / sizeof(char32_t); ++i)
+			assert(Xml::Encoding::CharactersReader::IsNameChar(allowed[i]));
+
+		for (std::size_t i = 0; i < sizeof(notAllowed) / sizeof(char32_t); ++i)
+		{
+			if (Xml::Encoding::CharactersReader::IsNameChar(notAllowed[i]))
+				std::cout << "dupa:" << i << "\n";
+			assert(!Xml::Encoding::CharactersReader::IsNameChar(notAllowed[i]));
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void IsEncNameStartCharTest()
+	{
+		std::cout << "Is enc name start char test... ";
+
+		const char32_t* allowed = U"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+		char32_t notAllowed[] = { 0x0, 0x30, 0x35, 0x39, 0x40, 0x5B, 0x60, 0x7B, 0x4100, ~((char32_t)0) };
+
+		for (std::size_t i = 0; i < (sizeof(allowed) - sizeof(char32_t)) / sizeof(char32_t); ++i)
+			assert(Xml::Encoding::CharactersReader::IsEncNameStartChar(allowed[i]));
+
+		for (std::size_t i = 0; i < sizeof(notAllowed) / sizeof(char32_t); ++i)
+			assert(!Xml::Encoding::CharactersReader::IsEncNameStartChar(notAllowed[i]));
+
+		std::cout << "OK\n";
+	}
+
+	void IsEncNameCharTest()
+	{
+		std::cout << "Is enc name char test... ";
+
+		const char32_t* allowed = U"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-";
+
+		char32_t notAllowed[] = { 0x0, 0x1, 0x40, 0x5B, 0x60, 0x7B, 0x4100, ~((char32_t)0) };
+
+		for (std::size_t i = 0; i < (sizeof(allowed) - sizeof(char32_t)) / sizeof(char32_t); ++i)
+			assert(Xml::Encoding::CharactersReader::IsEncNameChar(allowed[i]));
+
+		for (std::size_t i = 0; i < sizeof(notAllowed) / sizeof(char32_t); ++i)
+			assert(!Xml::Encoding::CharactersReader::IsEncNameChar(notAllowed[i]));
+
+		std::cout << "OK\n";
+	}
+
+	void GetHexDigitValueTest()
+	{
+		std::cout << "Get hex digit value test... ";
+
+		const char32_t* digits = U"0123456789ABCDEF";
+		const char32_t* digits2 = U"0123456789ABCDEF";
+
+		for (std::size_t i = 0; i < (sizeof(digits) - sizeof(char32_t)) / sizeof(char32_t); ++i)
+			assert(Xml::Encoding::CharactersReader::GetHexDigitValue(digits[i]) == (int)i);
+
+		for (std::size_t i = 0; i < (sizeof(digits2) - sizeof(char32_t)) / sizeof(char32_t); ++i)
+			assert(Xml::Encoding::CharactersReader::GetHexDigitValue(digits2[i]) == (int)i);
+
 		std::cout << "OK\n";
 	}
 };

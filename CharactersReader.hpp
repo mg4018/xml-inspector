@@ -53,8 +53,9 @@ namespace Xml
 
 				@param[in] codePoint Code point of Unicode character.
 				@return True if character is allowed in XML document.
+				@sa http://www.w3.org/TR/REC-xml/#NT-Char.
 			*/
-			static bool IsAllowed(char32_t codePoint);
+			static bool IsChar(char32_t codePoint);
 
 			/**
 				@brief Checks if character is white space.
@@ -63,6 +64,56 @@ namespace Xml
 				@return True if character is either space, carriage return, line feed, or tab.
 			*/
 			static bool IsWhiteSpace(char32_t codePoint);
+
+			/**
+				@brief Checks if character is allowed to be the first character of XML name.
+
+				@param[in] codePoint Code point of Unicode character.
+				@return True if character is allowed to be the first character of XML name.
+				@sa http://www.w3.org/TR/REC-xml/#NT-NameStartChar.
+			*/
+			static bool IsNameStartChar(char32_t codePoint);
+
+			/**
+				@brief Checks if character is allowed to be the one of
+					XML name characters except first.
+
+				@param[in] codePoint Code point of Unicode character.
+				@return True if character is allowed to be the one of
+					XML name characters except first.
+				@sa http://www.w3.org/TR/REC-xml/#NT-NameChar.
+			*/
+			static bool IsNameChar(char32_t codePoint);
+
+			/**
+				@brief Checks if character is allowed to be the first character of
+					XML encoding declaration name.
+
+				@param[in] codePoint Code point of Unicode character.
+				@return True if character is allowed to be the first character of
+					XML encoding declaration name.
+				@sa http://www.w3.org/TR/REC-xml/#NT-EncName.
+			*/
+			static bool IsEncNameStartChar(char32_t codePoint);
+
+			/**
+				@brief Checks if character is allowed to be the one of
+					XML encoding declaration name characters except first.
+
+				@param[in] codePoint Code point of Unicode character.
+				@return True if character is allowed to be the one of
+					XML encoding declaration name characters except first.
+				@sa http://www.w3.org/TR/REC-xml/#NT-EncName.
+			*/
+			static bool IsEncNameChar(char32_t codePoint);
+
+			/**
+				@brief Gets the value represented by hexadecimal character.
+
+				@return Value represented by hexadecimal character,
+					or -1 if this is not the hexadecimal character.
+			*/
+			static int GetHexDigitValue(char32_t codePoint);
 
 			/**
 				@brief Reads one character from the specifically encoded source
@@ -402,7 +453,7 @@ namespace Xml
 		
 		}
 
-		inline bool CharactersReader::IsAllowed(char32_t codePoint)
+		inline bool CharactersReader::IsChar(char32_t codePoint)
 		{
 			if (codePoint < 0xD800)
 			{
@@ -420,6 +471,157 @@ namespace Xml
 		{
 			return (codePoint == 0x20 || codePoint == 0x0A ||
 				codePoint == 0x09 || codePoint == 0x0D);
+		}
+
+		inline bool CharactersReader::IsNameStartChar(char32_t codePoint)
+		{
+			static const char Allowed1Byte[256] =
+			{
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+				0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1,
+				0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1
+			};
+			if (codePoint <= 0xFF)
+				return (Allowed1Byte[static_cast<unsigned char>(codePoint)] != 0);
+
+			return (
+				(codePoint <= 0x2FF) ||
+				(codePoint >= 0x370 && codePoint <= 0x37D) ||
+				(codePoint >= 0x37F && codePoint <= 0x1FFF) ||
+				(codePoint >= 0x200C && codePoint <= 0x200D) ||
+				(codePoint >= 0x2070 && codePoint <= 0x218F) ||
+				(codePoint >= 0x2C00 && codePoint <= 0x2FEF) ||
+				(codePoint >= 0x3001 && codePoint <= 0xD7FF) ||
+				(codePoint >= 0xF900 && codePoint <= 0xFDCF) ||
+				(codePoint >= 0xFDF0 && codePoint <= 0xFFFD) ||
+				(codePoint >= 0x10000 && codePoint <= 0xEFFFF));
+		}
+
+		inline bool CharactersReader::IsNameChar(char32_t codePoint)
+		{
+			static const char Allowed1Byte[256] =
+			{
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+				0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1,
+				0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1
+			};
+			if (codePoint <= 0xFF)
+				return (Allowed1Byte[static_cast<unsigned char>(codePoint)] != 0);
+
+			return (
+				(codePoint <= 0x2FF) ||
+				(codePoint >= 0x300 && codePoint <= 0x37D) ||
+				(codePoint >= 0x37F && codePoint <= 0x1FFF) ||
+				(codePoint >= 0x200C && codePoint <= 0x200D) ||
+				(codePoint >= 0x203F && codePoint <= 0x2040) ||
+				(codePoint >= 0x2070 && codePoint <= 0x218F) ||
+				(codePoint >= 0x2C00 && codePoint <= 0x2FEF) ||
+				(codePoint >= 0x3001 && codePoint <= 0xD7FF) ||
+				(codePoint >= 0xF900 && codePoint <= 0xFDCF) ||
+				(codePoint >= 0xFDF0 && codePoint <= 0xFFFD) ||
+				(codePoint >= 0x10000 && codePoint <= 0xEFFFF));
+		}
+
+		inline bool CharactersReader::IsEncNameStartChar(char32_t codePoint)
+		{
+			static const char Allowed[256] =
+			{
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+				0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+			};
+			return (codePoint <= 0xFF &&
+				Allowed[static_cast<unsigned char>(codePoint)] != 0);
+		}
+
+		inline bool CharactersReader::IsEncNameChar(char32_t codePoint)
+		{
+			static const char Allowed[256] =
+			{
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+				0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1,
+				0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+			};
+			return (codePoint <= 0xFF &&
+				Allowed[static_cast<unsigned char>(codePoint)] != 0);
+		}
+
+		inline int CharactersReader::GetHexDigitValue(char32_t codePoint)
+		{
+			static const signed char HexValue[256] =
+			{
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, -1, -1, -1, -1, -1, -1,
+				-1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 
+			};
+			if (codePoint <= 0xFF)
+				return static_cast<int>(HexValue[static_cast<unsigned char>(codePoint)]);
+			return -1;
 		}
 
 		//
@@ -991,7 +1193,7 @@ namespace Xml
 
 				codePoint |= static_cast<char32_t>(static_cast<unsigned char>(oneByte));
 				result = codePoint;
-				if (IsAllowed(result))
+				if (IsChar(result))
 					return 1;
 				return -1;
 			}
@@ -1081,7 +1283,7 @@ namespace Xml
 
 				codePoint |= (static_cast<char32_t>(static_cast<unsigned char>(oneByte)) << 24);
 				result = codePoint;
-				if (IsAllowed(result))
+				if (IsChar(result))
 					return 1;
 				return -1;
 			}

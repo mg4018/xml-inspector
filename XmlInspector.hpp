@@ -361,10 +361,38 @@ namespace Xml
 		*/
 		typedef uint_least64_t SizeType;
 	private:
-		static const char32_t Space = 0x20;
-		static const char32_t LineFeed = 0x0A;
-		static const char32_t CarriageReturn = 0x0D;
-		static const char32_t LessThan = 0x3C;
+		static const char32_t Space = 0x20;                  // ' '
+		static const char32_t LineFeed = 0x0A;               // '\n'
+		static const char32_t CarriageReturn = 0x0D;         // '\r'
+		static const char32_t LessThan = 0x3C;               // '<'
+		static const char32_t GreaterThan = 0x3E;            // '>'
+		static const char32_t Equals = 0x3D;                 // '='
+		static const char32_t Apostrophe = 0x27;             // '\''
+		static const char32_t DoubleQuote = 0x22;            // '\"'
+		static const char32_t Slash = 0x2F;                  // '/'
+		static const char32_t Question = 0x3F;               // '?'
+		static const char32_t Exclamation = 0x21;            // '!'
+		static const char32_t Minus = 0x2D;                  // '-'
+		static const char32_t Ampersand = 0x26;              // '&'
+		static const char32_t Hash = 0x23;                   // '#'
+		static const char32_t X = 0x78;                      // 'x'
+		static const char32_t Colon = 0x3A;                  // ':'
+		static const char32_t Semicolon = 0x3B;              // ';'
+		static const char32_t LeftSquareBracket = 0x3B;      // '['
+		static const char32_t RightSquareBracket = 0x3B;     // ']'
+		static const char32_t Dot = 0x3B;                    // '.'
+		static constexpr const char32_t* LowerXml = U"xml";
+		static constexpr const char32_t* UpperXml = U"XML";
+		static constexpr const char32_t* Xmlns = U"xmlns";
+		static constexpr const char32_t* XmlUri = U"http://www.w3.org/XML/1998/namespace";
+		static constexpr const char32_t* XmlnsUri = U"http://www.w3.org/2000/xmlns/";
+		static constexpr const char32_t* XmlDeclarationVersion = U"version";
+		static constexpr const char32_t* XmlDeclarationEncoding = U"encoding";
+		static constexpr const char32_t* XmlDeclarationStandalone = U"standalone";
+		static constexpr const char32_t* Yes = U"yes";
+		static constexpr const char32_t* No = U"no";
+		static constexpr const char32_t* CDATA = U"CDATA";
+		static constexpr const char32_t* DOCTYPE = U"DOCTYPE";
 
 		SizeType lineNumber;
 		SizeType linePosition;
@@ -1215,8 +1243,21 @@ namespace Xml
 			return false;
 		}
 
-		// TODO:
-		assert(false && "Not implemented yet.");
+		if (currentCharacter == LessThan) // New tag to parse.
+		{
+			// TODO:
+			assert(false && "Not implemented yet.");
+		}
+		else if (currentCharacter == GreaterThan) // End of tag.
+		{
+			// TODO:
+			assert(false && "Not implemented yet.");
+		}
+		else // currentCharacter == Semicolon // End of reference.
+		{
+			// TODO:
+			assert(false && "Not implemented yet.");
+		}
 		return true;
 	}
 
