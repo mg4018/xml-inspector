@@ -64,6 +64,7 @@ public:
 		EmptyDocumentTest();
 		WhitespaceTest();
 		InvalidByteSequenceTest();
+		InvalidSyntaxTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -703,6 +704,32 @@ public:
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetLineNumber() == 3);
 		assert(inspector.GetLinePosition() == 2);
+		assert(inspector.GetDepth() == 0);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+	
+		std::cout << "OK\n";
+	}
+
+	void InvalidSyntaxTest()
+	{
+		std::cout << "Invalid syntax test... ";
+
+		std::string source = u8"  \t \n  bad<root />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			source.begin(), source.end());
+
+		bool result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetLineNumber() == 2);
+		assert(inspector.GetLinePosition() == 3);
 		assert(inspector.GetDepth() == 0);
 		assert(inspector.GetNodeType() == Xml::NodeType::None);
 		assert(inspector.GetName().empty());

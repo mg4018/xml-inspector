@@ -364,6 +364,7 @@ namespace Xml
 		static const char32_t Space = 0x20;
 		static const char32_t LineFeed = 0x0A;
 		static const char32_t CarriageReturn = 0x0D;
+		static const char32_t LessThan = 0x3C;
 
 		SizeType lineNumber;
 		SizeType linePosition;
@@ -1185,8 +1186,15 @@ namespace Xml
 				while (IsWhiteSpace(currentCharacter));
 			}
 
-			// TODO:
-			assert(false && "Not implemented yet.");
+			if (currentCharacter != LessThan)
+			{
+				tempLineNumber = currentLineNumber;
+				tempLinePosition = currentLinePosition;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				lineNumber = tempLineNumber;
+				linePosition = tempLinePosition;
+			}
 		}
 
 		if (err != ErrorCode::None)
