@@ -888,7 +888,7 @@ public:
 		std::cout << "Get hex digit value test... ";
 
 		const char32_t* digits = U"0123456789ABCDEF";
-		const char32_t* digits2 = U"0123456789ABCDEF";
+		const char32_t* digits2 = U"0123456789abcdef";
 
 		for (std::size_t i = 0; i < (sizeof(digits) - sizeof(char32_t)) / sizeof(char32_t); ++i)
 			assert(Xml::Encoding::CharactersReader::GetHexDigitValue(digits[i]) == (int)i);
