@@ -33,6 +33,7 @@
 #include <cstdint>
 #include <cassert>
 #include <memory>
+#include <deque>
 
 /**
 	@file XmlInspector.hpp
@@ -274,6 +275,103 @@ namespace Xml
 		InvalidXmlPrefixDeclaration
 	};
 
+	/**
+		@brief Delimiter for attribute value.
+	*/
+	enum class ValueDelimiter
+	{
+		/**
+			@brief Attribute is delimited by apostrophes (for example <tt>&lt;a name='value'&gt;</tt> ).
+		*/
+		Apostrophe,
+
+		/**
+			@brief Attribute is delimited by double quotes (for example <tt>&lt;a name="value"&gt;</tt> ).
+		*/
+		DoubleQuote
+	};
+
+	/**
+		@brief Class for storing attribute data like name and value.
+	*/
+	template <typename TStringType>
+	class Attribute
+	{
+	public:
+		/**
+			@brief Alias to string type provided by class template parameter.
+		*/
+		typedef TStringType StringType;
+
+		/**
+			@brief Unsigned integer type definition for determining location in XML document.
+				This type should be enough to store any file size or memory buffer size.
+		*/
+		typedef uint_least64_t SizeType;
+
+		/**
+			@brief Qualified name of the attribute.
+		*/
+		StringType Name;
+
+		/**
+			@brief Value of the attribute.
+		*/
+		StringType Value;
+
+		/**
+			@brief Local name of the attribute.
+		*/
+		StringType LocalName;
+
+		/**
+			@brief Namespace prefix of the attribute.
+		*/
+		StringType Prefix;
+
+		/**
+			@brief Namespace URI of the attribute.
+		*/
+		StringType NamespaceUri;
+
+		/**
+			@brief Line number of attribute name.
+
+			Starting value is 1. For example:
+			@verbatim
+			<root>
+			   <a
+			       attrName=
+				       "value"
+			   />
+			</root>
+			@endverbatim
+			Line number of @c attrName is 3.
+
+			@sa LinePosition.
+		*/
+		SizeType LineNumber;
+
+		/**
+			@brief Line position of attribute name.
+
+			Starting value is 1. For example:
+			@verbatim
+			<root attrName="value"/>
+			@endverbatim
+			Line position of @c attrName is 7.
+
+			@warning Carriage return characters (U+000D) are ignored.
+			@sa LineNumber.
+		*/
+		SizeType LinePosition;
+
+		/**
+			@brief Delimiter for attribute value.
+		*/
+		ValueDelimiter Delimiter;
+	};
+
 	/// @cond DETAILS
 	namespace Details
 	{
@@ -326,6 +424,18 @@ namespace Xml
 			
 			}
 		};
+
+		template <typename TStringType>
+		class NamespaceDeclaration
+		{
+		public:	
+			typedef TStringType StringType;
+			typedef uint_least64_t SizeType;
+
+			StringType Prefix;
+			StringType Uri;
+			SizeType TagIndex; // Counting from 0.
+		};
 	}
 	/// @endcond
 
@@ -334,8 +444,8 @@ namespace Xml
 
 		TODO: detailed description...
 
-		@tparam TCharactersWriter Desired encoding. You don't need to care how XML file is encoded.
-			You can choose how you want to read XML strings between Utf8CharactersWriter, Utf16CharactersWriter
+		@tparam TCharactersWriter Writer with specified encoding. You don't need to care how XML file is encoded.
+			You can choose how you want to store the strings between Utf8CharactersWriter, Utf16CharactersWriter
 			and Utf32CharactersWriter class from CharactersWriter.hpp file. They respectively store the strings in
 			@c std::string, @c std::u16string and @c std::u32string. You can also write your own fancy way of
 			storing strings. For example you may want to use @c std::wstring and even other than Unicode encoding.
@@ -355,12 +465,26 @@ namespace Xml
 		typedef typename TCharactersWriter::StringType StringType;
 
 		/**
-			@brief Unsigned integer type definition for determining location in XML document.
+			@brief Attribute type.
+		*/
+		typedef Attribute<StringType> AttributeType;
 
-			This type should be enough to store any file size or memory buffer size.
+		/**
+			@brief Attribute iterator.
+		*/
+		typedef typename std::deque<AttributeType>::const_iterator AttributeIterator;
+
+		/**
+			@brief Unsigned integer type definition for determining location in XML document.
+				This type should be enough to store any file size or memory buffer size.
 		*/
 		typedef uint_least64_t SizeType;
 	private:
+		typedef Details::NamespaceDeclaration<StringType> NamespaceDeclarationType;
+		typedef typename std::deque<AttributeType>::size_type AttributesSizeType;
+		typedef typename std::deque<StringType>::size_type UnclosedTagsSizeType;
+		typedef typename std::deque<NamespaceDeclarationType>::size_type NamespacesSizeType;
+
 		static const char32_t Space = 0x20;                  // ' '
 		static const char32_t LineFeed = 0x0A;               // '\n'
 		static const char32_t CarriageReturn = 0x0D;         // '\r'
@@ -393,6 +517,12 @@ namespace Xml
 		static constexpr const char32_t* No = U"no";
 		static constexpr const char32_t* CDATA = U"CDATA";
 		static constexpr const char32_t* DOCTYPE = U"DOCTYPE";
+		// Source types.
+		static const int SourceNone = 0; // Inspector() constructor.
+		static const int SourcePath = 1; // Inspector(const char*) or Inspector(const std::string&) constructor.
+		static const int SourceStream = 2; // Inspector(std::istream*) constructor.
+		static const int SourceIterators = 3; // Inspector(InputIterator first, InputIterator last) constructor.
+		static const int SourceReader = 4; // Inspector(Encoding::CharactersReader*) constructor.
 
 		SizeType lineNumber;
 		SizeType linePosition;
@@ -405,8 +535,7 @@ namespace Xml
 		std::ifstream fileStream;
 		std::istream* inputStreamPtr;
 		Encoding::CharactersReader* reader;
-		bool isExternalStream;
-		bool isExternalReader;
+		int sourceType;
 		bool afterBom;
 		Details::Bom bom;
 		StringType name;
@@ -418,6 +547,18 @@ namespace Xml
 		char32_t bufferedCharacter;
 		bool foundElement;
 		bool eof;
+		StringType xmlUriString;
+		StringType xmlnsUriString;
+		// Instead of removing objects from collection I decrement size.
+		// It's a fake size, but I don't want to
+		// allocate strings in objects after each element node and each XML document.
+		// To clear these collections you can call Inspector::Clear method.
+		std::deque<AttributeType> attributes;
+		AttributesSizeType attributesSize;
+		std::deque<StringType> unclosedTags;
+		UnclosedTagsSizeType unclosedTagsSize;
+		std::deque<NamespaceDeclarationType> namespaces;
+		NamespacesSizeType namespacesSize;
 
 		// We don't need to check carriage return
 		// while NextCharBad method removes them for us.
@@ -528,6 +669,23 @@ namespace Xml
 		const StringType& GetNamespaceUri() const;
 
 		/**
+			@brief Gets the number of attributes on the current node.
+		*/
+		SizeType GetAttributesCount() const;
+
+		/**
+			@brief Returns a const iterator referring to the first
+				attribute on the current node.
+		*/
+		AttributeIterator GetAttributeBegin() const;
+
+		/**
+			@brief Returns a const iterator referring to the <em>past-the-end</em>
+				attribute on the current node.
+		*/
+		AttributeIterator GetAttributeEnd() const;
+
+		/**
 			@brief Gets the last error message.
 		*/
 		const char* GetErrorMessage() const;
@@ -564,7 +722,7 @@ namespace Xml
 			abcdef<mytag />
 			</root>
 			@endverbatim
-			Line position of <tt>&lt;@c mytag /&gt;</tt> is 7.
+			Line position of <tt>&lt;mytag /&gt;</tt> is 7.
 
 			@warning Carriage return characters (U+000D) are ignored.
 			@sa GetLineNumber() and GetDepth().
@@ -591,33 +749,56 @@ namespace Xml
 		SizeType GetDepth() const;
 
 		/**
-			@brief Removes the association with the source and clears
+			@brief Removes the association with the source and resets
 				the state of Inspector object.
+
+			It doesn't clear the helpful containers to reduce the number of
+			string allocations in future reading nodes. To completely
+			clear those containers you should call the Clear method instead.
+
+			@sa Clear().
 		*/
 		void Reset();
 
 		/**
-			@brief Clears the state of Inspector object and assign
+			@brief Resets the state of Inspector object and assign
 				the source to the specified file path.
+
+			It doesn't clear the helpful containers to reduce the number of
+			string allocations in future reading nodes. To completely
+			clear those containers you can call the Clear method.
+
+			@sa Clear().
 		*/
 		void Reset(const char* filePath);
 
 		/**
-			@brief Clears the state of Inspector object and assign
+			@brief Resets the state of Inspector object and assign
 				the source to the specified file path.
+
+			It doesn't clear the helpful containers to reduce the number of
+			string allocations in future reading nodes. To completely
+			clear those containers you can call the Clear method.
+
+			@sa Clear().
 		*/
 		void Reset(const std::string& filePath);
 
 		/**
-			@brief Clears the state of Inspector object and assign
+			@brief Resets the state of Inspector object and assign
 				the source to the specified stream.
 
+			It doesn't clear the helpful containers to reduce the number of
+			string allocations in future reading nodes. To completely
+			clear those containers you can call the Clear method.
 			TODO: warning - stream from this pointer must exist while reading nodes.
+
+			@sa Clear().
 		*/
 		void Reset(std::istream* inputStream);
 
 		/**
-			@brief Clears the state of Inspector object and assign
+			@brief Resets the state of Inspector object and assign
 				the source to the specified iterators.
 
 			@param[in] first,last Input iterators to the initial
@@ -625,17 +806,41 @@ namespace Xml
 				is [first,last), which contains all the elements
 				between first and last, including the element pointed
 				by first but not the element pointed by last.
+
+			It doesn't clear the helpful containers to reduce the number of
+			string allocations in future reading nodes. To completely
+			clear those containers you can call the Clear method.
+
+			@sa Clear().
 		*/
 		template <typename TInputIterator>
 		void Reset(TInputIterator first, TInputIterator last);
 
 		/**
-			@brief Clears the state of Inspector object and assign
+			@brief Resets the state of Inspector object and assign
 				the source to the specified characters reader interface.
 
+			It doesn't clear the helpful containers to reduce the number of
+			string allocations in future reading nodes. To completely
+			clear those containers you can call the Clear method.
 			TODO: warning message about BOM.
+
+			@sa Clear().
 		*/
 		void Reset(Encoding::CharactersReader* reader);
+
+		/**
+			@brief Removes the association with the source, resets
+				the state of Inspector object and clears internal containers.
+
+			This method clears all the helpful containers in addition to
+			just reset the state. If you want to use Inspector object
+			to parse more XML documents you should consider Reset methods
+			instead. It would reduce the number of string allocations.
+
+			@sa Reset().
+		*/
+		void Clear();
 	};
 
 	template <typename TCharactersWriter>
@@ -657,8 +862,7 @@ namespace Xml
 		fileStream(),
 		inputStreamPtr(nullptr),
 		reader(nullptr),
-		isExternalStream(false),
-		isExternalReader(false),
+		sourceType(SourceNone),
 		afterBom(false),
 		bom(Details::Bom::None),
 		name(),
@@ -669,9 +873,24 @@ namespace Xml
 		currentCharacter(0),
 		bufferedCharacter(0),
 		foundElement(false),
-		eof(false)
+		eof(false),
+		xmlUriString(),
+		xmlnsUriString(),
+		attributes(),
+		attributesSize(0),
+		unclosedTags(),
+		unclosedTagsSize(0),
+		namespaces(),
+		namespacesSize(0)
 	{
+		xmlUriString.reserve(36);
+		xmlnsUriString.reserve(29);
 
+		for (std::size_t i = 0; i < 36; ++i)
+			CharactersWriterType::WriteCharacter(xmlUriString, XmlUri[i]);
+
+		for (std::size_t i = 0; i < 29; ++i)
+			CharactersWriterType::WriteCharacter(xmlnsUriString, XmlnsUri[i]);
 	}
 
 	template <typename TCharactersWriter>
@@ -823,7 +1042,7 @@ namespace Xml
 	template <typename TCharactersWriter>
 	inline void Inspector<TCharactersWriter>::ParseBom()
 	{
-		if (!fPath.empty())
+		if (sourceType == SourcePath)
 		{
 			fileStream.open(fPath.c_str());
 			if (!fileStream.is_open())
@@ -935,7 +1154,7 @@ namespace Xml
 				bom = tempBom;
 			}
 		}
-		else if (inputStreamPtr != nullptr)
+		else if (sourceType == SourceStream || sourceType == SourceIterators)
 		{
 			Details::Bom tempBom = Details::ReadBom(inputStreamPtr);
 			if (tempBom == Details::Bom::None || tempBom == Details::Bom::Utf8)
@@ -990,7 +1209,7 @@ namespace Xml
 				bom = tempBom;
 			}
 		}
-		else if (isExternalReader)
+		else if (sourceType == SourceReader)
 		{
 			err = ErrorCode::None;
 			afterBom = true;
@@ -1303,6 +1522,27 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
+	inline typename Inspector<TCharactersWriter>::SizeType
+		Inspector<TCharactersWriter>::GetAttributesCount() const
+	{
+		return static_cast<SizeType>(attributesSize);
+	}
+
+	template <typename TCharactersWriter>
+	inline typename Inspector<TCharactersWriter>::AttributeIterator
+		Inspector<TCharactersWriter>::GetAttributeBegin() const
+	{
+		return attributes.cbegin();
+	}
+
+	template <typename TCharactersWriter>
+	inline typename Inspector<TCharactersWriter>::AttributeIterator
+		Inspector<TCharactersWriter>::GetAttributeEnd() const
+	{
+		return attributes.cbegin() + attributesSize;
+	}
+
+	template <typename TCharactersWriter>
 	inline const char* Inspector<TCharactersWriter>::GetErrorMessage() const
 	{
 		return errMsg;
@@ -1357,7 +1597,10 @@ namespace Xml
 		bufferedCharacter = 0;
 		foundElement = false;
 		eof = false;
-		if (!fPath.empty())
+		attributesSize = 0;
+		unclosedTagsSize = 0;
+		namespacesSize = 0;
+		if (sourceType == SourcePath)
 		{
 			fPath.clear();
 			if (fileStream.is_open())
@@ -1366,29 +1609,25 @@ namespace Xml
 			delete reader;
 			reader = nullptr;
 		}
-		else if (isExternalReader)
+		else if (sourceType == SourceReader)
 		{
 			reader = nullptr;
-			isExternalReader = false;
 		}
-		else if (isExternalStream)
+		else if (sourceType == SourceStream)
 		{
 			inputStreamPtr = nullptr;
-			isExternalStream = false;
 			delete reader;
 			reader = nullptr;
 		}
-		else
+		else if (sourceType == SourceIterators)
 		{
-			if (inputStreamPtr != nullptr)
-			{
-				delete inputStreamPtr->rdbuf();
-				delete inputStreamPtr;
-				inputStreamPtr = nullptr;
-			}
+			delete inputStreamPtr->rdbuf();
+			delete inputStreamPtr;
+			inputStreamPtr = nullptr;
 			delete reader;
 			reader = nullptr;
 		}
+		sourceType = SourceNone;
 	}
 
 	template <typename TCharactersWriter>
@@ -1396,6 +1635,7 @@ namespace Xml
 	{
 		Reset();
 		fPath = filePath;
+		sourceType = SourcePath;
 	}
 
 	template <typename TCharactersWriter>
@@ -1403,6 +1643,7 @@ namespace Xml
 	{
 		Reset();
 		fPath = filePath;
+		sourceType = SourcePath;
 	}
 
 	template <typename TCharactersWriter>
@@ -1410,7 +1651,7 @@ namespace Xml
 	{
 		Reset();
 		inputStreamPtr = inputStream;
-		isExternalStream = true;
+		sourceType = SourceStream;
 	}
 
 	template <typename TCharactersWriter>
@@ -1423,14 +1664,27 @@ namespace Xml
 			new Details::BasicIteratorsBuf<TInputIterator, char>(first, last));
 		inputStreamPtr = new std::istream(buf.get());
 		buf.release();
+		sourceType = SourceIterators;
 	}
 
 	template <typename TCharactersWriter>
 	inline void Inspector<TCharactersWriter>::Reset(Encoding::CharactersReader* r)
 	{
 		Reset();
-		reader = r;
-		isExternalReader = (r != nullptr);
+		if (r != nullptr)
+		{
+			reader = r;
+			sourceType = SourceReader;
+		}
+	}
+
+	template <typename TCharactersWriter>
+	inline void Inspector<TCharactersWriter>::Clear()
+	{
+		Reset();
+		attributes.clear();
+		unclosedTags.clear();
+		namespaces.clear();
 	}
 
 	/// @cond DETAILS
