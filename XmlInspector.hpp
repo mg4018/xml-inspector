@@ -34,6 +34,7 @@
 #include <cassert>
 #include <memory>
 #include <deque>
+#include <utility>
 
 /**
 	@file XmlInspector.hpp
@@ -622,6 +623,16 @@ namespace Xml
 			TODO: warning message about BOM.
 		*/
 		Inspector(Encoding::CharactersReader* reader);
+
+		/**
+			@brief Copy constructor is inaccessible for this class.
+		*/
+		Inspector(const Inspector&) = delete;
+
+		/**
+			@brief Assignment operator is inaccessible for this class.
+		*/
+		Inspector& operator=(Inspector&) = delete;
 
 		/**
 			@brief Destructor.
