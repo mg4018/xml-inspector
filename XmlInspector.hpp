@@ -34,7 +34,6 @@
 #include <cassert>
 #include <memory>
 #include <deque>
-#include <utility>
 
 /**
 	@file XmlInspector.hpp
