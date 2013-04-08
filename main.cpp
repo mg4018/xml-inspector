@@ -382,6 +382,7 @@ public:
 		assert(inspector.GetLocalName().empty());
 		assert(inspector.GetPrefix().empty());
 		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
@@ -407,6 +408,7 @@ public:
 		assert(inspector.GetLocalName().empty());
 		assert(inspector.GetPrefix().empty());
 		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
@@ -683,6 +685,7 @@ public:
 		assert(inspector.GetLocalName().empty());
 		assert(inspector.GetPrefix().empty());
 		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
@@ -712,6 +715,7 @@ public:
 		assert(inspector.GetLocalName().empty());
 		assert(inspector.GetPrefix().empty());
 		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
@@ -729,6 +733,7 @@ public:
 		assert(inspector.GetLocalName().empty());
 		assert(inspector.GetPrefix().empty());
 		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
@@ -757,6 +762,7 @@ public:
 		assert(inspector.GetLocalName().empty());
 		assert(inspector.GetPrefix().empty());
 		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
@@ -785,6 +791,7 @@ public:
 		assert(inspector.GetLocalName().empty());
 		assert(inspector.GetPrefix().empty());
 		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);

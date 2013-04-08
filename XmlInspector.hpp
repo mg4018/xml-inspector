@@ -669,6 +669,11 @@ namespace Xml
 		const StringType& GetNamespaceUri() const;
 
 		/**
+			@brief Gets a value indicating whether the current node has any attributes.
+		*/
+		bool HasAttributes() const;
+
+		/**
 			@brief Gets the number of attributes on the current node.
 		*/
 		SizeType GetAttributesCount() const;
@@ -1519,6 +1524,12 @@ namespace Xml
 		Inspector<TCharactersWriter>::GetNamespaceUri() const
 	{
 		return namespaceUri;
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::HasAttributes() const
+	{
+		return (attributesSize != 0);
 	}
 
 	template <typename TCharactersWriter>
