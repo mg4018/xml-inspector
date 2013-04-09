@@ -73,6 +73,7 @@ public:
 		IsEncNameStartCharTest();
 		IsEncNameCharTest();
 		GetHexDigitValueTest();
+		StartElementTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -954,6 +955,35 @@ public:
 		assert(Xml::Encoding::CharactersReader::GetHexDigitValue(0x47) == -1);
 		assert(Xml::Encoding::CharactersReader::GetHexDigitValue(0x67) == -1);
 
+		std::cout << "OK\n";
+	}
+
+	void StartElementTest()
+	{
+		std::cout << "Start element test... ";
+
+		std::string docString = u8"<element>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		bool result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
+		assert(inspector.GetName() == u8"element");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"element");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetDepth() == 0);
+	
 		std::cout << "OK\n";
 	}
 };

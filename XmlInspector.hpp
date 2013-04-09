@@ -444,7 +444,7 @@ namespace Xml
 
 		Example:
 		@code{.cpp}
-        #include "xml-inspector/XmlInspector.hpp"
+        #include "XmlInspector.hpp"
         #include <iostream>
         #include <cstdlib>
         #include <string>
@@ -618,6 +618,24 @@ namespace Xml
 		bool NextCharBad(bool insideTag);
 
 		void ParseBom();
+
+		bool ParseElement();
+
+		bool ParseEndElement();
+
+		bool ParseText();
+
+		bool ParseQuestion();
+
+		bool ParseExclamation();
+
+		void PrepareNode();
+
+		AttributeType& NewAttribute();
+
+		StringType& NewUnclosedTag();
+
+		NamespaceDeclarationType& NewNamespace();
 	public:
 		/**
 			@brief Initializes a new instance of the Inspector class.
@@ -1278,6 +1296,196 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::ParseElement()
+	{
+		// currentCharacter == name start character.
+		// and
+		// currentCharacter != Colon.
+		SizeType tempLineNumber = currentLineNumber;
+		SizeType tempLinePosition = currentLinePosition;
+
+		PrepareNode();
+
+		// Element name.
+		do
+		{
+			CharactersWriterType::WriteCharacter(name, currentCharacter);
+			CharactersWriterType::WriteCharacter(localName, currentCharacter);
+
+			if (NextCharBad(true))
+				return false;
+
+			if (currentCharacter == Colon)
+			{
+				// Prefixed name.
+				prefix = name;
+				localName.clear();
+				CharactersWriterType::WriteCharacter(name, currentCharacter);
+
+				if (NextCharBad(true))
+					return false;
+
+				if (currentCharacter == Colon ||
+					!Encoding::CharactersReader::IsNameStartChar(currentCharacter))
+				{
+					Reset();
+					SetError(ErrorCode::InvalidTagName);
+					lineNumber = tempLineNumber;
+					linePosition = tempLinePosition;
+					return false;
+				}
+
+				do
+				{
+					CharactersWriterType::WriteCharacter(name, currentCharacter);
+					CharactersWriterType::WriteCharacter(localName, currentCharacter);
+
+					if (NextCharBad(true))
+						return false;
+
+					if (currentCharacter == Colon)
+					{
+						Reset();
+						SetError(ErrorCode::InvalidTagName);
+						lineNumber = tempLineNumber;
+						linePosition = tempLinePosition;
+						return false;
+					}
+				}
+				while (Encoding::CharactersReader::IsNameChar(currentCharacter));
+				break;
+			}
+		}
+		while (Encoding::CharactersReader::IsNameChar(currentCharacter));
+
+		if (currentCharacter == GreaterThan)
+		{
+			node = NodeType::StartElement;
+			StringType& ref = NewUnclosedTag();
+			ref = name;
+			return true;
+		}
+
+		assert(false && "Not implemented yet.");
+
+		return true;
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::ParseEndElement()
+	{
+		// currentCharacter == Slash.
+		// TODO:
+		assert(false && "Not implemented yet.");
+		return false;
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::ParseText()
+	{
+		// currentCharacter == GreaterThan // End of tag.
+		// or
+		// currentCharacter == Semicolon // End of reference.
+		// TODO:
+		assert(false && "Not implemented yet.");
+		return false;
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::ParseQuestion()
+	{
+		// currentCharacter == Question.
+		// XmlDeclaration or ProcessingInstruction.
+		// TODO:
+		assert(false && "Not implemented yet.");
+		return false;
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::ParseExclamation()
+	{
+		// currentCharacter == Exclamation.
+		// Comment or DocumentType.
+		// TODO:
+		assert(false && "Not implemented yet.");
+		return false;
+	}
+	
+	template <typename TCharactersWriter>
+	inline void Inspector<TCharactersWriter>::PrepareNode()
+	{
+		name.clear();
+		value.clear();
+		localName.clear();
+		prefix.clear();
+		namespaceUri.clear();
+		attributesSize = 0;
+	}
+
+	template <typename TCharactersWriter>
+	inline typename Inspector<TCharactersWriter>::AttributeType&
+		Inspector<TCharactersWriter>::NewAttribute()
+	{
+		AttributesSizeType fakeSize = static_cast<AttributesSizeType>(attributesSize);
+		if (fakeSize < attributes.size())
+		{
+			++attributesSize;
+			AttributeType& ref = attributes[fakeSize];
+			ref.Name.clear();
+			ref.Value.clear();
+			ref.LocalName.clear();
+			ref.Prefix.clear();
+			ref.NamespaceUri.clear();
+			return ref;
+		}
+
+		// fakeSize >= attributes.size().
+		attributes.push_back(AttributeType());
+		++attributesSize;
+		return attributes.back();
+	}
+
+	template <typename TCharactersWriter>
+	inline typename Inspector<TCharactersWriter>::StringType&
+		Inspector<TCharactersWriter>::NewUnclosedTag()
+	{
+		UnclosedTagsSizeType fakeSize = static_cast<UnclosedTagsSizeType>(unclosedTagsSize);
+		if (fakeSize < unclosedTags.size())
+		{
+			++unclosedTagsSize;
+			StringType& ref = unclosedTags[fakeSize];
+			ref.clear();
+			return ref;
+		}
+
+		// fakeSize >= unclosedTags.size().
+		unclosedTags.push_back(StringType());
+		++unclosedTagsSize;
+		return unclosedTags.back();
+	}
+
+	template <typename TCharactersWriter>
+	inline typename Inspector<TCharactersWriter>::NamespaceDeclarationType&
+		Inspector<TCharactersWriter>::NewNamespace()
+	{
+		NamespacesSizeType fakeSize = static_cast<NamespacesSizeType>(namespacesSize);
+		if (fakeSize < namespaces.size())
+		{
+			++namespacesSize;
+			NamespaceDeclarationType& ref = namespaces[fakeSize];
+			ref.Prefix.clear();
+			ref.Uri.clear();
+			ref.TagIndex = 0;
+			return ref;
+		}
+
+		// fakeSize >= namespaces.size().
+		namespaces.push_back(NamespaceDeclarationType());
+		++namespacesSize;
+		return namespaces.back();
+	}
+
+	template <typename TCharactersWriter>
 	inline void Inspector<TCharactersWriter>::SavePosition()
 	{
 		lineNumber = currentLineNumber;
@@ -1441,9 +1649,9 @@ namespace Xml
 	{
 		SizeType tempLineNumber;
 		SizeType tempLinePosition;
-		if (!afterBom) // First call of ReadNode method...
+		if (!afterBom && (err == ErrorCode::None || err == ErrorCode::StreamError))
 		{
-			// ...or after error while BOM parsing. Let's try to parse it again.
+			// First call of ReadNode method or after stream error while BOM parsing.
 			ParseBom();
 			if (err != ErrorCode::None)
 				return false;
@@ -1508,6 +1716,7 @@ namespace Xml
 		{
 			if (!foundElement)
 			{
+				// In XML document at least one root element is required.
 				tempLineNumber = currentLineNumber;
 				tempLinePosition = currentLinePosition;
 				Reset();
@@ -1516,25 +1725,78 @@ namespace Xml
 				linePosition = tempLinePosition;
 				eof = true;
 			}
+			else
+			{
+				// XML document is fully parsed without any error.
+				tempLineNumber = currentLineNumber;
+				tempLinePosition = currentLinePosition;
+				Reset();
+				lineNumber = tempLineNumber;
+				linePosition = tempLinePosition;
+				afterBom = true;
+				eof = true;
+			}
 			return false;
 		}
 
 		if (currentCharacter == LessThan) // New tag to parse.
 		{
-			// TODO:
-			assert(false && "Not implemented yet.");
+			SavePosition();
+
+			// Go to the next character after '<'.
+			if (NextCharBad(true))
+				return false;
+
+			if (currentCharacter == Slash)
+			{
+				// EndElement.
+				return ParseEndElement();
+			}
+
+			if (currentCharacter != Colon &&
+				Encoding::CharactersReader::IsNameStartChar(currentCharacter))
+			{
+				// StartElement or EmptyElement.
+				return ParseElement();
+			}
+
+			if (currentCharacter == Exclamation)
+			{
+				// Comment or DocumentType.
+				return ParseExclamation();
+			}
+
+			if (currentCharacter == Question)
+			{
+				// XmlDeclaration or ProcessingInstruction.
+				return ParseQuestion();
+			}
+
+			// currentCharacter is not allowed here.
+			tempLineNumber = currentLineNumber;
+			tempLinePosition = currentLinePosition;
+			if (Encoding::CharactersReader::IsNameChar(currentCharacter))
+			{
+				// Not allowed as start character of the name,
+				// but allowed as a part of this name.
+				Reset();
+				SetError(ErrorCode::InvalidTagName);
+			}
+			else
+			{
+				// Some weird character.
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+			}
+			lineNumber = tempLineNumber;
+			linePosition = tempLinePosition;
+			return false;
 		}
-		else if (currentCharacter == GreaterThan) // End of tag.
-		{
-			// TODO:
-			assert(false && "Not implemented yet.");
-		}
-		else // currentCharacter == Semicolon // End of reference.
-		{
-			// TODO:
-			assert(false && "Not implemented yet.");
-		}
-		return true;
+
+		// currentCharacter == GreaterThan // End of tag.
+		// or
+		// currentCharacter == Semicolon // End of reference.
+		return ParseText();
 	}
 
 	template <typename TCharactersWriter>
