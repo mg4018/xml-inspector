@@ -24,7 +24,6 @@
 #define XML_CHARACTERS_READER_HPP__f66b9cdaf20734ef11086d0851a9c563
 
 #include <istream>
-#include <string>
 
 /**
 	@file CharactersReader.hpp
@@ -38,7 +37,7 @@ namespace Xml
 	namespace Encoding
 	{
 		/**
-			@brief Abstract class for reading characters.
+			@brief Abstract class for reading characters from XML documents.
 		*/
 		class CharactersReader
 		{
@@ -51,16 +50,16 @@ namespace Xml
 			/**
 				@brief Checks if character is allowed in XML document.
 
-				@param[in] codePoint Code point of Unicode character.
+				@param[in] codePoint Unicode character.
 				@return True if character is allowed in XML document.
 				@sa http://www.w3.org/TR/REC-xml/#NT-Char.
 			*/
 			static bool IsChar(char32_t codePoint);
 
 			/**
-				@brief Checks if character is white space.
+				@brief Checks if character is a white space.
 
-				@param[in] codePoint Code point of Unicode character.
+				@param[in] codePoint Unicode character.
 				@return True if character is either space, carriage return, line feed, or tab.
 			*/
 			static bool IsWhiteSpace(char32_t codePoint);
@@ -68,7 +67,7 @@ namespace Xml
 			/**
 				@brief Checks if character is allowed to be the first character of XML name.
 
-				@param[in] codePoint Code point of Unicode character.
+				@param[in] codePoint Unicode character.
 				@return True if character is allowed to be the first character of XML name.
 				@sa http://www.w3.org/TR/REC-xml/#NT-NameStartChar.
 			*/
@@ -78,7 +77,7 @@ namespace Xml
 				@brief Checks if character is allowed to be the one of
 					XML name characters except first.
 
-				@param[in] codePoint Code point of Unicode character.
+				@param[in] codePoint Unicode character.
 				@return True if character is allowed to be the one of
 					XML name characters except first.
 				@sa http://www.w3.org/TR/REC-xml/#NT-NameChar.
@@ -89,7 +88,7 @@ namespace Xml
 				@brief Checks if character is allowed to be the first character of
 					XML encoding declaration name.
 
-				@param[in] codePoint Code point of Unicode character.
+				@param[in] codePoint Unicode character.
 				@return True if character is allowed to be the first character of
 					XML encoding declaration name.
 				@sa http://www.w3.org/TR/REC-xml/#NT-EncName.
@@ -100,7 +99,7 @@ namespace Xml
 				@brief Checks if character is allowed to be the one of
 					XML encoding declaration name characters except first.
 
-				@param[in] codePoint Code point of Unicode character.
+				@param[in] codePoint Unicode character.
 				@return True if character is allowed to be the one of
 					XML encoding declaration name characters except first.
 				@sa http://www.w3.org/TR/REC-xml/#NT-EncName.
@@ -110,6 +109,7 @@ namespace Xml
 			/**
 				@brief Gets the value represented by hexadecimal character.
 
+				@param[in] codePoint Unicode character.
 				@return Value represented by hexadecimal character,
 					or -1 if this is not the hexadecimal character.
 			*/
@@ -122,7 +122,7 @@ namespace Xml
 				The source could be a stream, buffer or anything
 				depending on derived class.
 
-				@param[out] result Unicode character.
+				@param[out] result Variable that will receive the Unicode character.
 				@return @b 1 if the character was read successfully.
 					@b 0 if there are no more characters to read.
 					@b -1 if character is not allowed in XML document.
@@ -179,7 +179,7 @@ namespace Xml
 				Depending on the character there could be from 1 to 4
 				bytes needed to read from the UTF-8 encoded stream.
 
-				@param[out] result Unicode character.
+				@param[out] result Variable that will receive the Unicode character.
 				@return @b 1 if the character was read successfully.
 					@b 0 if there are no more characters to read.
 					@b -1 if character is not allowed in XML document.
@@ -200,6 +200,50 @@ namespace Xml
 
 		/**
 			@brief UTF-8 characters reader from iterators.
+
+			Purpose of this class is ability to parsing XML documents
+			from iterators with a fixed encoding (UTF-8) without
+			checking BOM and character set in XML declaration.
+			If you are not sure how document is encoded, use Inspector
+			constructor or Reset method with specified iterators instead
+			of this reader.
+
+			You can also use reader object without intermediate
+			Inspector class:
+			@code{.cpp}
+            #include "CharactersReader.hpp"
+            #include <iostream>
+            #include <cstdlib>
+            #include <string>
+
+            int main()
+            {
+                // We want to convert UTF-8 string to UTF-32 string.
+                std::string source =
+                    u8"<root>Greek small letter pi: \U000003C0.</root>";
+                std::u32string destination;
+                std::u32string desired =
+                    U"<root>Greek small letter pi: \U000003C0.</root>";
+
+                Xml::Encoding::Utf8IteratorsReader<std::string::iterator> reader(
+                    source.begin(), source.end());
+
+                char32_t c;
+                while (reader.ReadCharacter(c) == 1)
+                    destination.push_back(c);
+
+                if (destination == desired)
+                    std::cout << "OK!\n";
+                else
+                    std::cout << "Not OK :(\n";
+
+                return EXIT_SUCCESS;
+            }
+			@endcode
+			Result:
+			@verbatim
+			OK!
+			@endverbatim
 		*/
 		template <typename TInputIterator>
 		class Utf8IteratorsReader : public Utf8ReaderBase
@@ -212,7 +256,7 @@ namespace Xml
 				@brief Constructor.
 
 				@param[in] first,last Input iterators to the initial
-					and final positions in a sequence. The range used
+					and final positions in a sequence of bytes. The range used
 					is [first,last), which contains all the elements
 					between first and last, including the element pointed
 					by first but not the element pointed by last.
@@ -230,7 +274,7 @@ namespace Xml
 				Depending on the character there could be from 1 to 4
 				bytes per one Unicode character.
 
-				@param[out] result Unicode character.
+				@param[out] result Variable that will receive the Unicode character.
 				@return @b 1 if the character was read successfully.
 					@b 0 if there are no more characters to read.
 					@b -1 if character is not allowed in XML document.
@@ -287,7 +331,7 @@ namespace Xml
 				Depending on the character there could be a 2 or 4
 				bytes needed to read from the UTF-16 (big endian) encoded stream.
 
-				@param[out] result Unicode character.
+				@param[out] result Variable that will receive the Unicode character.
 				@return @b 1 if the character was read successfully.
 					@b 0 if there are no more characters to read.
 					@b -1 if character is not allowed in XML document.
@@ -333,7 +377,7 @@ namespace Xml
 				Depending on the character there could be a 2 or 4
 				bytes needed to read from the UTF-16 (little endian) encoded stream.
 
-				@param[out] result Unicode character.
+				@param[out] result Variable that will receive the Unicode character.
 				@return @b 1 if the character was read successfully.
 					@b 0 if there are no more characters to read.
 					@b -1 if character is not allowed in XML document.
@@ -379,7 +423,7 @@ namespace Xml
 				There are 4 bytes needed to read per one character
 				from the UTF-32 (big endian) encoded stream.
 
-				@param[out] result Unicode character.
+				@param[out] result Variable that will receive the Unicode character.
 				@return @b 1 if the character was read successfully.
 					@b 0 if there are no more characters to read.
 					@b -1 if character is not allowed in XML document.
@@ -425,7 +469,7 @@ namespace Xml
 				There are 4 bytes needed to read per one character
 				from the UTF-32 (little endian) encoded stream.
 
-				@param[out] result Unicode character.
+				@param[out] result Variable that will receive the Unicode character.
 				@return @b 1 if the character was read successfully.
 					@b 0 if there are no more characters to read.
 					@b -1 if character is not allowed in XML document.

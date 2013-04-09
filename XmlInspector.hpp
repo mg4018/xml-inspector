@@ -442,7 +442,49 @@ namespace Xml
 	/**
 		@brief Primary XML parser class.
 
-		TODO: detailed description...
+		Example:
+		@code{.cpp}
+        #include "xml-inspector/XmlInspector.hpp"
+        #include <iostream>
+        #include <cstdlib>
+        #include <string>
+
+        int main()
+        {
+            Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+                "test.xml");
+
+            while (inspector.ReadNode())
+            {
+                switch (inspector.GetNodeType())
+                {
+                    case Xml::NodeType::StartElement:
+                        std::cout << "[StartElement] name(" << inspector.GetName() <<
+                            "), value(" << inspector.GetValue() << ").\n";
+                        break;
+                    case Xml::NodeType::EndElement:
+                        std::cout << "[EndElement] name(" << inspector.GetName() <<
+                            "), value(" << inspector.GetValue() << ").\n";
+                        break;
+                    case Xml::NodeType::Text:
+                        std::cout << "[Text] value(" << inspector.GetValue() << ").";
+                        break;
+                    case Xml::NodeType::Whitespace:
+                        // Ignore white spaces between markup.
+                        break;
+                    default:
+                        std::cout << "[...] name(" << inspector.GetName() <<
+                            "), value(" << inspector.GetValue() << ").\n";
+                        break;
+                }
+            }
+
+            if (inspector.GetErrorCode() != Xml::ErrorCode::None)
+                std::cout << "Error: " << inspector.GetErrorMessage() << "\n";
+
+            return EXIT_SUCCESS;
+        }
+		@endcode
 
 		@tparam TCharactersWriter Writer with specified encoding. You don't need to care how XML file is encoded.
 			You can choose how you want to store the strings between Utf8CharactersWriter, Utf16CharactersWriter
