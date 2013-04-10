@@ -1379,6 +1379,8 @@ namespace Xml
 			node = NodeType::StartElement;
 			UnclosedTagType& ref = NewUnclosedTag();
 			ref.Name = name;
+			ref.LocalName = localName;
+			ref.Prefix = prefix;
 			ref.LineNumber = tempLineNumber;
 			ref.LinePosition = tempLinePosition;
 			return true;
