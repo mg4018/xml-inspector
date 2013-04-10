@@ -436,6 +436,21 @@ namespace Xml
 			StringType Uri;
 			SizeType TagIndex; // Counting from 0.
 		};
+
+		template <typename TStringType>
+		class UnclosedTag
+		{
+		public:	
+			typedef TStringType StringType;
+			typedef uint_least64_t SizeType;
+
+			StringType Name;
+			StringType LocalName;
+			StringType Prefix;
+			StringType NamespaceUri;
+			SizeType LineNumber;
+			SizeType LinePosition;
+		};
 	}
 	/// @endcond
 
@@ -522,9 +537,10 @@ namespace Xml
 		*/
 		typedef uint_least64_t SizeType;
 	private:
+		typedef Details::UnclosedTag<StringType> UnclosedTagType;
 		typedef Details::NamespaceDeclaration<StringType> NamespaceDeclarationType;
 		typedef typename std::deque<AttributeType>::size_type AttributesSizeType;
-		typedef typename std::deque<StringType>::size_type UnclosedTagsSizeType;
+		typedef typename std::deque<UnclosedTagType>::size_type UnclosedTagsSizeType;
 		typedef typename std::deque<NamespaceDeclarationType>::size_type NamespacesSizeType;
 
 		static const char32_t Space = 0x20;                  // ' '
@@ -597,7 +613,7 @@ namespace Xml
 		// To clear these collections you can call Inspector::Clear method.
 		std::deque<AttributeType> attributes;
 		AttributesSizeType attributesSize;
-		std::deque<StringType> unclosedTags;
+		std::deque<UnclosedTagType> unclosedTags;
 		UnclosedTagsSizeType unclosedTagsSize;
 		std::deque<NamespaceDeclarationType> namespaces;
 		NamespacesSizeType namespacesSize;
@@ -633,7 +649,7 @@ namespace Xml
 
 		AttributeType& NewAttribute();
 
-		StringType& NewUnclosedTag();
+		UnclosedTagType& NewUnclosedTag();
 
 		NamespaceDeclarationType& NewNamespace();
 	public:
@@ -1361,8 +1377,10 @@ namespace Xml
 		if (currentCharacter == GreaterThan)
 		{
 			node = NodeType::StartElement;
-			StringType& ref = NewUnclosedTag();
-			ref = name;
+			UnclosedTagType& ref = NewUnclosedTag();
+			ref.Name = name;
+			ref.LineNumber = tempLineNumber;
+			ref.LinePosition = tempLinePosition;
 			return true;
 		}
 
@@ -1446,20 +1464,23 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
-	inline typename Inspector<TCharactersWriter>::StringType&
+	inline typename Inspector<TCharactersWriter>::UnclosedTagType&
 		Inspector<TCharactersWriter>::NewUnclosedTag()
 	{
 		UnclosedTagsSizeType fakeSize = static_cast<UnclosedTagsSizeType>(unclosedTagsSize);
 		if (fakeSize < unclosedTags.size())
 		{
 			++unclosedTagsSize;
-			StringType& ref = unclosedTags[fakeSize];
-			ref.clear();
+			UnclosedTagType& ref = unclosedTags[fakeSize];
+			ref.Name.clear();
+			ref.LocalName.clear();
+			ref.Prefix.clear();
+			ref.NamespaceUri.clear();
 			return ref;
 		}
 
 		// fakeSize >= unclosedTags.size().
-		unclosedTags.push_back(StringType());
+		unclosedTags.push_back(UnclosedTagType());
 		++unclosedTagsSize;
 		return unclosedTags.back();
 	}
