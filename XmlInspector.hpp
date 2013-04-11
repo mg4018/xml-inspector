@@ -186,11 +186,6 @@ namespace Xml
 		InvalidAttributeName,
 
 		/**
-			@brief We should get '=' character now, but we have got other, not allowed character.
-		*/
-		EqualsSignExpected,
-
-		/**
 			@brief For example it's not allowed in XML: <tt>&lt;tagName attrName=value&gt;</tt>,
 				but this is OK: <tt>&lt;tagName attrName="value"&gt;</tt>.
 		*/
@@ -219,12 +214,6 @@ namespace Xml
 				Check http://www.w3.org/TR/REC-xml/#NT-CharRef.
 		*/
 		InvalidCharacterReference,
-
-		/**
-			@brief We should get the greater than sign now, but we have got other,
-				not allowed character.
-		*/
-		GreaterThanSignExpected,
 
 		/**
 			@brief For example: <tt>&lt;a&gt;text&lt;/b&gt;</tt>. <tt>&lt;/a&gt;</tt> expected, but <tt>&lt;/b&gt;</tt> found.
@@ -1090,9 +1079,6 @@ namespace Xml
 				case ErrorCode::InvalidAttributeName:
 					errMsg = "Invalid attribute name.";
 					return;
-				case ErrorCode::EqualsSignExpected:
-					errMsg = "Equals sign expected.";
-					return;
 				case ErrorCode::QuotationMarkExpected:
 					errMsg = "Quotation mark expected.";
 					return;
@@ -1108,9 +1094,6 @@ namespace Xml
 				case ErrorCode::InvalidCharacterReference:
 					errMsg = "Code point in character reference doesn\'t match "
 						"the valid character in ISO/IEC 10646 character set.";
-					return;
-				case ErrorCode::GreaterThanSignExpected:
-					errMsg = "Greater than sign expected.";
 					return;
 				case ErrorCode::UnexpectedEndTag:
 					errMsg = "Unexpected end tag.";
@@ -1481,8 +1464,8 @@ namespace Xml
 			// Invalid syntax.
 			// For example <tagName !abc...
 			// ! is not allowed as a part of the name.
-			lineNumber = currentLineNumber;
-			linePosition = currentLinePosition;
+			tempLineNumber = currentLineNumber;
+			tempLinePosition = currentLinePosition;
 			Reset();
 			SetError(ErrorCode::InvalidSyntax);
 			lineNumber = tempLineNumber;
@@ -1502,9 +1485,152 @@ namespace Xml
 	inline bool Inspector<TCharactersWriter>::ParseEndElement()
 	{
 		// currentCharacter == Slash.
-		// TODO:
-		assert(false && "Not implemented yet.");
-		return false;
+		if (NextCharBad(true))
+			return false;
+
+		SizeType tempLineNumber = currentLineNumber;
+		SizeType tempLinePosition = currentLinePosition;
+
+		if (currentCharacter == Colon)
+		{
+			Reset();
+			SetError(ErrorCode::InvalidTagName);
+			lineNumber = tempLineNumber;
+			linePosition = tempLinePosition;
+			return false;
+		}
+		else if (!Encoding::CharactersReader::IsNameStartChar(currentCharacter))
+		{
+			if (Encoding::CharactersReader::IsNameChar(currentCharacter))
+			{
+				// Not allowed as start character of the name,
+				// but allowed as a part of this name.
+				Reset();
+				SetError(ErrorCode::InvalidTagName);
+			}
+			else
+			{
+				// Some weird character.
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+			}
+			lineNumber = tempLineNumber;
+			linePosition = tempLinePosition;
+			return false;
+		}
+
+		PrepareNode();
+
+		// End element name.
+		do
+		{
+			CharactersWriterType::WriteCharacter(name, currentCharacter);
+			CharactersWriterType::WriteCharacter(localName, currentCharacter);
+
+			if (NextCharBad(true))
+				return false;
+
+			if (currentCharacter == Colon)
+			{
+				// Prefixed name.
+				prefix = name;
+				localName.clear();
+				CharactersWriterType::WriteCharacter(name, currentCharacter);
+
+				if (NextCharBad(true))
+					return false;
+
+				if (currentCharacter == Colon ||
+					!Encoding::CharactersReader::IsNameStartChar(currentCharacter))
+				{
+					Reset();
+					SetError(ErrorCode::InvalidTagName);
+					lineNumber = tempLineNumber;
+					linePosition = tempLinePosition;
+					return false;
+				}
+
+				do
+				{
+					CharactersWriterType::WriteCharacter(name, currentCharacter);
+					CharactersWriterType::WriteCharacter(localName, currentCharacter);
+
+					if (NextCharBad(true))
+						return false;
+
+					if (currentCharacter == Colon)
+					{
+						Reset();
+						SetError(ErrorCode::InvalidTagName);
+						lineNumber = tempLineNumber;
+						linePosition = tempLinePosition;
+						return false;
+					}
+				}
+				while (Encoding::CharactersReader::IsNameChar(currentCharacter));
+				break;
+			}
+		}
+		while (Encoding::CharactersReader::IsNameChar(currentCharacter));
+
+		if (IsWhiteSpace(currentCharacter))
+		{
+			// Ignore white spaces.
+			do
+			{
+				if (NextCharBad(true))
+					return false;
+			}
+			while (IsWhiteSpace(currentCharacter));
+
+			if (currentCharacter != GreaterThan)
+			{
+				tempLineNumber = currentLineNumber;
+				tempLinePosition = currentLinePosition;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				lineNumber = tempLineNumber;
+				linePosition = tempLinePosition;
+				return false;
+			}
+		}
+		else if (currentCharacter != GreaterThan)
+		{
+			Reset();
+			SetError(ErrorCode::InvalidTagName);
+			lineNumber = tempLineNumber;
+			linePosition = tempLinePosition;
+			return false;
+		}
+
+		if (unclosedTagsSize == 0 ||
+			unclosedTags[unclosedTagsSize - 1].Name != name)
+		{
+			tempLineNumber = lineNumber;
+			tempLinePosition = linePosition;
+			Reset();
+			SetError(ErrorCode::UnexpectedEndTag);
+			lineNumber = tempLineNumber;
+			linePosition = tempLinePosition;
+			return false;
+		}
+		namespaceUri = unclosedTags[unclosedTagsSize - 1].NamespaceUri;
+
+		// Tag is closed.
+		--unclosedTagsSize;
+
+		// Namespaces associated with this tag are no longer needed.
+		SizeType indicesToRemove = static_cast<SizeType>(unclosedTagsSize);
+		NamespacesSizeType newNamespacesSize = 0;
+		while (newNamespacesSize < namespacesSize)
+		{
+			if (namespaces[newNamespacesSize].TagIndex == indicesToRemove)
+				break;
+			++newNamespacesSize;
+		}
+		namespacesSize = newNamespacesSize;
+
+		return true;
 	}
 
 	template <typename TCharactersWriter>

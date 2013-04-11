@@ -82,6 +82,7 @@ public:
 		ValidTagNameTest();
 		XmlElementPrefixTest();
 		XmlnsElementPrefixTest();
+		UnexpectedEndTagTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -1268,6 +1269,35 @@ public:
 		assert(inspector.GetLinePosition() == 2);
 		assert(inspector.GetDepth() == 0);
 
+		std::cout << "OK\n";
+	}
+
+	void UnexpectedEndTagTest()
+	{
+		std::cout << "Unexpected end tag test... ";
+
+		std::string docString = u8"</unexpected>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		bool result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::UnexpectedEndTag);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetDepth() == 0);
+	
 		std::cout << "OK\n";
 	}
 };
