@@ -269,7 +269,7 @@ namespace Xml
 		PrefixBoundToReservedNamespace,
 
 		/**
-			@brief Reserved namespace cannot be declared as the default namespace.
+			@brief Reserved namespace cannot be declared as a default namespace.
 		*/
 		ReservedNamespaceAsDefault,
 
@@ -1138,7 +1138,7 @@ namespace Xml
 					errMsg = "Prefix is bound to reserved namespace.";
 					return;
 				case ErrorCode::ReservedNamespaceAsDefault:
-					errMsg = "Reserved namespace cannot be declared as the default namespace.";
+					errMsg = "Reserved namespace cannot be declared as a default namespace.";
 					return;
 				case ErrorCode::InvalidXmlPrefixDeclaration:
 					errMsg = "Prefix \'xml\' is reserved for use by XML and has a fixed "
@@ -2252,8 +2252,11 @@ namespace Xml
 	inline typename Inspector<TCharactersWriter>::SizeType
 		Inspector<TCharactersWriter>::GetDepth() const
 	{
-		// TODO:
-		return 0;
+		if (node == NodeType::StartElement ||
+			node == NodeType::EmptyElement)
+			return static_cast<SizeType>(unclosedTagsSize - 1);
+		else
+			return static_cast<SizeType>(unclosedTagsSize);
 	}
 
 	template <typename TCharactersWriter>
