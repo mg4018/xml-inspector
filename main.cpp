@@ -73,7 +73,15 @@ public:
 		IsEncNameStartCharTest();
 		IsEncNameCharTest();
 		GetHexDigitValueTest();
+		UnclosedTokenTest();
 		StartElementTest();
+		TagNameAfterSpaceTest();
+		InvalidTagNameStartCharTest();
+		InvalidTagNameCharTest();
+		WeirdTagNameStartCharTest();
+		ValidTagNameTest();
+		XmlElementPrefixTest();
+		XmlnsElementPrefixTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -958,6 +966,35 @@ public:
 		std::cout << "OK\n";
 	}
 
+	void UnclosedTokenTest()
+	{
+		std::cout << "Unclosed token test... ";
+
+		std::string docString = u8"<elem";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		bool result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::UnclosedToken);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetDepth() == 0);
+	
+		std::cout << "OK\n";
+	}
+
 	void StartElementTest()
 	{
 		std::cout << "Start element test... ";
@@ -984,6 +1021,253 @@ public:
 		assert(inspector.GetLinePosition() == 1);
 		assert(inspector.GetDepth() == 0);
 	
+		std::cout << "OK\n";
+	}
+
+	void TagNameAfterSpaceTest()
+	{
+		std::cout << "Tag name after space test... ";
+	
+		std::string docString = u8"< afterspace>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		bool result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 2);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void InvalidTagNameStartCharTest()
+	{
+		std::cout << "Invalid tag name start char test... ";
+	
+		std::string docString = u8"<1name>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		bool result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidTagName);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 2);
+		assert(inspector.GetDepth() == 0);
+
+		docString = u8"<:name>";
+		inspector.Reset(docString.begin(), docString.end());
+
+		result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidTagName);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 2);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void InvalidTagNameCharTest()
+	{
+		std::cout << "Invalid tag name char test... ";
+	
+		std::string docString = u8"<na^me>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		bool result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidTagName);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 2);
+		assert(inspector.GetDepth() == 0);
+
+		docString = u8"<name:>";
+		inspector.Reset(docString.begin(), docString.end());
+
+		result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidTagName);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 2);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void WeirdTagNameStartCharTest()
+	{
+		std::cout << "Weird tag name start char test... ";
+	
+		std::string docString = u8"<^name>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		bool result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 2);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void ValidTagNameTest()
+	{
+		std::cout << "Valid tag name test... ";
+	
+		std::string docString = u8"<name123_abc>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		bool result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
+		assert(inspector.GetName() == u8"name123_abc");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"name123_abc");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void XmlElementPrefixTest()
+	{
+		std::cout << "xml element prefix test... ";
+	
+		std::string docString = u8"<xml:local>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		bool result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
+		assert(inspector.GetName() == u8"xml:local");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"local");
+		assert(inspector.GetPrefix() == u8"xml");
+		assert(inspector.GetNamespaceUri() == u8"http://www.w3.org/XML/1998/namespace");
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void XmlnsElementPrefixTest()
+	{
+		std::cout << "xmlns element prefix test... ";
+	
+		std::string docString = u8"<xmlns:local>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		bool result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() != nullptr);
+		// I don't want to create new error code just for this case,
+		// I will use existing error code instead.
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::PrefixWithoutAssignedNamespace);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 2);
+		assert(inspector.GetDepth() == 0);
+
 		std::cout << "OK\n";
 	}
 };

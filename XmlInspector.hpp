@@ -269,6 +269,11 @@ namespace Xml
 		PrefixBoundToReservedNamespace,
 
 		/**
+			@brief Reserved namespace cannot be declared as the default namespace.
+		*/
+		ReservedNamespaceAsDefault,
+
+		/**
 			@brief Prefix 'xml' is reserved for use by XML and has a fixed
 				namespace URI http://www.w3.org/XML/1998/namespace.
 		*/
@@ -605,6 +610,8 @@ namespace Xml
 		char32_t bufferedCharacter;
 		bool foundElement;
 		bool eof;
+		StringType lowerXmlString;
+		StringType xmlnsString;
 		StringType xmlUriString;
 		StringType xmlnsUriString;
 		// Instead of removing objects from collection I decrement size.
@@ -646,6 +653,8 @@ namespace Xml
 		bool ParseExclamation();
 
 		void PrepareNode();
+
+		bool NamespacesStuff();
 
 		AttributeType& NewAttribute();
 
@@ -965,6 +974,8 @@ namespace Xml
 		bufferedCharacter(0),
 		foundElement(false),
 		eof(false),
+		lowerXmlString(),
+		xmlnsString(),
 		xmlUriString(),
 		xmlnsUriString(),
 		attributes(),
@@ -974,8 +985,16 @@ namespace Xml
 		namespaces(),
 		namespacesSize(0)
 	{
+		lowerXmlString.reserve(3);
+		xmlnsString.reserve(5);
 		xmlUriString.reserve(36);
 		xmlnsUriString.reserve(29);
+
+		for (std::size_t i = 0; i < 3; ++i)
+			CharactersWriterType::WriteCharacter(lowerXmlString, LowerXml[i]);
+
+		for (std::size_t i = 0; i < 5; ++i)
+			CharactersWriterType::WriteCharacter(xmlnsString, Xmlns[i]);
 
 		for (std::size_t i = 0; i < 36; ++i)
 			CharactersWriterType::WriteCharacter(xmlUriString, XmlUri[i]);
@@ -1117,6 +1136,9 @@ namespace Xml
 					return;
 				case ErrorCode::PrefixBoundToReservedNamespace:
 					errMsg = "Prefix is bound to reserved namespace.";
+					return;
+				case ErrorCode::ReservedNamespaceAsDefault:
+					errMsg = "Reserved namespace cannot be declared as the default namespace.";
 					return;
 				case ErrorCode::InvalidXmlPrefixDeclaration:
 					errMsg = "Prefix \'xml\' is reserved for use by XML and has a fixed "
@@ -1377,18 +1399,103 @@ namespace Xml
 		if (currentCharacter == GreaterThan)
 		{
 			node = NodeType::StartElement;
-			UnclosedTagType& ref = NewUnclosedTag();
-			ref.Name = name;
-			ref.LocalName = localName;
-			ref.Prefix = prefix;
-			ref.LineNumber = tempLineNumber;
-			ref.LinePosition = tempLinePosition;
-			return true;
+			bool noErrors = NamespacesStuff();
+			if (noErrors)
+			{
+				UnclosedTagType& ref = NewUnclosedTag();
+				ref.Name = name;
+				ref.LocalName = localName;
+				ref.Prefix = prefix;
+				ref.NamespaceUri = namespaceUri;
+				ref.LineNumber = tempLineNumber;
+				ref.LinePosition = tempLinePosition;
+				foundElement = true;
+				return true;
+			}
+			return false;
 		}
 
-		assert(false && "Not implemented yet.");
+		if (currentCharacter == Slash)
+		{
+			// <tagName/
+			// TODO:
+			assert(false && "Not implemented yet.");
+		}
 
-		return true;
+		if (IsWhiteSpace(currentCharacter))
+		{
+			// Ignore white spaces.
+			do
+			{
+				if (NextCharBad(true))
+					return false;
+			}
+			while (IsWhiteSpace(currentCharacter));
+
+			if (currentCharacter != Colon &&
+				Encoding::CharactersReader::IsNameStartChar(currentCharacter))
+			{
+				// Attributes.
+				// TODO:
+				assert(false && "Not implemented yet.");
+			}
+
+			if (currentCharacter == Slash)
+			{
+				// <tagName /
+				// TODO:
+				assert(false && "Not implemented yet.");
+			}
+
+			if (currentCharacter == GreaterThan)
+			{
+				// <tagName >
+				node = NodeType::StartElement;
+				bool noErrors = NamespacesStuff();
+				if (noErrors)
+				{
+					UnclosedTagType& ref = NewUnclosedTag();
+					ref.Name = name;
+					ref.LocalName = localName;
+					ref.Prefix = prefix;
+					ref.NamespaceUri = namespaceUri;
+					ref.LineNumber = tempLineNumber;
+					ref.LinePosition = tempLinePosition;
+					foundElement = true;
+					return true;
+				}
+				return false;
+			}
+
+			if (Encoding::CharactersReader::IsNameChar(currentCharacter))
+			{
+				// For example <tagName 123attr="value">
+				// 1 is not allowed as a first character name.
+				Reset();
+				SetError(ErrorCode::InvalidAttributeName);
+				lineNumber = tempLineNumber;
+				linePosition = tempLinePosition;
+				return false;
+			}
+
+			// Invalid syntax.
+			// For example <tagName !abc...
+			// ! is not allowed as a part of the name.
+			lineNumber = currentLineNumber;
+			linePosition = currentLinePosition;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			lineNumber = tempLineNumber;
+			linePosition = tempLinePosition;
+			return false;
+		}
+
+		// Invalid tag name.
+		Reset();
+		SetError(ErrorCode::InvalidTagName);
+		lineNumber = tempLineNumber;
+		linePosition = tempLinePosition;
+		return false;
 	}
 
 	template <typename TCharactersWriter>
@@ -1440,6 +1547,231 @@ namespace Xml
 		prefix.clear();
 		namespaceUri.clear();
 		attributesSize = 0;
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::NamespacesStuff()
+	{
+		// Collect namespaces from attributes.
+		typedef typename std::deque<AttributeType>::iterator AttrIter;
+		AttrIter attrEnd = attributes.begin() + attributesSize;
+		for (AttrIter attr = attributes.begin(); attr != attrEnd; ++attr)
+		{
+			if (attr->Prefix.empty())
+			{
+				if (attr->LocalName == xmlnsString)
+				{
+					// Default namespace.
+					// <mytag xmlns=...
+					if (attr->Value == xmlUriString ||
+						attr->Value == xmlnsUriString)
+					{
+						// <mytag xmlns="http://www.w3.org/XML/1998/namespace"...
+						// or
+						// <mytag xmlns="http://www.w3.org/2000/xmlns/"...
+						Reset();
+						SetError(ErrorCode::ReservedNamespaceAsDefault);
+						lineNumber = attr->LineNumber;
+						linePosition = attr->LinePosition;
+						return false;
+					}
+
+					NamespaceDeclarationType& ref = NewNamespace();
+					ref.Uri = attr->Value;
+					ref.TagIndex = static_cast<SizeType>(unclosedTagsSize);
+				}
+			}
+			else if (attr->Prefix == xmlnsString)
+			{
+				if (attr->LocalName == xmlnsString)
+				{
+					// <mytag xmlns:xmlns=...
+					Reset();
+					SetError(ErrorCode::XmlnsDeclared);
+					lineNumber = attr->LineNumber;
+					linePosition = attr->LinePosition;
+					return false;
+				}
+				else if (attr->LocalName == lowerXmlString)
+				{
+					// <mytag xmlns:xml=...
+
+					if (attr->Value != xmlUriString)
+					{
+						Reset();
+						SetError(ErrorCode::InvalidXmlPrefixDeclaration);
+						lineNumber = attr->LineNumber;
+						linePosition = attr->LinePosition;
+						return false;
+					}
+				}
+				else if (attr->Value == xmlUriString ||
+					attr->Value == xmlnsUriString)
+				{
+					// <mytag xmlns:newprefix="http://www.w3.org/XML/1998/namespace"...
+					// or
+					// <mytag xmlns:newprefix="http://www.w3.org/2000/xmlns/"...
+					Reset();
+					SetError(ErrorCode::PrefixBoundToReservedNamespace);
+					lineNumber = attr->LineNumber;
+					linePosition = attr->LinePosition;
+					return false;
+				}
+				else if (attr->Value.empty())
+				{
+					// <mytag xmlns:newprefix=""...
+					Reset();
+					SetError(ErrorCode::PrefixWithEmptyNamespace);
+					lineNumber = attr->LineNumber;
+					linePosition = attr->LinePosition;
+					return false;
+				}
+				else
+				{
+					NamespaceDeclarationType& ref = NewNamespace();
+					ref.Prefix = attr->LocalName;
+					ref.Uri = attr->Value;
+					ref.TagIndex = static_cast<SizeType>(unclosedTagsSize);
+				}
+			}
+		}
+
+		// Assign URIs to attributes.
+		typedef typename std::deque<NamespaceDeclarationType>::const_iterator NamespaceIter;
+		NamespaceIter namespaceLast = namespaces.begin();
+		if (namespacesSize != 0)
+			namespaceLast += (namespacesSize - 1);
+		for (AttrIter attr = attributes.begin(); attr != attrEnd; ++attr)
+		{
+			if (!attr->Prefix.empty())
+			{
+				if (attr->Prefix == xmlnsString)
+				{
+					attr->NamespaceUri = xmlnsUriString;
+				}
+				else if (attr->Prefix == lowerXmlString)
+				{
+					attr->NamespaceUri = xmlUriString;
+				}
+				else
+				{
+					bool found = false;
+					NamespaceIter n = namespaceLast;
+					for ( ; n != namespaces.begin(); --n)
+					{
+						if (attr->Prefix == n->Prefix)
+						{
+							found = true;
+							break;
+						}
+					}
+					if (!found && (namespacesSize == 0 || attr->Prefix != n->Prefix))
+					{
+						Reset();
+						SetError(ErrorCode::PrefixWithoutAssignedNamespace);
+						lineNumber = attr->LineNumber;
+						linePosition = attr->LinePosition;
+						return false;
+					}
+					else
+					{
+						attr->NamespaceUri = n->Uri;
+					}
+				}
+			}
+		}
+
+		// Assign URI to element.
+		if (!prefix.empty())
+		{
+			if (prefix == xmlnsString)
+			{
+				// lineNumber and linePosition => '<'
+				SizeType tempLineNumber = lineNumber;
+				SizeType tempLinePosition = linePosition + 1;
+				Reset();
+				SetError(ErrorCode::PrefixWithoutAssignedNamespace);
+				lineNumber = tempLineNumber;
+				linePosition = tempLinePosition;
+				return false;
+			}
+			else if (prefix == lowerXmlString)
+			{
+				namespaceUri = xmlUriString;
+			}
+			else
+			{
+				bool found = false;
+				NamespaceIter n = namespaceLast;
+				for ( ; n != namespaces.begin(); --n)
+				{
+					if (prefix == n->Prefix)
+					{
+						found = true;
+						break;
+					}
+				}
+				if (!found && (namespacesSize == 0 || prefix != n->Prefix))
+				{
+					// lineNumber and linePosition => '<'
+					SizeType tempLineNumber = lineNumber;
+					SizeType tempLinePosition = linePosition + 1;
+					Reset();
+					SetError(ErrorCode::PrefixWithoutAssignedNamespace);
+					lineNumber = tempLineNumber;
+					linePosition = tempLinePosition;
+					return false;
+				}
+				else
+				{
+					namespaceUri = n->Uri;
+				}
+			}
+		}
+		else // prefix.empty() == true.
+		{
+			// Find default namespace.
+			bool found = false;
+			NamespaceIter n = namespaceLast;
+			for ( ; n != namespaces.begin(); --n)
+			{
+				if (n->Prefix.empty())
+				{
+					found = true;
+					break;
+				}
+			}
+			if (found || (namespacesSize != 0 && n->Prefix.empty()))
+				namespaceUri = n->Uri;
+		}
+
+		// Ensure no double attribute name like:
+		// <a x:local="first" y:local="second">
+		// where x and y prefixes are bound to the same namespace URI.
+		if (attributesSize > 1)
+		{
+			AttrIter attrEndMinus1 = attributes.begin() + (attributesSize - 1);
+			for (AttrIter attr = attributes.begin(); attr != attrEndMinus1; ++attr)
+			{
+				if (!attr->Prefix.empty())
+				{
+					for (AttrIter next = attr + 1; next != attrEnd; ++next)
+					{
+						if (attr->LocalName == next->LocalName &&
+							attr->NamespaceUri == next->NamespaceUri)
+						{
+							Reset();
+							SetError(ErrorCode::DoubleAttributeName);
+							lineNumber = next->LineNumber;
+							linePosition = next->LinePosition;
+							return false;
+						}
+					}
+				}
+			}
+		}
+
+		return true;
 	}
 
 	template <typename TCharactersWriter>
