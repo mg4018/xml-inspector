@@ -2193,12 +2193,30 @@ namespace Xml
 		if (err != ErrorCode::None)
 			return false;
 
-		if (currentCharacter == GreaterThan ||
-			currentCharacter == Semicolon)
+		if (currentCharacter == GreaterThan)
 		{
-			// End of token or reference.
+			// End of token.
 			if (NextCharBad(false) && !eof)
 				return false;
+		}
+		else if (currentCharacter == Semicolon)
+		{
+			// End of reference.
+			if (NextCharBad(false))
+			{
+				if (eof)
+				{
+					tempLineNumber = currentLineNumber;
+					tempLinePosition = currentLinePosition;
+					Reset();
+					SetError(ErrorCode::InvalidSyntax);
+					lineNumber = tempLineNumber;
+					linePosition = tempLinePosition;
+					eof = true;
+				}
+				afterBom = true;
+				return false;
+			}
 		}
 
 		if (eof)
