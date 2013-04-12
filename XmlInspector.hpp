@@ -1629,16 +1629,14 @@ namespace Xml
 			++newNamespacesSize;
 		}
 		namespacesSize = newNamespacesSize;
-
+		node = NodeType::EndElement;
 		return true;
 	}
 
 	template <typename TCharactersWriter>
 	inline bool Inspector<TCharactersWriter>::ParseText()
 	{
-		// currentCharacter == GreaterThan // End of tag.
-		// or
-		// currentCharacter == Semicolon // End of reference.
+		// currentCharacter == first character of text.
 		// TODO:
 		assert(false && "Not implemented yet.");
 		return false;
@@ -2042,6 +2040,7 @@ namespace Xml
 				linePosition = tempLinePosition;
 				SetError(ErrorCode::StreamError);
 			}
+			afterBom = true;
 			return true;
 		}
 
@@ -2122,6 +2121,7 @@ namespace Xml
 			linePosition = tempLinePosition;
 			SetError(ErrorCode::StreamError);
 		}
+		afterBom = true;
 		return true;
 	}
 
@@ -2193,6 +2193,14 @@ namespace Xml
 		if (err != ErrorCode::None)
 			return false;
 
+		if (currentCharacter == GreaterThan ||
+			currentCharacter == Semicolon)
+		{
+			// End of token or reference.
+			if (NextCharBad(false) && !eof)
+				return false;
+		}
+
 		if (eof)
 		{
 			if (!foundElement)
@@ -2204,7 +2212,17 @@ namespace Xml
 				SetError(ErrorCode::NoElement);
 				lineNumber = tempLineNumber;
 				linePosition = tempLinePosition;
-				eof = true;
+			}
+			else if (unclosedTagsSize != 0)
+			{
+				UnclosedTagsSizeType s = unclosedTagsSize;
+				UnclosedTagType& ref = unclosedTags[s - 1];
+				Reset();
+				SetError(ErrorCode::UnclosedTag);
+				lineNumber = ref.LineNumber;
+				linePosition = ref.LinePosition;
+				foundElement = true;
+				unclosedTagsSize = s;
 			}
 			else
 			{
@@ -2214,9 +2232,10 @@ namespace Xml
 				Reset();
 				lineNumber = tempLineNumber;
 				linePosition = tempLinePosition;
-				afterBom = true;
-				eof = true;
+				node = NodeType::None;
 			}
+			afterBom = true;
+			eof = true;
 			return false;
 		}
 
@@ -2274,9 +2293,7 @@ namespace Xml
 			return false;
 		}
 
-		// currentCharacter == GreaterThan // End of tag.
-		// or
-		// currentCharacter == Semicolon // End of reference.
+		// currentCharacter == first character of text.
 		return ParseText();
 	}
 

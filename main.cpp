@@ -83,6 +83,7 @@ public:
 		XmlElementPrefixTest();
 		XmlnsElementPrefixTest();
 		UnexpectedEndTagTest();
+		StartElementPlusEndElementTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -1296,6 +1297,74 @@ public:
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::UnexpectedEndTag);
 		assert(inspector.GetLineNumber() == 1);
 		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetDepth() == 0);
+	
+		std::cout << "OK\n";
+	}
+
+	void StartElementPlusEndElementTest()
+	{
+		std::cout << "Start element plus end element test... ";
+
+		std::string docString = u8"<element></element>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// <element>
+		bool result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
+		assert(inspector.GetName() == u8"element");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"element");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// </element>
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::EndElement);
+		assert(inspector.GetName() == u8"element");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"element");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 10);
+		assert(inspector.GetDepth() == 0);
+
+		// eof
+		result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetLineNumber() == 1);
+		assert(inspector.GetLinePosition() == 20);
 		assert(inspector.GetDepth() == 0);
 	
 		std::cout << "OK\n";
