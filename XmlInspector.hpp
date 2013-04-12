@@ -1637,8 +1637,40 @@ namespace Xml
 	inline bool Inspector<TCharactersWriter>::ParseText()
 	{
 		// currentCharacter == first character of text.
+
+		SizeType tempLineNumber;
+		SizeType tempLinePosition;
+
+		PrepareNode();
+
+		if (IsWhiteSpace(currentCharacter))
+		{
+			do
+			{
+				CharactersWriterType::WriteCharacter(value, currentCharacter);
+				
+				if (NextCharBad(false))
+				{
+					if (eof)
+					{
+						node = NodeType::Whitespace;
+						return true;
+					}
+					return false;
+				}
+			}
+			while (IsWhiteSpace(currentCharacter));
+
+			if (currentCharacter == LessThan)
+			{
+				node = NodeType::Whitespace;
+				return true;
+			}
+		}
+
 		// TODO:
 		assert(false && "Not implemented yet.");
+
 		return false;
 	}
 
@@ -2177,6 +2209,20 @@ namespace Xml
 					}
 				}
 				while (IsWhiteSpace(currentCharacter));
+
+				if (currentCharacter != LessThan)
+				{
+					tempLineNumber = currentLineNumber;
+					tempLinePosition = currentLinePosition;
+					Reset();
+					SetError(ErrorCode::InvalidSyntax);
+					lineNumber = tempLineNumber;
+					linePosition = tempLinePosition;
+					return false;
+				}
+				
+				node = NodeType::Whitespace;
+				return true;
 			}
 
 			if (currentCharacter != LessThan)
@@ -2312,6 +2358,7 @@ namespace Xml
 		}
 
 		// currentCharacter == first character of text.
+		SavePosition();
 		return ParseText();
 	}
 
