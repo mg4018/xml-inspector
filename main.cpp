@@ -399,8 +399,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
-		assert(inspector.GetLineNumber() == 0);
-		assert(inspector.GetLinePosition() == 0);
+		assert(inspector.GetRow() == 0);
+		assert(inspector.GetColumn() == 0);
 		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
@@ -425,8 +425,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::StreamError);
-		assert(inspector.GetLineNumber() == 0);
-		assert(inspector.GetLinePosition() == 0);
+		assert(inspector.GetRow() == 0);
+		assert(inspector.GetColumn() == 0);
 		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
@@ -702,8 +702,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::NoElement);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
 		assert(inspector.GetDepth() == 0);
 	
 		std::cout << "OK\n";
@@ -732,8 +732,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
 		assert(inspector.GetDepth() == 0);
 
 		result = inspector.ReadNode();
@@ -750,8 +750,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::NoElement);
-		assert(inspector.GetLineNumber() == 6);
-		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetRow() == 6);
+		assert(inspector.GetColumn() == 1);
 		assert(inspector.GetDepth() == 0);
 	
 		std::cout << "OK\n";
@@ -779,8 +779,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidByteSequence);
-		assert(inspector.GetLineNumber() == 3);
-		assert(inspector.GetLinePosition() == 2);
+		assert(inspector.GetRow() == 3);
+		assert(inspector.GetColumn() == 2);
 		assert(inspector.GetDepth() == 0);
 	
 		std::cout << "OK\n";
@@ -808,8 +808,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
-		assert(inspector.GetLineNumber() == 2);
-		assert(inspector.GetLinePosition() == 3);
+		assert(inspector.GetRow() == 2);
+		assert(inspector.GetColumn() == 3);
 		assert(inspector.GetDepth() == 0);
 	
 		std::cout << "OK\n";
@@ -991,8 +991,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::UnclosedToken);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
 		assert(inspector.GetDepth() == 0);
 	
 		std::cout << "OK\n";
@@ -1020,8 +1020,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
 		assert(inspector.GetDepth() == 0);
 	
 		std::cout << "OK\n";
@@ -1049,8 +1049,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 2);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 2);
 		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
@@ -1078,8 +1078,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidTagName);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 2);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 2);
 		assert(inspector.GetDepth() == 0);
 
 		docString = u8"<:name>";
@@ -1099,8 +1099,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidTagName);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 2);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 2);
 		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
@@ -1128,8 +1128,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidTagName);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 2);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 2);
 		assert(inspector.GetDepth() == 0);
 
 		docString = u8"<name:>";
@@ -1149,8 +1149,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidTagName);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 2);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 2);
 		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
@@ -1178,8 +1178,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 2);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 2);
 		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
@@ -1207,8 +1207,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
 		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
@@ -1236,8 +1236,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
 		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
@@ -1267,8 +1267,8 @@ public:
 		// I don't want to create new error code just for this case,
 		// I will use existing error code instead.
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::PrefixWithoutAssignedNamespace);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 2);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 2);
 		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
@@ -1296,8 +1296,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::UnexpectedEndTag);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
 		assert(inspector.GetDepth() == 0);
 	
 		std::cout << "OK\n";
@@ -1326,8 +1326,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
 		assert(inspector.GetDepth() == 0);
 
 		// </element>
@@ -1345,8 +1345,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 10);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 10);
 		assert(inspector.GetDepth() == 0);
 
 		// eof
@@ -1364,8 +1364,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 20);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 20);
 		assert(inspector.GetDepth() == 0);
 	
 		std::cout << "OK\n";
@@ -1404,8 +1404,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
-		assert(inspector.GetLineNumber() == 1);
-		assert(inspector.GetLinePosition() == 1);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
 		assert(inspector.GetDepth() == 0);
 
 		// <a>
@@ -1423,8 +1423,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
-		assert(inspector.GetLineNumber() == 5);
-		assert(inspector.GetLinePosition() == 3);
+		assert(inspector.GetRow() == 5);
+		assert(inspector.GetColumn() == 3);
 		assert(inspector.GetDepth() == 0);
 
 		// White spaces.
@@ -1442,8 +1442,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
-		assert(inspector.GetLineNumber() == 5);
-		assert(inspector.GetLinePosition() == 6);
+		assert(inspector.GetRow() == 5);
+		assert(inspector.GetColumn() == 6);
 		assert(inspector.GetDepth() == 1);
 
 		// </a>
@@ -1461,8 +1461,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
-		assert(inspector.GetLineNumber() == 9);
-		assert(inspector.GetLinePosition() == 3);
+		assert(inspector.GetRow() == 9);
+		assert(inspector.GetColumn() == 3);
 		assert(inspector.GetDepth() == 0);
 
 		// White spaces.
@@ -1480,8 +1480,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
-		assert(inspector.GetLineNumber() == 9);
-		assert(inspector.GetLinePosition() == 7);
+		assert(inspector.GetRow() == 9);
+		assert(inspector.GetColumn() == 7);
 		assert(inspector.GetDepth() == 0);
 
 		// eof
@@ -1499,8 +1499,8 @@ public:
 		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
-		assert(inspector.GetLineNumber() == 13);
-		assert(inspector.GetLinePosition() == 3);
+		assert(inspector.GetRow() == 13);
+		assert(inspector.GetColumn() == 3);
 		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
