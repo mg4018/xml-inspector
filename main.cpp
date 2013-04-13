@@ -1703,13 +1703,211 @@ public:
 		std::cout << "Unclosed tag test... ";
 
 		std::string docString =
-			u8"<a><b><c></c>   ";
+			u8"<a><b><c></c>";
 
 		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
 			docString.begin(), docString.end());
 
 		// <a>
 		bool result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
+		assert(inspector.GetName() == u8"a");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"a");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// <b>
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
+		assert(inspector.GetName() == u8"b");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"b");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 4);
+		assert(inspector.GetDepth() == 1);
+
+		// <c>
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
+		assert(inspector.GetName() == u8"c");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"c");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 7);
+		assert(inspector.GetDepth() == 2);
+
+		// </c>
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::EndElement);
+		assert(inspector.GetName() == u8"c");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"c");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 10);
+		assert(inspector.GetDepth() == 2);
+
+		// UnclosedTag error.
+		result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::UnclosedTag);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 4);
+		assert(inspector.GetDepth() == 0);
+
+		docString = u8"<a><b><c></c>   ";
+
+		inspector.Reset(docString.begin(), docString.end());
+
+		// <a>
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
+		assert(inspector.GetName() == u8"a");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"a");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// <b>
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
+		assert(inspector.GetName() == u8"b");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"b");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 4);
+		assert(inspector.GetDepth() == 1);
+
+		// <c>
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
+		assert(inspector.GetName() == u8"c");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"c");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 7);
+		assert(inspector.GetDepth() == 2);
+
+		// </c>
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::EndElement);
+		assert(inspector.GetName() == u8"c");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"c");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 10);
+		assert(inspector.GetDepth() == 2);
+
+		// UnclosedTag error.
+		result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::UnclosedTag);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 4);
+		assert(inspector.GetDepth() == 0);
+
+		docString = u8"<a><b><c></c> abc  ";
+
+		inspector.Reset(docString.begin(), docString.end());
+
+		// <a>
+		result = inspector.ReadNode();
 
 		assert(result == true);
 		assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
