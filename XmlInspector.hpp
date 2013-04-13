@@ -2239,30 +2239,12 @@ namespace Xml
 		if (err != ErrorCode::None)
 			return false;
 
-		if (currentCharacter == GreaterThan)
+		if (currentCharacter == GreaterThan ||
+			currentCharacter == Semicolon)
 		{
-			// End of token.
+			// End of token or reference.
 			if (NextCharBad(false) && !eof)
 				return false;
-		}
-		else if (currentCharacter == Semicolon)
-		{
-			// End of reference.
-			if (NextCharBad(false))
-			{
-				if (eof)
-				{
-					tempRow = currentRow;
-					tempColumn = currentColumn;
-					Reset();
-					SetError(ErrorCode::InvalidSyntax);
-					lineNumber = tempRow;
-					linePosition = tempColumn;
-					eof = true;
-				}
-				afterBom = true;
-				return false;
-			}
 		}
 
 		if (eof)
