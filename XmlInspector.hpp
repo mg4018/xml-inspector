@@ -531,6 +531,7 @@ namespace Xml
 		*/
 		typedef uint_least64_t SizeType;
 	private:
+		typedef typename StringType::size_type StringSizeType;
 		typedef Details::UnclosedTag<StringType> UnclosedTagType;
 		typedef Details::NamespaceDeclaration<StringType> NamespaceDeclarationType;
 		typedef typename std::deque<AttributeType>::size_type AttributesSizeType;
@@ -575,6 +576,12 @@ namespace Xml
 		static const int SourceStream = 2; // Inspector(std::istream*) constructor.
 		static const int SourceIterators = 3; // Inspector(InputIterator first, InputIterator last) constructor.
 		static const int SourceReader = 4; // Inspector(Encoding::CharactersReader*) constructor.
+		
+		static const StringSizeType NameReserve = 31;
+		static const StringSizeType ValueReserve = 63;
+		static const StringSizeType LocalNameReserve = 15;
+		static const StringSizeType PrefixReserve = 15;
+		static const StringSizeType NamespaceUriReserve = 63;
 
 		SizeType lineNumber;
 		SizeType linePosition;
@@ -974,6 +981,12 @@ namespace Xml
 		namespaces(),
 		namespacesSize(0)
 	{
+		name.reserve(NameReserve);
+		value.reserve(ValueReserve);
+		localName.reserve(LocalNameReserve);
+		prefix.reserve(PrefixReserve);
+		namespaceUri.reserve(NamespaceUriReserve);
+
 		lowerXmlString.reserve(3);
 		xmlnsString.reserve(5);
 		xmlUriString.reserve(36);
@@ -1950,7 +1963,13 @@ namespace Xml
 		// fakeSize >= attributes.size().
 		attributes.push_back(AttributeType());
 		++attributesSize;
-		return attributes.back();
+		AttributeType& ref = attributes.back();
+		ref.Name.reserve(NameReserve);
+		ref.Value.reserve(ValueReserve);
+		ref.LocalName.reserve(LocalNameReserve);
+		ref.Prefix.reserve(PrefixReserve);
+		ref.NamespaceUri.reserve(NamespaceUriReserve);
+		return ref;
 	}
 
 	template <typename TCharactersWriter>
@@ -1972,7 +1991,12 @@ namespace Xml
 		// fakeSize >= unclosedTags.size().
 		unclosedTags.push_back(UnclosedTagType());
 		++unclosedTagsSize;
-		return unclosedTags.back();
+		UnclosedTagType& ref = unclosedTags.back();
+		ref.Name.reserve(NameReserve);
+		ref.LocalName.reserve(LocalNameReserve);
+		ref.Prefix.reserve(PrefixReserve);
+		ref.NamespaceUri.reserve(NamespaceUriReserve);
+		return ref;
 	}
 
 	template <typename TCharactersWriter>
@@ -1993,7 +2017,10 @@ namespace Xml
 		// fakeSize >= namespaces.size().
 		namespaces.push_back(NamespaceDeclarationType());
 		++namespacesSize;
-		return namespaces.back();
+		NamespaceDeclarationType& ref = namespaces.back();
+		ref.Prefix.reserve(PrefixReserve);
+		ref.Uri.reserve(NamespaceUriReserve);
+		return ref;
 	}
 
 	template <typename TCharactersWriter>
