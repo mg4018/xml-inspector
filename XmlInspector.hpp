@@ -555,9 +555,9 @@ namespace Xml
 		static const char32_t X = 0x78;                      // 'x'
 		static const char32_t Colon = 0x3A;                  // ':'
 		static const char32_t Semicolon = 0x3B;              // ';'
-		static const char32_t LeftSquareBracket = 0x3B;      // '['
-		static const char32_t RightSquareBracket = 0x3B;     // ']'
-		static const char32_t Dot = 0x3B;                    // '.'
+		static const char32_t LeftSquareBracket = 0x5B;      // '['
+		static const char32_t RightSquareBracket = 0x5D;     // ']'
+		static const char32_t Dot = 0x2E;                    // '.'
 		static constexpr const char32_t* LowerXml = U"xml";
 		static constexpr const char32_t* UpperXml = U"XML";
 		static constexpr const char32_t* Xmlns = U"xmlns";
@@ -583,8 +583,8 @@ namespace Xml
 		static const StringSizeType PrefixReserve = 15;
 		static const StringSizeType NamespaceUriReserve = 63;
 
-		SizeType lineNumber;
-		SizeType linePosition;
+		SizeType row;
+		SizeType column;
 		SizeType currentRow;
 		SizeType currentColumn;
 		NodeType node;
@@ -947,8 +947,8 @@ namespace Xml
 
 	template <typename TCharactersWriter>
 	inline Inspector<TCharactersWriter>::Inspector()
-		: lineNumber(0),
-		linePosition(0),
+		: row(0),
+		column(0),
 		currentRow(0),
 		currentColumn(0),
 		node(NodeType::None),
@@ -1364,8 +1364,8 @@ namespace Xml
 				{
 					Reset();
 					SetError(ErrorCode::InvalidTagName);
-					lineNumber = tempRow;
-					linePosition = tempColumn;
+					row = tempRow;
+					column = tempColumn;
 					return false;
 				}
 
@@ -1381,8 +1381,8 @@ namespace Xml
 					{
 						Reset();
 						SetError(ErrorCode::InvalidTagName);
-						lineNumber = tempRow;
-						linePosition = tempColumn;
+						row = tempRow;
+						column = tempColumn;
 						return false;
 					}
 				}
@@ -1398,6 +1398,8 @@ namespace Xml
 			bool noErrors = NamespacesStuff();
 			if (noErrors)
 			{
+				tempRow = row;
+				tempColumn = column;
 				UnclosedTagType& ref = NewUnclosedTag();
 				ref.Name = name;
 				ref.LocalName = localName;
@@ -1450,6 +1452,8 @@ namespace Xml
 				bool noErrors = NamespacesStuff();
 				if (noErrors)
 				{
+					tempRow = row;
+					tempColumn = column;
 					UnclosedTagType& ref = NewUnclosedTag();
 					ref.Name = name;
 					ref.LocalName = localName;
@@ -1469,8 +1473,8 @@ namespace Xml
 				// 1 is not allowed as a first character name.
 				Reset();
 				SetError(ErrorCode::InvalidAttributeName);
-				lineNumber = tempRow;
-				linePosition = tempColumn;
+				row = tempRow;
+				column = tempColumn;
 				return false;
 			}
 
@@ -1481,16 +1485,16 @@ namespace Xml
 			tempColumn = currentColumn;
 			Reset();
 			SetError(ErrorCode::InvalidSyntax);
-			lineNumber = tempRow;
-			linePosition = tempColumn;
+			row = tempRow;
+			column = tempColumn;
 			return false;
 		}
 
 		// Invalid tag name.
 		Reset();
 		SetError(ErrorCode::InvalidTagName);
-		lineNumber = tempRow;
-		linePosition = tempColumn;
+		row = tempRow;
+		column = tempColumn;
 		return false;
 	}
 
@@ -1508,8 +1512,8 @@ namespace Xml
 		{
 			Reset();
 			SetError(ErrorCode::InvalidTagName);
-			lineNumber = tempRow;
-			linePosition = tempColumn;
+			row = tempRow;
+			column = tempColumn;
 			return false;
 		}
 		else if (!Encoding::CharactersReader::IsNameStartChar(currentCharacter))
@@ -1527,8 +1531,8 @@ namespace Xml
 				Reset();
 				SetError(ErrorCode::InvalidSyntax);
 			}
-			lineNumber = tempRow;
-			linePosition = tempColumn;
+			row = tempRow;
+			column = tempColumn;
 			return false;
 		}
 
@@ -1558,8 +1562,8 @@ namespace Xml
 				{
 					Reset();
 					SetError(ErrorCode::InvalidTagName);
-					lineNumber = tempRow;
-					linePosition = tempColumn;
+					row = tempRow;
+					column = tempColumn;
 					return false;
 				}
 
@@ -1575,8 +1579,8 @@ namespace Xml
 					{
 						Reset();
 						SetError(ErrorCode::InvalidTagName);
-						lineNumber = tempRow;
-						linePosition = tempColumn;
+						row = tempRow;
+						column = tempColumn;
 						return false;
 					}
 				}
@@ -1602,8 +1606,8 @@ namespace Xml
 				tempColumn = currentColumn;
 				Reset();
 				SetError(ErrorCode::InvalidSyntax);
-				lineNumber = tempRow;
-				linePosition = tempColumn;
+				row = tempRow;
+				column = tempColumn;
 				return false;
 			}
 		}
@@ -1611,20 +1615,20 @@ namespace Xml
 		{
 			Reset();
 			SetError(ErrorCode::InvalidTagName);
-			lineNumber = tempRow;
-			linePosition = tempColumn;
+			row = tempRow;
+			column = tempColumn;
 			return false;
 		}
 
 		if (unclosedTagsSize == 0 ||
 			unclosedTags[unclosedTagsSize - 1].Name != name)
 		{
-			tempRow = lineNumber;
-			tempColumn = linePosition;
+			tempRow = row;
+			tempColumn = column;
 			Reset();
 			SetError(ErrorCode::UnexpectedEndTag);
-			lineNumber = tempRow;
-			linePosition = tempColumn;
+			row = tempRow;
+			column = tempColumn;
 			return false;
 		}
 		namespaceUri = unclosedTags[unclosedTagsSize - 1].NamespaceUri;
@@ -1666,6 +1670,18 @@ namespace Xml
 				{
 					if (eof)
 					{
+						if (unclosedTagsSize != 0)
+						{
+							UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+							Reset();
+							SetError(ErrorCode::UnclosedTag);
+							row = ref.Row;
+							column = ref.Column;
+							eof = true;
+							afterBom = true;
+							return false;
+						}
+
 						node = NodeType::Whitespace;
 						return true;
 					}
@@ -1681,10 +1697,52 @@ namespace Xml
 			}
 		}
 
-		// TODO:
-		assert(false && "Not implemented yet.");
+		if (unclosedTagsSize == 0)
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			afterBom = true;
+			return false;
+		}
 
-		return false;
+		do
+		{
+			if (currentCharacter == Ampersand)
+			{
+				// TODO:
+				assert(false && "Not implemented yet.");
+			}
+
+			if (currentCharacter == RightSquareBracket)
+			{
+				// TODO:
+				assert(false && "Not implemented yet.");
+			}
+
+			CharactersWriterType::WriteCharacter(value, currentCharacter);
+			if (NextCharBad(false))
+			{
+				if (eof)
+				{
+					UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+					Reset();
+					SetError(ErrorCode::UnclosedTag);
+					row = ref.Row;
+					column = ref.Column;
+					eof = true;
+				}
+				afterBom = true;
+				return false;
+			}
+		}
+		while (currentCharacter != LessThan);
+
+		node = NodeType::Text;
+		return true;
 	}
 
 	template <typename TCharactersWriter>
@@ -1740,8 +1798,8 @@ namespace Xml
 						// <mytag xmlns="http://www.w3.org/2000/xmlns/"...
 						Reset();
 						SetError(ErrorCode::ReservedNamespaceAsDefault);
-						lineNumber = attr->Row;
-						linePosition = attr->Column;
+						row = attr->Row;
+						column = attr->Column;
 						return false;
 					}
 
@@ -1757,8 +1815,8 @@ namespace Xml
 					// <mytag xmlns:xmlns=...
 					Reset();
 					SetError(ErrorCode::XmlnsDeclared);
-					lineNumber = attr->Row;
-					linePosition = attr->Column;
+					row = attr->Row;
+					column = attr->Column;
 					return false;
 				}
 				else if (attr->LocalName == lowerXmlString)
@@ -1769,8 +1827,8 @@ namespace Xml
 					{
 						Reset();
 						SetError(ErrorCode::InvalidXmlPrefixDeclaration);
-						lineNumber = attr->Row;
-						linePosition = attr->Column;
+						row = attr->Row;
+						column = attr->Column;
 						return false;
 					}
 				}
@@ -1782,8 +1840,8 @@ namespace Xml
 					// <mytag xmlns:newprefix="http://www.w3.org/2000/xmlns/"...
 					Reset();
 					SetError(ErrorCode::PrefixBoundToReservedNamespace);
-					lineNumber = attr->Row;
-					linePosition = attr->Column;
+					row = attr->Row;
+					column = attr->Column;
 					return false;
 				}
 				else if (attr->Value.empty())
@@ -1791,8 +1849,8 @@ namespace Xml
 					// <mytag xmlns:newprefix=""...
 					Reset();
 					SetError(ErrorCode::PrefixWithEmptyNamespace);
-					lineNumber = attr->Row;
-					linePosition = attr->Column;
+					row = attr->Row;
+					column = attr->Column;
 					return false;
 				}
 				else
@@ -1838,8 +1896,8 @@ namespace Xml
 					{
 						Reset();
 						SetError(ErrorCode::PrefixWithoutAssignedNamespace);
-						lineNumber = attr->Row;
-						linePosition = attr->Column;
+						row = attr->Row;
+						column = attr->Column;
 						return false;
 					}
 					else
@@ -1855,13 +1913,13 @@ namespace Xml
 		{
 			if (prefix == xmlnsString)
 			{
-				// lineNumber and linePosition => '<'
-				SizeType tempRow = lineNumber;
-				SizeType tempColumn = linePosition + 1;
+				// row and column => '<'
+				SizeType tempRow = row;
+				SizeType tempColumn = column + 1;
 				Reset();
 				SetError(ErrorCode::PrefixWithoutAssignedNamespace);
-				lineNumber = tempRow;
-				linePosition = tempColumn;
+				row = tempRow;
+				column = tempColumn;
 				return false;
 			}
 			else if (prefix == lowerXmlString)
@@ -1882,13 +1940,13 @@ namespace Xml
 				}
 				if (!found && (namespacesSize == 0 || prefix != n->Prefix))
 				{
-					// lineNumber and linePosition => '<'
-					SizeType tempRow = lineNumber;
-					SizeType tempColumn = linePosition + 1;
+					// row and column => '<'
+					SizeType tempRow = row;
+					SizeType tempColumn = column + 1;
 					Reset();
 					SetError(ErrorCode::PrefixWithoutAssignedNamespace);
-					lineNumber = tempRow;
-					linePosition = tempColumn;
+					row = tempRow;
+					column = tempColumn;
 					return false;
 				}
 				else
@@ -1931,8 +1989,8 @@ namespace Xml
 						{
 							Reset();
 							SetError(ErrorCode::DoubleAttributeName);
-							lineNumber = next->Row;
-							linePosition = next->Column;
+							row = next->Row;
+							column = next->Column;
 							return false;
 						}
 					}
@@ -2026,8 +2084,8 @@ namespace Xml
 	template <typename TCharactersWriter>
 	inline void Inspector<TCharactersWriter>::SavePosition()
 	{
-		lineNumber = currentRow;
-		linePosition = currentColumn;
+		row = currentRow;
+		column = currentColumn;
 	}
 
 	template <typename TCharactersWriter>
@@ -2065,11 +2123,11 @@ namespace Xml
 				if (insideTag)
 				{
 					// Start token position.
-					tempRow = lineNumber;
-					tempColumn = linePosition;
+					tempRow = row;
+					tempColumn = column;
 					Reset();
-					lineNumber = tempRow;
-					linePosition = tempColumn;
+					row = tempRow;
+					column = tempColumn;
 					SetError(ErrorCode::UnclosedToken);
 					eof = true;
 				}
@@ -2085,8 +2143,8 @@ namespace Xml
 				tempRow = currentRow;
 				tempColumn = currentColumn;
 				Reset();
-				lineNumber = tempRow;
-				linePosition = tempColumn;
+				row = tempRow;
+				column = tempColumn;
 				SetError(ErrorCode::InvalidByteSequence);
 			}
 			else // bufferedCharacter == 3 // Stream error.
@@ -2095,8 +2153,8 @@ namespace Xml
 				tempRow = currentRow;
 				tempColumn = currentColumn;
 				Reset();
-				lineNumber = tempRow;
-				linePosition = tempColumn;
+				row = tempRow;
+				column = tempColumn;
 				SetError(ErrorCode::StreamError);
 			}
 			afterBom = true;
@@ -2147,11 +2205,11 @@ namespace Xml
 			if (insideTag)
 			{
 				// Start token position.
-				tempRow = lineNumber;
-				tempColumn = linePosition;
+				tempRow = row;
+				tempColumn = column;
 				Reset();
-				lineNumber = tempRow;
-				linePosition = tempColumn;
+				row = tempRow;
+				column = tempColumn;
 				SetError(ErrorCode::UnclosedToken);
 				eof = true;
 			}
@@ -2166,8 +2224,8 @@ namespace Xml
 			tempRow = currentRow;
 			tempColumn = currentColumn;
 			Reset();
-			lineNumber = tempRow;
-			linePosition = tempColumn;
+			row = tempRow;
+			column = tempColumn;
 			SetError(ErrorCode::InvalidByteSequence);
 		}
 		else // result == -2 // Stream error.
@@ -2176,8 +2234,8 @@ namespace Xml
 			tempRow = currentRow;
 			tempColumn = currentColumn;
 			Reset();
-			lineNumber = tempRow;
-			linePosition = tempColumn;
+			row = tempRow;
+			column = tempColumn;
 			SetError(ErrorCode::StreamError);
 		}
 		afterBom = true;
@@ -2195,8 +2253,8 @@ namespace Xml
 			ParseBom();
 			if (err != ErrorCode::None)
 				return false;
-			lineNumber = 1;
-			linePosition = 1;
+			row = 1;
+			column = 1;
 			if (eof)
 			{
 				SetError(ErrorCode::NoElement);
@@ -2243,8 +2301,8 @@ namespace Xml
 					tempColumn = currentColumn;
 					Reset();
 					SetError(ErrorCode::InvalidSyntax);
-					lineNumber = tempRow;
-					linePosition = tempColumn;
+					row = tempRow;
+					column = tempColumn;
 					return false;
 				}
 				
@@ -2258,8 +2316,8 @@ namespace Xml
 				tempColumn = currentColumn;
 				Reset();
 				SetError(ErrorCode::InvalidSyntax);
-				lineNumber = tempRow;
-				linePosition = tempColumn;
+				row = tempRow;
+				column = tempColumn;
 			}
 		}
 
@@ -2283,19 +2341,17 @@ namespace Xml
 				tempColumn = currentColumn;
 				Reset();
 				SetError(ErrorCode::NoElement);
-				lineNumber = tempRow;
-				linePosition = tempColumn;
+				row = tempRow;
+				column = tempColumn;
 			}
 			else if (unclosedTagsSize != 0)
 			{
-				UnclosedTagsSizeType s = unclosedTagsSize;
-				UnclosedTagType& ref = unclosedTags[s - 1];
+				UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
 				Reset();
 				SetError(ErrorCode::UnclosedTag);
-				lineNumber = ref.Row;
-				linePosition = ref.Column;
+				row = ref.Row;
+				column = ref.Column;
 				foundElement = true;
-				unclosedTagsSize = s;
 			}
 			else
 			{
@@ -2303,8 +2359,8 @@ namespace Xml
 				tempRow = currentRow;
 				tempColumn = currentColumn;
 				Reset();
-				lineNumber = tempRow;
-				linePosition = tempColumn;
+				row = tempRow;
+				column = tempColumn;
 				node = NodeType::None;
 			}
 			afterBom = true;
@@ -2361,8 +2417,8 @@ namespace Xml
 				Reset();
 				SetError(ErrorCode::InvalidSyntax);
 			}
-			lineNumber = tempRow;
-			linePosition = tempColumn;
+			row = tempRow;
+			column = tempColumn;
 			return false;
 		}
 
@@ -2455,14 +2511,14 @@ namespace Xml
 	inline typename Inspector<TCharactersWriter>::SizeType
 		Inspector<TCharactersWriter>::GetRow() const
 	{
-		return lineNumber;
+		return row;
 	}
 
 	template <typename TCharactersWriter>
 	inline typename Inspector<TCharactersWriter>::SizeType
 		Inspector<TCharactersWriter>::GetColumn() const
 	{
-		return linePosition;
+		return column;
 	}
 
 	template <typename TCharactersWriter>
@@ -2479,8 +2535,8 @@ namespace Xml
 	template <typename TCharactersWriter>
 	inline void Inspector<TCharactersWriter>::Reset()
 	{
-		lineNumber = 0;
-		linePosition = 0;
+		row = 0;
+		column = 0;
 		currentRow = 0;
 		currentColumn = 0;
 		node = NodeType::None;
