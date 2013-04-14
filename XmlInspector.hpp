@@ -1678,7 +1678,6 @@ namespace Xml
 							row = ref.Row;
 							column = ref.Column;
 							eof = true;
-							afterBom = true;
 							return false;
 						}
 
@@ -1705,7 +1704,6 @@ namespace Xml
 			SetError(ErrorCode::InvalidSyntax);
 			row = tempRow;
 			column = tempColumn;
-			afterBom = true;
 			return false;
 		}
 
@@ -1735,7 +1733,6 @@ namespace Xml
 					column = ref.Column;
 					eof = true;
 				}
-				afterBom = true;
 				return false;
 			}
 		}
@@ -2290,7 +2287,6 @@ namespace Xml
 							SetError(ErrorCode::NoElement);
 							row = tempRow;
 							column = tempColumn;
-							afterBom = true;
 							return false;
 						}
 						else // White spaces followed by invalid character or stream error.
@@ -2310,7 +2306,6 @@ namespace Xml
 					SetError(ErrorCode::InvalidSyntax);
 					row = tempRow;
 					column = tempColumn;
-					afterBom = true;
 					return false;
 				}
 				
@@ -2326,7 +2321,6 @@ namespace Xml
 				SetError(ErrorCode::InvalidSyntax);
 				row = tempRow;
 				column = tempColumn;
-				afterBom = true;
 			}
 		}
 
@@ -2372,7 +2366,6 @@ namespace Xml
 				column = tempColumn;
 				node = NodeType::None;
 			}
-			afterBom = true;
 			eof = true;
 			return false;
 		}
