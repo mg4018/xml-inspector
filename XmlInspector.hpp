@@ -2283,8 +2283,15 @@ namespace Xml
 					{
 						if (eof) // White spaces followed by end of file.
 						{
-							node = NodeType::Whitespace;
-							return true;
+							// In XML document at least one root element is required.
+							tempRow = currentRow;
+							tempColumn = currentColumn;
+							Reset();
+							SetError(ErrorCode::NoElement);
+							row = tempRow;
+							column = tempColumn;
+							afterBom = true;
+							return false;
 						}
 						else // White spaces followed by invalid character or stream error.
 						{
@@ -2303,6 +2310,7 @@ namespace Xml
 					SetError(ErrorCode::InvalidSyntax);
 					row = tempRow;
 					column = tempColumn;
+					afterBom = true;
 					return false;
 				}
 				
@@ -2318,6 +2326,7 @@ namespace Xml
 				SetError(ErrorCode::InvalidSyntax);
 				row = tempRow;
 				column = tempColumn;
+				afterBom = true;
 			}
 		}
 

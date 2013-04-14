@@ -715,7 +715,8 @@ public:
 	{
 		std::cout << "Whitespace test... ";
 
-		unsigned char source[] = { 0x0D, 0x09, 0x0D, 0x0A, 0x20, 0x0A, 0x0D, 0x20, 0x0D };
+		unsigned char source[] = { 0x0D, 0x09, 0x0D, 0x0A, 0x20, 0x0A, 0x0D, 0x20, 0x0D, 0x3C, 0x61, 0x2F, 0x3E };
+		// After white spaces is "<a/>".
 		const char* pattern = u8"\n\t\n \n\n \n"; // Check http://www.w3.org/TR/REC-xml/#sec-line-ends.
 		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
 			source, source + sizeof(source));
@@ -738,24 +739,6 @@ public:
 		assert(inspector.GetColumn() == 1);
 		assert(inspector.GetDepth() == 0);
 
-		result = inspector.ReadNode();
-
-		assert(result == false);
-		assert(inspector.GetNodeType() == Xml::NodeType::None);
-		assert(inspector.GetName().empty());
-		assert(inspector.GetValue().empty());
-		assert(inspector.GetLocalName().empty());
-		assert(inspector.GetPrefix().empty());
-		assert(inspector.GetNamespaceUri().empty());
-		assert(inspector.HasAttributes() == false);
-		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
-		assert(inspector.GetErrorMessage() != nullptr);
-		assert(inspector.GetErrorCode() == Xml::ErrorCode::NoElement);
-		assert(inspector.GetRow() == 6);
-		assert(inspector.GetColumn() == 1);
-		assert(inspector.GetDepth() == 0);
-	
 		std::cout << "OK\n";
 	}
 
