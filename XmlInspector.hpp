@@ -2364,8 +2364,12 @@ namespace Xml
 				Reset();
 				row = tempRow;
 				column = tempColumn;
-				node = NodeType::None;
+				currentRow = tempRow;
+				currentColumn = tempColumn;
+				foundElement = true;
+				afterBom = true;
 			}
+			currentCharacter = 0;
 			eof = true;
 			return false;
 		}
