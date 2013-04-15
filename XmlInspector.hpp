@@ -1717,8 +1717,39 @@ namespace Xml
 
 			if (currentCharacter == RightSquareBracket)
 			{
-				// TODO:
-				assert(false && "Not implemented yet.");
+				// "]]>" is not allowed here.
+				SizeType bracketCount = 0;
+				do
+				{
+					++bracketCount;
+					CharactersWriterType::WriteCharacter(value, currentCharacter);
+
+					if (NextCharBad(false))
+					{
+						if (eof)
+						{
+							UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+							Reset();
+							SetError(ErrorCode::UnclosedTag);
+							row = ref.Row;
+							column = ref.Column;
+							eof = true;
+						}
+						return false;
+					}
+				}
+				while (currentCharacter == RightSquareBracket);
+
+				if (currentCharacter == GreaterThan && bracketCount > 1)
+				{
+					tempRow = currentRow;
+					tempColumn = currentColumn - 2;
+					Reset();
+					SetError(ErrorCode::InvalidSyntax);
+					row = tempRow;
+					column = tempColumn;
+					return false;
+				}
 			}
 
 			CharactersWriterType::WriteCharacter(value, currentCharacter);

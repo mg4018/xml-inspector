@@ -88,6 +88,7 @@ public:
 		TextPlusElementTest();
 		UnclosedTagTest();
 		ReadOverflowTest();
+		EndCDATAInTextTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -2116,6 +2117,55 @@ public:
 			assert(inspector.GetColumn() == 4);
 			assert(inspector.GetDepth() == 0);
 		}
+	
+		std::cout << "OK\n";
+	}
+	
+	void EndCDATAInTextTest()
+	{
+		std::cout << "End of CDATA in text test... ";
+
+		std::string docString = u8"<a>abc]] >def[]]]>ghi</a>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// <a>
+		bool result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
+		assert(inspector.GetName() == u8"a");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"a");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// Invalid syntax - "]]>" in text node.
+		result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 16);
+		assert(inspector.GetDepth() == 0);
 	
 		std::cout << "OK\n";
 	}
