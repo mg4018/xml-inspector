@@ -2300,8 +2300,6 @@ public:
 			// Invalid character reference.
 			result = inspector.ReadNode();
 
-			if (inspector.GetNodeType() != Xml::NodeType::None)
-				std::cout << "chuj:" << i << "\n";
 			assert(result == false);
 			assert(inspector.GetNodeType() == Xml::NodeType::None);
 			assert(inspector.GetName().empty());
