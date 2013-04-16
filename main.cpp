@@ -89,6 +89,9 @@ public:
 		UnclosedTagTest();
 		ReadOverflowTest();
 		EndCDATAInTextTest();
+		CharacterReferenceTest();
+		InvalidCharacterReferenceTest();
+		InvalidReferenceSyntaxTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -2167,6 +2170,217 @@ public:
 		assert(inspector.GetColumn() == 16);
 		assert(inspector.GetDepth() == 0);
 	
+		std::cout << "OK\n";
+	}
+
+	void CharacterReferenceTest()
+	{
+		std::cout << "Character reference test... ";
+
+		std::string docString =
+			u8"<a>&#x61;&#97;a&#x3C; &#xd; &#x000000000000024;&#00000000162;&#x20Ac;&#00150370;</a>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// <a>
+		bool result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
+		assert(inspector.GetName() == u8"a");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"a");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// Text.
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::Text);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue() == u8"aaa< \r \U00000024\U000000A2\U000020AC\U00024B62");
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 4);
+		assert(inspector.GetDepth() == 1);
+
+		// </a>
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::EndElement);
+		assert(inspector.GetName() == u8"a");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"a");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 81);
+		assert(inspector.GetDepth() == 0);
+
+		// End of file.
+		result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 85);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void InvalidCharacterReferenceTest()
+	{
+		std::cout << "Invalid character reference test... ";
+
+		std::string bad[] =
+		{
+			u8"<a> &#xD800; </a>",
+			u8"<a> &#xFFFE; </a>",
+			u8"<a> &#x9999999999999999999; </a>"
+		};
+
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector;
+
+		for (std::size_t i = 0; i < sizeof(bad) / sizeof(std::string); ++i)
+		{
+			inspector.Reset(bad[i].begin(), bad[i].end());
+
+			// <a>
+			bool result = inspector.ReadNode();
+
+			assert(result == true);
+			assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
+			assert(inspector.GetName() == u8"a");
+			assert(inspector.GetValue().empty());
+			assert(inspector.GetLocalName() == u8"a");
+			assert(inspector.GetPrefix().empty());
+			assert(inspector.GetNamespaceUri().empty());
+			assert(inspector.HasAttributes() == false);
+			assert(inspector.GetAttributesCount() == 0);
+			assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+			assert(inspector.GetErrorMessage() == nullptr);
+			assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+			assert(inspector.GetRow() == 1);
+			assert(inspector.GetColumn() == 1);
+			assert(inspector.GetDepth() == 0);
+
+			// Invalid character reference.
+			result = inspector.ReadNode();
+
+			if (inspector.GetNodeType() != Xml::NodeType::None)
+				std::cout << "chuj:" << i << "\n";
+			assert(result == false);
+			assert(inspector.GetNodeType() == Xml::NodeType::None);
+			assert(inspector.GetName().empty());
+			assert(inspector.GetValue().empty());
+			assert(inspector.GetLocalName().empty());
+			assert(inspector.GetPrefix().empty());
+			assert(inspector.GetNamespaceUri().empty());
+			assert(inspector.HasAttributes() == false);
+			assert(inspector.GetAttributesCount() == 0);
+			assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+			assert(inspector.GetErrorMessage() != nullptr);
+			assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidCharacterReference);
+			assert(inspector.GetRow() == 1);
+			assert(inspector.GetColumn() == 5);
+			assert(inspector.GetDepth() == 0);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void InvalidReferenceSyntaxTest()
+	{
+		std::cout << "Invalid reference syntax test... ";
+
+		std::string bad[] =
+		{
+			u8"<a> &#x1@34; </a>",
+			u8"<a> &0x1234; </a>",
+			u8"<a> &#0D; </a>",
+			u8"<a> &; </a>",
+			u8"<a> &#x10000000000000000000!!!; </a>",
+			u8"<a> &#xFGH; </a>"
+		};
+
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector;
+
+		for (std::size_t i = 0; i < sizeof(bad) / sizeof(std::string); ++i)
+		{
+			inspector.Reset(bad[i].begin(), bad[i].end());
+
+			// <a>
+			bool result = inspector.ReadNode();
+
+			assert(result == true);
+			assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
+			assert(inspector.GetName() == u8"a");
+			assert(inspector.GetValue().empty());
+			assert(inspector.GetLocalName() == u8"a");
+			assert(inspector.GetPrefix().empty());
+			assert(inspector.GetNamespaceUri().empty());
+			assert(inspector.HasAttributes() == false);
+			assert(inspector.GetAttributesCount() == 0);
+			assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+			assert(inspector.GetErrorMessage() == nullptr);
+			assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+			assert(inspector.GetRow() == 1);
+			assert(inspector.GetColumn() == 1);
+			assert(inspector.GetDepth() == 0);
+
+			// Invalid reference syntax.
+			result = inspector.ReadNode();
+
+			assert(result == false);
+			assert(inspector.GetNodeType() == Xml::NodeType::None);
+			assert(inspector.GetName().empty());
+			assert(inspector.GetValue().empty());
+			assert(inspector.GetLocalName().empty());
+			assert(inspector.GetPrefix().empty());
+			assert(inspector.GetNamespaceUri().empty());
+			assert(inspector.HasAttributes() == false);
+			assert(inspector.GetAttributesCount() == 0);
+			assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+			assert(inspector.GetErrorMessage() != nullptr);
+			assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidReferenceSyntax);
+			assert(inspector.GetRow() == 1);
+			assert(inspector.GetColumn() == 5);
+			assert(inspector.GetDepth() == 0);
+		}
+
 		std::cout << "OK\n";
 	}
 };

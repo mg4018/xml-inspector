@@ -652,6 +652,9 @@ namespace Xml
 
 		bool NamespacesStuff();
 
+		// Returns false if error.
+		bool ParseCharacterReference(char32_t& result, bool insideTag);
+
 		AttributeType& NewAttribute();
 
 		UnclosedTagType& NewUnclosedTag();
@@ -1711,8 +1714,63 @@ namespace Xml
 		{
 			if (currentCharacter == Ampersand)
 			{
-				// TODO:
-				assert(false && "Not implemented yet.");
+				if (NextCharBad(false))
+				{
+					if (eof)
+					{
+						UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+						Reset();
+						SetError(ErrorCode::UnclosedTag);
+						row = ref.Row;
+						column = ref.Column;
+						eof = true;
+					}
+					return false;
+				}
+
+				if (currentCharacter == Hash)
+				{
+					// "&#"
+
+					char32_t codePoint;
+
+					if (!ParseCharacterReference(codePoint, false))
+						return false;
+
+					// currentCharacter == Semicolon.
+
+					CharactersWriterType::WriteCharacter(value, codePoint);
+					if (NextCharBad(false))
+					{
+						if (eof)
+						{
+							UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+							Reset();
+							SetError(ErrorCode::UnclosedTag);
+							row = ref.Row;
+							column = ref.Column;
+							eof = true;
+						}
+						return false;
+					}
+					continue;
+				}
+				else if (Encoding::CharactersReader::IsNameStartChar(currentCharacter))
+				{
+					// Entity reference.
+					// TODO:
+					assert(false && "Not implemented yet.");
+				}
+				else
+				{
+					tempRow = currentRow;
+					tempColumn = currentColumn - 1;
+					Reset();
+					SetError(ErrorCode::InvalidReferenceSyntax);
+					row = tempRow;
+					column = tempColumn;
+					return false;
+				}
 			}
 
 			if (currentCharacter == RightSquareBracket)
@@ -2030,6 +2088,187 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::ParseCharacterReference(char32_t& result, bool insideTag)
+	{
+		// currentCharacter == Hash.
+		
+		SizeType tempRow = currentRow;
+		SizeType tempColumn = currentColumn - 1;
+
+		if (NextCharBad(insideTag))
+		{
+			if (!insideTag && eof)
+			{
+				UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+				Reset();
+				SetError(ErrorCode::UnclosedTag);
+				row = ref.Row;
+				column = ref.Column;
+				eof = true;
+			}
+			return false;
+		}
+
+		const int BufferSize = 7;
+		unsigned char buffer[BufferSize];
+		int digitCount = 0;
+		int digit = 0;
+		int radix = 10;
+
+		if (currentCharacter == X)
+		{
+			// Hexadecimal representation of the character's code point.
+			radix = 16;
+			if (NextCharBad(insideTag))
+			{
+				if (!insideTag && eof)
+				{
+					UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+					Reset();
+					SetError(ErrorCode::UnclosedTag);
+					row = ref.Row;
+					column = ref.Column;
+					eof = true;
+				}
+				return false;
+			}
+		}
+
+		digit = Encoding::CharactersReader::GetHexDigitValue(currentCharacter);
+
+		// Ignore leading zeros.
+		bool leadingZeros = false;
+		while (digit == 0)
+		{
+			leadingZeros = true;
+			if (NextCharBad(insideTag))
+			{
+				if (!insideTag && eof)
+				{
+					UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+					Reset();
+					SetError(ErrorCode::UnclosedTag);
+					row = ref.Row;
+					column = ref.Column;
+					eof = true;
+				}
+				return false;
+			}
+			digit = Encoding::CharactersReader::GetHexDigitValue(currentCharacter);
+		}
+
+		while (digitCount < BufferSize && digit >= 0 && digit < radix)
+		{
+			buffer[digitCount++] = static_cast<unsigned char>(digit);
+			if (NextCharBad(insideTag))
+			{
+				if (!insideTag && eof)
+				{
+					UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+					Reset();
+					SetError(ErrorCode::UnclosedTag);
+					row = ref.Row;
+					column = ref.Column;
+					eof = true;
+				}
+				return false;
+			}
+			digit = Encoding::CharactersReader::GetHexDigitValue(currentCharacter);
+		}
+
+		// Now should be a semicolon.
+		if (currentCharacter == Semicolon)
+		{
+			// &#x0; is invalid code point in character reference.
+			// &#x; is invalid syntax of reference.
+			if (digitCount == 0)
+			{
+				if (leadingZeros)
+				{
+					Reset();
+					SetError(ErrorCode::InvalidCharacterReference);
+					row = tempRow;
+					column = tempColumn;
+				}
+				else
+				{
+					Reset();
+					SetError(ErrorCode::InvalidReferenceSyntax);
+					row = tempRow;
+					column = tempColumn;
+				}
+				return false;
+			}
+
+			// We are sure that digitCount is 7 max.
+			result = 0;
+			for (int i = 0; i < digitCount; ++i)
+				result = result * radix + static_cast<char32_t>(buffer[i]);
+
+			if (!Encoding::CharactersReader::IsChar(result))
+			{
+				Reset();
+				SetError(ErrorCode::InvalidCharacterReference);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+		}
+		else if (digit >= 0 && digit < radix)
+		{
+			// To many digits, but we must check the syntax to set appropriate error.
+
+			do
+			{
+				if (NextCharBad(insideTag))
+				{
+					if (!insideTag && eof)
+					{
+						UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+						Reset();
+						SetError(ErrorCode::UnclosedTag);
+						row = ref.Row;
+						column = ref.Column;
+						eof = true;
+					}
+					return false;
+				}
+				digit = Encoding::CharactersReader::GetHexDigitValue(currentCharacter);
+			}
+			while (digit >= 0 && digit < radix);
+
+			if (currentCharacter == Semicolon)
+			{
+				// just invalid code point.
+				Reset();
+				SetError(ErrorCode::InvalidCharacterReference);
+				row = tempRow;
+				column = tempColumn;
+			}
+			else
+			{
+				// Invalid syntax of character reference, not just invalid code point.
+				Reset();
+				SetError(ErrorCode::InvalidReferenceSyntax);
+				row = tempRow;
+				column = tempColumn;
+			}
+			return false;
+		}
+		else
+		{
+			// Not allowed character.
+			Reset();
+			SetError(ErrorCode::InvalidReferenceSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		return true;
+	}
+
+	template <typename TCharactersWriter>
 	inline typename Inspector<TCharactersWriter>::AttributeType&
 		Inspector<TCharactersWriter>::NewAttribute()
 	{
@@ -2046,7 +2285,7 @@ namespace Xml
 			return ref;
 		}
 
-		// fakeSize >= attributes.size().
+		// fakeSize == attributes.size().
 		attributes.push_back(AttributeType());
 		++attributesSize;
 		AttributeType& ref = attributes.back();
@@ -2074,7 +2313,7 @@ namespace Xml
 			return ref;
 		}
 
-		// fakeSize >= unclosedTags.size().
+		// fakeSize == unclosedTags.size().
 		unclosedTags.push_back(UnclosedTagType());
 		++unclosedTagsSize;
 		UnclosedTagType& ref = unclosedTags.back();
@@ -2100,7 +2339,7 @@ namespace Xml
 			return ref;
 		}
 
-		// fakeSize >= namespaces.size().
+		// fakeSize == namespaces.size().
 		namespaces.push_back(NamespaceDeclarationType());
 		++namespacesSize;
 		NamespaceDeclarationType& ref = namespaces.back();
