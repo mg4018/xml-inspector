@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <list>
 #include <cassert>
+#include <stdexcept>
 
 class MemBuf : public std::streambuf
 {
@@ -97,6 +98,7 @@ public:
 		WhitespaceCharacterReferenceTest();
 		EmptyElementTest();
 		EmptyElementBadEndTest();
+		OutOfRangeAttributeTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -2861,6 +2863,25 @@ public:
 		assert(inspector.GetColumn() == 16);
 		assert(inspector.GetDepth() == 0);
 	
+		std::cout << "OK\n";
+	}
+
+	void OutOfRangeAttributeTest()
+	{
+		std::cout << "Out of range attribute test... ";
+
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector;
+		bool OK = false;
+		try
+		{
+			std::cout << inspector.GetAttributeAt(0).Name << "\n";
+		}
+		catch (std::out_of_range&)
+		{
+			OK = true;
+		}
+		assert(OK);
+		
 		std::cout << "OK\n";
 	}
 };

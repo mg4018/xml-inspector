@@ -34,6 +34,7 @@
 #include <cassert>
 #include <memory>
 #include <deque>
+#include <stdexcept>
 
 /**
 	@file XmlInspector.hpp
@@ -793,6 +794,16 @@ namespace Xml
 				attribute on the current node.
 		*/
 		AttributeIterator GetAttributeEnd() const;
+
+		/**
+			@brief Returns attribute at specified index on the current node.
+
+			@param[in] index Index of the attribute.
+			@return Constant reference to the chosen attribute.
+			@exception std::out_of_range Index starting value is 0,
+				and GetAttributesCount() should be greater than index.
+		*/
+		const AttributeType& GetAttributeAt(SizeType index) const;
 
 		/**
 			@brief Gets the last error message.
@@ -3289,6 +3300,15 @@ namespace Xml
 		Inspector<TCharactersWriter>::GetAttributeEnd() const
 	{
 		return attributes.cbegin() + attributesSize;
+	}
+
+	template <typename TCharactersWriter>
+	inline const typename Inspector<TCharactersWriter>::AttributeType&
+		Inspector<TCharactersWriter>::GetAttributeAt(SizeType index) const
+	{
+		if (index >= attributesSize)
+			throw std::out_of_range("Attempt to access out of range element.");
+		return attributes[index];
 	}
 
 	template <typename TCharactersWriter>
