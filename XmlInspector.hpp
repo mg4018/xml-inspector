@@ -1752,6 +1752,8 @@ namespace Xml
 
 					// currentCharacter == Semicolon.
 
+					if (!Encoding::CharactersReader::IsWhiteSpace(codePoint))
+						onlyWhite = false;
 					CharactersWriterType::WriteCharacter(value, codePoint);
 					if (NextCharBad(false))
 					{
@@ -1831,8 +1833,6 @@ namespace Xml
 				}
 			}
 
-			onlyWhite = false;
-
 			if (currentCharacter == RightSquareBracket)
 			{
 				// "]]>" is not allowed here.
@@ -1871,6 +1871,8 @@ namespace Xml
 			}
 
 			CharactersWriterType::WriteCharacter(value, currentCharacter);
+			if (!IsWhiteSpace(currentCharacter))
+				onlyWhite = false;
 			if (NextCharBad(false))
 			{
 				if (eof)
@@ -1887,7 +1889,11 @@ namespace Xml
 		}
 		while (currentCharacter != LessThan);
 
-		node = NodeType::Text;
+		if (!onlyWhite)
+			node = NodeType::Text;
+		else
+			node = NodeType::Whitespace;
+
 		return true;
 	}
 
