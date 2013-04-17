@@ -1431,8 +1431,27 @@ namespace Xml
 		if (currentCharacter == Slash)
 		{
 			// <tagName/
-			// TODO:
-			assert(false && "Not implemented yet.");
+			if (NextCharBad(true))
+				return false;
+			if (currentCharacter != GreaterThan)
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+
+			node = NodeType::EmptyElement;
+			bool noErrors = NamespacesStuff();
+			if (noErrors)
+			{
+				foundElement = true;
+				return true;
+			}
+			return false;
 		}
 
 		if (IsWhiteSpace(currentCharacter))
@@ -1456,8 +1475,27 @@ namespace Xml
 			if (currentCharacter == Slash)
 			{
 				// <tagName /
-				// TODO:
-				assert(false && "Not implemented yet.");
+				if (NextCharBad(true))
+					return false;
+				if (currentCharacter != GreaterThan)
+				{
+					tempRow = currentRow;
+					tempColumn = currentColumn;
+					Reset();
+					SetError(ErrorCode::InvalidSyntax);
+					row = tempRow;
+					column = tempColumn;
+					return false;
+				}
+
+				node = NodeType::EmptyElement;
+				bool noErrors = NamespacesStuff();
+				if (noErrors)
+				{
+					foundElement = true;
+					return true;
+				}
+				return false;
 			}
 
 			if (currentCharacter == GreaterThan)
@@ -3283,8 +3321,7 @@ namespace Xml
 	inline typename Inspector<TCharactersWriter>::SizeType
 		Inspector<TCharactersWriter>::GetDepth() const
 	{
-		if (node == NodeType::StartElement ||
-			node == NodeType::EmptyElement)
+		if (node == NodeType::StartElement)
 			return static_cast<SizeType>(unclosedTagsSize - 1);
 		else
 			return static_cast<SizeType>(unclosedTagsSize);
