@@ -522,11 +522,6 @@ namespace Xml
 		typedef Attribute<StringType> AttributeType;
 
 		/**
-			@brief Attribute iterator.
-		*/
-		typedef typename std::deque<AttributeType>::const_iterator AttributeIterator;
-
-		/**
 			@brief Unsigned integer type definition for determining location in XML document.
 				This type should be enough to store any file size or memory buffer size.
 		*/
@@ -782,18 +777,6 @@ namespace Xml
 			@brief Gets the number of attributes on the current node.
 		*/
 		SizeType GetAttributesCount() const;
-
-		/**
-			@brief Returns a const iterator referring to the first
-				attribute on the current node.
-		*/
-		AttributeIterator GetAttributeBegin() const;
-
-		/**
-			@brief Returns a const iterator referring to the <em>past-the-end</em>
-				attribute on the current node.
-		*/
-		AttributeIterator GetAttributeEnd() const;
 
 		/**
 			@brief Returns attribute at specified index on the current node.
@@ -3289,26 +3272,12 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
-	inline typename Inspector<TCharactersWriter>::AttributeIterator
-		Inspector<TCharactersWriter>::GetAttributeBegin() const
-	{
-		return attributes.cbegin();
-	}
-
-	template <typename TCharactersWriter>
-	inline typename Inspector<TCharactersWriter>::AttributeIterator
-		Inspector<TCharactersWriter>::GetAttributeEnd() const
-	{
-		return attributes.cbegin() + attributesSize;
-	}
-
-	template <typename TCharactersWriter>
 	inline const typename Inspector<TCharactersWriter>::AttributeType&
 		Inspector<TCharactersWriter>::GetAttributeAt(SizeType index) const
 	{
 		if (index >= attributesSize)
 			throw std::out_of_range("Attempt to access out of range element.");
-		return attributes[index];
+		return attributes[static_cast<AttributesSizeType>(index)];
 	}
 
 	template <typename TCharactersWriter>

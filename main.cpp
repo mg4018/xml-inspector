@@ -410,7 +410,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 0);
@@ -436,7 +435,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::StreamError);
 		assert(inspector.GetRow() == 0);
@@ -713,7 +711,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::NoElement);
 		assert(inspector.GetRow() == 1);
@@ -744,7 +741,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -773,7 +769,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidByteSequence);
 		assert(inspector.GetRow() == 3);
@@ -802,7 +797,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
 		assert(inspector.GetRow() == 2);
@@ -824,7 +818,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -843,7 +836,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -862,7 +854,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
 		assert(inspector.GetRow() == 2);
@@ -1045,7 +1036,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::UnclosedToken);
 		assert(inspector.GetRow() == 1);
@@ -1074,7 +1064,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1103,7 +1092,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
 		assert(inspector.GetRow() == 1);
@@ -1132,7 +1120,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidTagName);
 		assert(inspector.GetRow() == 1);
@@ -1153,7 +1140,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidTagName);
 		assert(inspector.GetRow() == 1);
@@ -1182,7 +1168,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidTagName);
 		assert(inspector.GetRow() == 1);
@@ -1203,7 +1188,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidTagName);
 		assert(inspector.GetRow() == 1);
@@ -1232,7 +1216,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
 		assert(inspector.GetRow() == 1);
@@ -1261,7 +1244,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1290,7 +1272,6 @@ public:
 		assert(inspector.GetNamespaceUri() == u8"http://www.w3.org/XML/1998/namespace");
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1319,7 +1300,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		// I don't want to create new error code just for this case,
 		// I will use existing error code instead.
@@ -1350,7 +1330,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::UnexpectedEndTag);
 		assert(inspector.GetRow() == 1);
@@ -1372,7 +1351,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1391,7 +1369,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::UnexpectedEndTag);
 		assert(inspector.GetRow() == 1);
@@ -1421,7 +1398,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1440,7 +1416,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1459,7 +1434,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1499,7 +1473,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1518,7 +1491,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 5);
@@ -1537,7 +1509,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 5);
@@ -1556,7 +1527,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 9);
@@ -1575,7 +1545,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 9);
@@ -1594,7 +1563,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 13);
@@ -1626,7 +1594,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1645,7 +1612,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1664,7 +1630,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 3);
@@ -1683,7 +1648,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 3);
@@ -1715,7 +1679,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1734,7 +1697,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1753,7 +1715,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1772,7 +1733,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1791,7 +1751,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::UnclosedTag);
 		assert(inspector.GetRow() == 1);
@@ -1814,7 +1773,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1833,7 +1791,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1852,7 +1809,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1871,7 +1827,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1890,7 +1845,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::UnclosedTag);
 		assert(inspector.GetRow() == 1);
@@ -1913,7 +1867,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1932,7 +1885,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1951,7 +1903,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1970,7 +1921,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -1989,7 +1939,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::UnclosedTag);
 		assert(inspector.GetRow() == 1);
@@ -2019,7 +1968,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2038,7 +1986,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2058,7 +2005,6 @@ public:
 			assert(inspector.GetNamespaceUri().empty());
 			assert(inspector.HasAttributes() == false);
 			assert(inspector.GetAttributesCount() == 0);
-			assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 			assert(inspector.GetErrorMessage() == nullptr);
 			assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 			assert(inspector.GetRow() == 1);
@@ -2081,7 +2027,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2100,7 +2045,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2120,7 +2064,6 @@ public:
 			assert(inspector.GetNamespaceUri().empty());
 			assert(inspector.HasAttributes() == false);
 			assert(inspector.GetAttributesCount() == 0);
-			assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 			assert(inspector.GetErrorMessage() != nullptr);
 			assert(inspector.GetErrorCode() == Xml::ErrorCode::UnclosedTag);
 			assert(inspector.GetRow() == 1);
@@ -2151,7 +2094,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2170,7 +2112,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
 		assert(inspector.GetRow() == 1);
@@ -2201,7 +2142,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2220,7 +2160,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2239,7 +2178,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2258,7 +2196,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2297,7 +2234,6 @@ public:
 			assert(inspector.GetNamespaceUri().empty());
 			assert(inspector.HasAttributes() == false);
 			assert(inspector.GetAttributesCount() == 0);
-			assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 			assert(inspector.GetErrorMessage() == nullptr);
 			assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 			assert(inspector.GetRow() == 1);
@@ -2316,7 +2252,6 @@ public:
 			assert(inspector.GetNamespaceUri().empty());
 			assert(inspector.HasAttributes() == false);
 			assert(inspector.GetAttributesCount() == 0);
-			assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 			assert(inspector.GetErrorMessage() != nullptr);
 			assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidCharacterReference);
 			assert(inspector.GetRow() == 1);
@@ -2360,7 +2295,6 @@ public:
 			assert(inspector.GetNamespaceUri().empty());
 			assert(inspector.HasAttributes() == false);
 			assert(inspector.GetAttributesCount() == 0);
-			assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 			assert(inspector.GetErrorMessage() == nullptr);
 			assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 			assert(inspector.GetRow() == 1);
@@ -2379,7 +2313,6 @@ public:
 			assert(inspector.GetNamespaceUri().empty());
 			assert(inspector.HasAttributes() == false);
 			assert(inspector.GetAttributesCount() == 0);
-			assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 			assert(inspector.GetErrorMessage() != nullptr);
 			assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidReferenceSyntax);
 			assert(inspector.GetRow() == 1);
@@ -2410,7 +2343,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2429,7 +2361,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2448,7 +2379,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2467,7 +2397,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2497,7 +2426,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2516,7 +2444,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2535,7 +2462,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2554,7 +2480,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2573,7 +2498,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2592,7 +2516,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2611,7 +2534,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2630,7 +2552,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2649,7 +2570,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2679,7 +2599,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2698,7 +2617,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2717,7 +2635,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2736,7 +2653,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2766,7 +2682,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2785,7 +2700,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2807,7 +2721,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
@@ -2826,7 +2739,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 2);
@@ -2856,7 +2768,6 @@ public:
 		assert(inspector.GetNamespaceUri().empty());
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
-		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
 		assert(inspector.GetRow() == 1);
