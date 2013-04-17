@@ -1804,6 +1804,7 @@ namespace Xml
 					else // resultParsing == 1.
 					{
 						// Predefined entity reference.
+						onlyWhite = false;
 						CharactersWriterType::WriteCharacter(value, currentCharacter);
 						if (NextCharBad(false))
 						{
@@ -1840,6 +1841,7 @@ namespace Xml
 				do
 				{
 					++bracketCount;
+					onlyWhite = false;
 					CharactersWriterType::WriteCharacter(value, currentCharacter);
 
 					if (NextCharBad(false))
@@ -1870,9 +1872,9 @@ namespace Xml
 				}
 			}
 
-			CharactersWriterType::WriteCharacter(value, currentCharacter);
 			if (!IsWhiteSpace(currentCharacter))
 				onlyWhite = false;
+			CharactersWriterType::WriteCharacter(value, currentCharacter);
 			if (NextCharBad(false))
 			{
 				if (eof)
