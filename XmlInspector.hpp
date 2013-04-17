@@ -570,6 +570,11 @@ namespace Xml
 		static constexpr const char32_t* No = U"no";
 		static constexpr const char32_t* CDATA = U"CDATA";
 		static constexpr const char32_t* DOCTYPE = U"DOCTYPE";
+		static constexpr const char32_t* LtEntityName = U"lt";
+		static constexpr const char32_t* GtEntityName = U"gt";
+		static constexpr const char32_t* AmpEntityName = U"amp";
+		static constexpr const char32_t* AposEntityName = U"apos";
+		static constexpr const char32_t* QuotEntityName = U"quot";
 		// Source types.
 		static const int SourceNone = 0; // Inspector() constructor.
 		static const int SourcePath = 1; // Inspector(const char*) or Inspector(const std::string&) constructor.
@@ -602,6 +607,8 @@ namespace Xml
 		StringType localName;
 		StringType prefix;
 		StringType namespaceUri;
+		StringType entityName;
+		SizeType entityNameCharCount;
 		char32_t currentCharacter;
 		char32_t bufferedCharacter;
 		bool foundElement;
@@ -654,6 +661,9 @@ namespace Xml
 
 		// Returns false if error.
 		bool ParseCharacterReference(char32_t& result, bool insideTag);
+
+		// Returns 1 if predefined entity, 0 if unknown entity, -1 if error.
+		int ParseEntityReference(bool insideTag);
 
 		AttributeType& NewAttribute();
 
@@ -969,6 +979,8 @@ namespace Xml
 		localName(),
 		prefix(),
 		namespaceUri(),
+		entityName(),
+		entityNameCharCount(0),
 		currentCharacter(0),
 		bufferedCharacter(0),
 		foundElement(false),
@@ -1710,6 +1722,7 @@ namespace Xml
 			return false;
 		}
 
+		bool onlyWhite = true;
 		do
 		{
 			if (currentCharacter == Ampersand)
@@ -1755,11 +1768,56 @@ namespace Xml
 					}
 					continue;
 				}
-				else if (Encoding::CharactersReader::IsNameStartChar(currentCharacter))
+				else if (currentCharacter != Colon &&
+					Encoding::CharactersReader::IsNameStartChar(currentCharacter))
 				{
-					// Entity reference.
-					// TODO:
-					assert(false && "Not implemented yet.");
+					int resultParsing = ParseEntityReference(false);
+					if (resultParsing == -1)
+					{
+						// Error.
+						return false;
+					}
+					else if (resultParsing == 0)
+					{
+						// Unknown entity reference.
+						if (value.empty())
+						{
+							name = entityName;
+							localName = entityName;
+							entityName.clear();
+							node = NodeType::EntityReference;
+							return true;
+						}
+						else
+						{
+							// entityName field is set,
+							// but first I must return some text.
+							if (onlyWhite)
+								node = NodeType::Whitespace;
+							else
+								node = NodeType::Text;
+							return true;
+						}
+					}
+					else // resultParsing == 1.
+					{
+						// Predefined entity reference.
+						CharactersWriterType::WriteCharacter(value, currentCharacter);
+						if (NextCharBad(false))
+						{
+							if (eof)
+							{
+								UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+								Reset();
+								SetError(ErrorCode::UnclosedTag);
+								row = ref.Row;
+								column = ref.Column;
+								eof = true;
+							}
+							return false;
+						}
+						continue;
+					}
 				}
 				else
 				{
@@ -1772,6 +1830,8 @@ namespace Xml
 					return false;
 				}
 			}
+
+			onlyWhite = false;
 
 			if (currentCharacter == RightSquareBracket)
 			{
@@ -2269,6 +2329,401 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
+	inline int Inspector<TCharactersWriter>::ParseEntityReference(bool insideTag)
+	{
+		// IsNameStartChar(currentCharacter) == true
+		// &&
+		// currentCharacter != colon.
+		
+		SizeType tempRow = currentRow;
+		SizeType tempColumn = currentColumn - 1;
+
+		entityName.reserve(NameReserve);
+		entityNameCharCount = 0;
+
+		if (currentCharacter == LtEntityName[0])
+		{
+			// "&l"
+			CharactersWriterType::WriteCharacter(entityName, currentCharacter);
+			++entityNameCharCount;
+			if (NextCharBad(insideTag))
+			{
+				if (!insideTag && eof)
+				{
+					UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+					Reset();
+					SetError(ErrorCode::UnclosedTag);
+					row = ref.Row;
+					column = ref.Column;
+					eof = true;
+				}
+				return -1;
+			}
+
+			if (currentCharacter == LtEntityName[1])
+			{
+				// "&lt"
+				CharactersWriterType::WriteCharacter(entityName, currentCharacter);
+				++entityNameCharCount;
+				if (NextCharBad(insideTag))
+				{
+					if (!insideTag && eof)
+					{
+						UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+						Reset();
+						SetError(ErrorCode::UnclosedTag);
+						row = ref.Row;
+						column = ref.Column;
+						eof = true;
+					}
+					return -1;
+				}
+
+				if (currentCharacter == Semicolon)
+				{
+					// "&lt;"
+					currentCharacter = LessThan;
+					entityName.clear();
+					return 1;
+				}
+			}
+			
+			if (currentCharacter == Semicolon)
+			{
+				return 0;
+			}
+			else if (!Encoding::CharactersReader::IsNameChar(currentCharacter) ||
+				currentCharacter == Colon)
+			{
+				Reset();
+				SetError(ErrorCode::InvalidReferenceSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return -1;
+			}
+		}
+		else if (currentCharacter == GtEntityName[0])
+		{
+			// "&g"
+			CharactersWriterType::WriteCharacter(entityName, currentCharacter);
+			++entityNameCharCount;
+			if (NextCharBad(insideTag))
+			{
+				if (!insideTag && eof)
+				{
+					UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+					Reset();
+					SetError(ErrorCode::UnclosedTag);
+					row = ref.Row;
+					column = ref.Column;
+					eof = true;
+				}
+				return -1;
+			}
+
+			if (currentCharacter == GtEntityName[1])
+			{
+				// "&gt"
+				CharactersWriterType::WriteCharacter(entityName, currentCharacter);
+				++entityNameCharCount;
+				if (NextCharBad(insideTag))
+				{
+					if (!insideTag && eof)
+					{
+						UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+						Reset();
+						SetError(ErrorCode::UnclosedTag);
+						row = ref.Row;
+						column = ref.Column;
+						eof = true;
+					}
+					return -1;
+				}
+
+				if (currentCharacter == Semicolon)
+				{
+					// "&gt;"
+					currentCharacter = GreaterThan;
+					entityName.clear();
+					return 1;
+				}
+			}
+			
+			if (currentCharacter == Semicolon)
+			{
+				return 0;
+			}
+			else if (!Encoding::CharactersReader::IsNameChar(currentCharacter) ||
+				currentCharacter == Colon)
+			{
+				Reset();
+				SetError(ErrorCode::InvalidReferenceSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return -1;
+			}
+		}
+		else if (currentCharacter == AmpEntityName[0])
+		{
+			// "&a"
+			CharactersWriterType::WriteCharacter(entityName, currentCharacter);
+			++entityNameCharCount;
+			if (NextCharBad(insideTag))
+			{
+				if (!insideTag && eof)
+				{
+					UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+					Reset();
+					SetError(ErrorCode::UnclosedTag);
+					row = ref.Row;
+					column = ref.Column;
+					eof = true;
+				}
+				return -1;
+			}
+
+			if (currentCharacter == AmpEntityName[1])
+			{
+				// "&am"
+				CharactersWriterType::WriteCharacter(entityName, currentCharacter);
+				++entityNameCharCount;
+				if (NextCharBad(insideTag))
+				{
+					if (!insideTag && eof)
+					{
+						UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+						Reset();
+						SetError(ErrorCode::UnclosedTag);
+						row = ref.Row;
+						column = ref.Column;
+						eof = true;
+					}
+					return -1;
+				}
+
+				if (currentCharacter == AmpEntityName[2])
+				{
+					// "&amp"
+					CharactersWriterType::WriteCharacter(entityName, currentCharacter);
+					++entityNameCharCount;
+					if (NextCharBad(insideTag))
+					{
+						if (!insideTag && eof)
+						{
+							UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+							Reset();
+							SetError(ErrorCode::UnclosedTag);
+							row = ref.Row;
+							column = ref.Column;
+							eof = true;
+						}
+						return -1;
+					}
+
+					if (currentCharacter == Semicolon)
+					{
+						// "&amp;"
+						currentCharacter = Ampersand;
+						entityName.clear();
+						return 1;
+					}
+				}
+			}
+			else if (currentCharacter == AposEntityName[1])
+			{
+				// "&ap"
+				CharactersWriterType::WriteCharacter(entityName, currentCharacter);
+				++entityNameCharCount;
+				if (NextCharBad(insideTag))
+				{
+					if (!insideTag && eof)
+					{
+						UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+						Reset();
+						SetError(ErrorCode::UnclosedTag);
+						row = ref.Row;
+						column = ref.Column;
+						eof = true;
+					}
+					return -1;
+				}
+
+				if (currentCharacter == AposEntityName[2])
+				{
+					// "&apo"
+					CharactersWriterType::WriteCharacter(entityName, currentCharacter);
+					++entityNameCharCount;
+					if (NextCharBad(insideTag))
+					{
+						if (!insideTag && eof)
+						{
+							UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+							Reset();
+							SetError(ErrorCode::UnclosedTag);
+							row = ref.Row;
+							column = ref.Column;
+							eof = true;
+						}
+						return -1;
+					}
+
+					if (currentCharacter == AposEntityName[3])
+					{
+						// "&apos"
+						CharactersWriterType::WriteCharacter(entityName, currentCharacter);
+						++entityNameCharCount;
+						if (NextCharBad(insideTag))
+						{
+							if (!insideTag && eof)
+							{
+								UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+								Reset();
+								SetError(ErrorCode::UnclosedTag);
+								row = ref.Row;
+								column = ref.Column;
+								eof = true;
+							}
+							return -1;
+						}
+
+						if (currentCharacter == Semicolon)
+						{
+							// "&apos;"
+							currentCharacter = Apostrophe;
+							entityName.clear();
+							return 1;
+						}
+					}
+				}
+			}
+
+			if (currentCharacter == Semicolon)
+			{
+				return 0;
+			}
+			else if (!Encoding::CharactersReader::IsNameChar(currentCharacter) ||
+				currentCharacter == Colon)
+			{
+				Reset();
+				SetError(ErrorCode::InvalidReferenceSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return -1;
+			}
+		}
+		else if (currentCharacter == QuotEntityName[0])
+		{
+			// "&q"
+			CharactersWriterType::WriteCharacter(entityName, currentCharacter);
+			++entityNameCharCount;
+			std::size_t i;
+			for (i = 1; i < 4; ++i)
+			{
+				if (NextCharBad(insideTag))
+				{
+					if (!insideTag && eof)
+					{
+						UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+						Reset();
+						SetError(ErrorCode::UnclosedTag);
+						row = ref.Row;
+						column = ref.Column;
+						eof = true;
+					}
+					return -1;
+				}
+
+				if (currentCharacter != QuotEntityName[i])
+					break;
+
+				CharactersWriterType::WriteCharacter(entityName, currentCharacter);
+				++entityNameCharCount;
+			}
+
+			if (i == 4)
+			{
+				if (NextCharBad(insideTag))
+				{
+					if (!insideTag && eof)
+					{
+						UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+						Reset();
+						SetError(ErrorCode::UnclosedTag);
+						row = ref.Row;
+						column = ref.Column;
+						eof = true;
+					}
+					return -1;
+				}
+			}
+
+			if (currentCharacter == Semicolon)
+			{
+				if (i == 4)
+				{
+					// "&quot;"
+					currentCharacter = DoubleQuote;
+					entityName.clear();
+					return 1;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+			else if (!Encoding::CharactersReader::IsNameChar(currentCharacter) ||
+				currentCharacter == Colon)
+			{
+				Reset();
+				SetError(ErrorCode::InvalidReferenceSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return -1;
+			}
+		}
+
+		do
+		{
+			CharactersWriterType::WriteCharacter(entityName, currentCharacter);
+			++entityNameCharCount;
+			if (NextCharBad(insideTag))
+			{
+				if (!insideTag && eof)
+				{
+					UnclosedTagType& ref = unclosedTags[unclosedTagsSize - 1];
+					Reset();
+					SetError(ErrorCode::UnclosedTag);
+					row = ref.Row;
+					column = ref.Column;
+					eof = true;
+				}
+				return -1;
+			}
+
+			if (currentCharacter == Colon)
+			{
+				Reset();
+				SetError(ErrorCode::InvalidReferenceSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return -1;
+			}
+		}
+		while (Encoding::CharactersReader::IsNameChar(currentCharacter));
+
+		if (currentCharacter != Semicolon)
+		{
+			Reset();
+			SetError(ErrorCode::InvalidReferenceSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return -1;
+		}
+
+		return 0;
+	}
+
+	template <typename TCharactersWriter>
 	inline typename Inspector<TCharactersWriter>::AttributeType&
 		Inspector<TCharactersWriter>::NewAttribute()
 	{
@@ -2597,12 +3052,31 @@ namespace Xml
 		if (err != ErrorCode::None)
 			return false;
 
-		if (currentCharacter == GreaterThan ||
-			currentCharacter == Semicolon)
+		if (currentCharacter == GreaterThan) 
 		{
-			// End of token or reference.
+			// End of token.
 			if (NextCharBad(false) && !eof)
 				return false;
+		}
+		else if (currentCharacter == Semicolon)
+		{
+			if (!entityName.empty())
+			{
+				PrepareNode();
+				name = entityName;
+				localName = entityName;
+				entityName.clear();
+				node = NodeType::EntityReference;
+				row = currentRow;
+				column = (currentColumn - entityNameCharCount - 1);
+				return true;
+			}
+			else
+			{
+				// End of reference.
+				if (NextCharBad(false) && !eof)
+					return false;
+			}
 		}
 
 		if (eof)
@@ -2825,6 +3299,8 @@ namespace Xml
 		localName.clear();
 		prefix.clear();
 		namespaceUri.clear();
+		entityName.clear();
+		entityNameCharCount = 0;
 		currentCharacter = 0;
 		bufferedCharacter = 0;
 		foundElement = false;

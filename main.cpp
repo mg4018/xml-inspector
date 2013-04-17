@@ -92,6 +92,8 @@ public:
 		CharacterReferenceTest();
 		InvalidCharacterReferenceTest();
 		InvalidReferenceSyntaxTest();
+		PredefinedEntitiesTest();
+		EntityReferenceTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -2331,7 +2333,8 @@ public:
 			u8"<a> &#0D; </a>",
 			u8"<a> &; </a>",
 			u8"<a> &#x10000000000000000000!!!; </a>",
-			u8"<a> &#xFGH; </a>"
+			u8"<a> &#xFGH; </a>",
+			u8"<a> &abc:def; </a>"
 		};
 
 		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector;
@@ -2378,6 +2381,275 @@ public:
 			assert(inspector.GetColumn() == 5);
 			assert(inspector.GetDepth() == 0);
 		}
+
+		std::cout << "OK\n";
+	}
+
+	void PredefinedEntitiesTest()
+	{
+		std::cout << "Predefined entities test... ";
+
+		std::string docString = u8"<a>&gt;&lt; &amp; abc &apos;&quot;</a>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// <a>
+		bool result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
+		assert(inspector.GetName() == u8"a");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"a");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// Text.
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::Text);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue() == u8">< & abc \'\"");
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 4);
+		assert(inspector.GetDepth() == 1);
+
+		// </a>
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::EndElement);
+		assert(inspector.GetName() == u8"a");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"a");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 35);
+		assert(inspector.GetDepth() == 0);
+
+		// End of file.
+		result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 39);
+		assert(inspector.GetDepth() == 0);
+	
+		std::cout << "OK\n";
+	}
+
+	void EntityReferenceTest()
+	{
+		std::cout << "Entity reference test... ";
+
+		std::string docString = u8"<a>&Gt;&lt2; &lol; abc &lol2;</a>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// <a>
+		bool result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::StartElement);
+		assert(inspector.GetName() == u8"a");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"a");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// &Gt;
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::EntityReference);
+		assert(inspector.GetName() == u8"Gt");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"Gt");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 4);
+		assert(inspector.GetDepth() == 1);
+
+		// &lt2;
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::EntityReference);
+		assert(inspector.GetName() == u8"lt2");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"lt2");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 8);
+		assert(inspector.GetDepth() == 1);
+
+		// Whitespace.
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::Whitespace);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue() == u8" ");
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 13);
+		assert(inspector.GetDepth() == 1);
+
+		// &lol;
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::EntityReference);
+		assert(inspector.GetName() == u8"lol");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"lol");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 14);
+		assert(inspector.GetDepth() == 1);
+
+		// Text.
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::Text);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue() == u8" abc ");
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 19);
+		assert(inspector.GetDepth() == 1);
+
+		// &lol2;
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::EntityReference);
+		assert(inspector.GetName() == u8"lol2");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"lol2");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 24);
+		assert(inspector.GetDepth() == 1);
+
+		// </a>
+		result = inspector.ReadNode();
+
+		assert(result == true);
+		assert(inspector.GetNodeType() == Xml::NodeType::EndElement);
+		assert(inspector.GetName() == u8"a");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"a");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 30);
+		assert(inspector.GetDepth() == 0);
+
+		// End of file.
+		result = inspector.ReadNode();
+
+		assert(result == false);
+		assert(inspector.GetNodeType() == Xml::NodeType::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetAttributeBegin() == inspector.GetAttributeEnd());
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 34);
+		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
 	}
