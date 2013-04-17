@@ -801,7 +801,7 @@ namespace Xml
 			@param[in] index Index of the attribute.
 			@return Constant reference to the chosen attribute.
 			@exception std::out_of_range Index starting value is 0,
-				and GetAttributesCount() should be greater than index.
+				and GetAttributesCount() result should be greater than index.
 		*/
 		const AttributeType& GetAttributeAt(SizeType index) const;
 
