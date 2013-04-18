@@ -450,7 +450,7 @@ namespace Xml
 	/// @endcond
 
 	/**
-		@brief XML streaming parser class.
+		@brief Streaming XML parser class.
 
 		Example:
 		@code{.cpp}
@@ -461,8 +461,7 @@ namespace Xml
 
         int main()
         {
-            Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
-                "test.xml");
+            Xml::Inspector<Xml::Encoding::Utf8Writer> inspector("test.xml");
 
             while (inspector.Inspect())
             {
@@ -474,6 +473,10 @@ namespace Xml
                         break;
                     case Xml::Inspected::EndElement:
                         std::cout << "[EndElement] name(" << inspector.GetName() <<
+                            "), value(" << inspector.GetValue() << ").\n";
+                        break;
+                    case Xml::Inspected::EmptyElement:
+                        std::cout << "[EmptyElement] name(" << inspector.GetName() <<
                             "), value(" << inspector.GetValue() << ").\n";
                         break;
                     case Xml::Inspected::Text:
