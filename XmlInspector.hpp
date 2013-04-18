@@ -58,12 +58,12 @@ namespace Xml
 		/**
 			@brief A start element tag (for example <tt>&lt;mytag&gt;</tt> ).
 		*/
-		StartElement,
+		StartTag,
 
 		/**
 			@brief An end element tag (for example <tt>&lt;/mytag&gt;</tt> ).
 		*/
-		EndElement,
+		EndTag,
 
 		/**
 			@brief An empty element (for example <tt>&lt;mytag /&gt;</tt> ).
@@ -467,12 +467,12 @@ namespace Xml
             {
                 switch (inspector.GetInspected())
                 {
-                    case Xml::Inspected::StartElement:
-                        std::cout << "[StartElement] name(" << inspector.GetName() <<
+                    case Xml::Inspected::StartTag:
+                        std::cout << "[StartTag] name(" << inspector.GetName() <<
                             "), value(" << inspector.GetValue() << ").\n";
                         break;
-                    case Xml::Inspected::EndElement:
-                        std::cout << "[EndElement] name(" << inspector.GetName() <<
+                    case Xml::Inspected::EndTag:
+                        std::cout << "[EndTag] name(" << inspector.GetName() <<
                             "), value(" << inspector.GetValue() << ").\n";
                         break;
                     case Xml::Inspected::EmptyElement:
@@ -646,7 +646,7 @@ namespace Xml
 
 		bool ParseElement();
 
-		bool ParseEndElement();
+		bool ParseEndTag();
 
 		bool ParseText();
 
@@ -1406,7 +1406,7 @@ namespace Xml
 
 		if (currentCharacter == GreaterThan)
 		{
-			node = Inspected::StartElement;
+			node = Inspected::StartTag;
 			bool noErrors = NamespacesStuff();
 			if (noErrors)
 			{
@@ -1498,7 +1498,7 @@ namespace Xml
 			if (currentCharacter == GreaterThan)
 			{
 				// <tagName >
-				node = Inspected::StartElement;
+				node = Inspected::StartTag;
 				bool noErrors = NamespacesStuff();
 				if (noErrors)
 				{
@@ -1549,7 +1549,7 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
-	inline bool Inspector<TCharactersWriter>::ParseEndElement()
+	inline bool Inspector<TCharactersWriter>::ParseEndTag()
 	{
 		// currentCharacter == Slash.
 		if (NextCharBad(true))
@@ -1696,7 +1696,7 @@ namespace Xml
 			++newNamespacesSize;
 		}
 		namespacesSize = newNamespacesSize;
-		node = Inspected::EndElement;
+		node = Inspected::EndTag;
 		return true;
 	}
 
@@ -3171,14 +3171,14 @@ namespace Xml
 
 			if (currentCharacter == Slash)
 			{
-				// EndElement.
-				return ParseEndElement();
+				// EndTag.
+				return ParseEndTag();
 			}
 
 			if (currentCharacter != Colon &&
 				Encoding::CharactersReader::IsNameStartChar(currentCharacter))
 			{
-				// StartElement or EmptyElement.
+				// StartTag or EmptyElement.
 				return ParseElement();
 			}
 
@@ -3313,7 +3313,7 @@ namespace Xml
 	inline typename Inspector<TCharactersWriter>::SizeType
 		Inspector<TCharactersWriter>::GetDepth() const
 	{
-		if (node == Inspected::StartElement)
+		if (node == Inspected::StartTag)
 			return static_cast<SizeType>(unclosedTagsSize - 1);
 		else
 			return static_cast<SizeType>(unclosedTagsSize);

@@ -75,7 +75,7 @@ public:
 		IsEncNameCharTest();
 		GetHexDigitValueTest();
 		UnclosedTokenTest();
-		StartElementTest();
+		StartTagTest();
 		TagNameAfterSpaceTest();
 		InvalidTagNameStartCharTest();
 		InvalidTagNameCharTest();
@@ -84,7 +84,7 @@ public:
 		XmlElementPrefixTest();
 		XmlnsElementPrefixTest();
 		UnexpectedEndTagTest();
-		StartElementPlusEndElementTest();
+		StartTagPlusEndTagTest();
 		WhitespacePlusElementTest();
 		TextPlusElementTest();
 		UnclosedTagTest();
@@ -810,7 +810,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -828,7 +828,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::EndElement);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -1045,7 +1045,7 @@ public:
 		std::cout << "OK\n";
 	}
 
-	void StartElementTest()
+	void StartTagTest()
 	{
 		std::cout << "Start element test... ";
 
@@ -1056,7 +1056,7 @@ public:
 		bool result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"element");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"element");
@@ -1236,7 +1236,7 @@ public:
 		bool result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"name123_abc");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"name123_abc");
@@ -1264,7 +1264,7 @@ public:
 		bool result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"xml:local");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"local");
@@ -1343,7 +1343,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -1378,7 +1378,7 @@ public:
 		std::cout << "OK\n";
 	}
 
-	void StartElementPlusEndElementTest()
+	void StartTagPlusEndTagTest()
 	{
 		std::cout << "Start element plus end element test... ";
 
@@ -1390,7 +1390,7 @@ public:
 		bool result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"element");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"element");
@@ -1408,7 +1408,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::EndElement);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
 		assert(inspector.GetName() == u8"element");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"element");
@@ -1483,7 +1483,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -1519,7 +1519,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::EndElement);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -1586,7 +1586,7 @@ public:
 		bool result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"element");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"element");
@@ -1622,7 +1622,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::EndElement);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
 		assert(inspector.GetName() == u8"element");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"element");
@@ -1671,7 +1671,7 @@ public:
 		bool result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -1689,7 +1689,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"b");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"b");
@@ -1707,7 +1707,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"c");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"c");
@@ -1725,7 +1725,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::EndElement);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
 		assert(inspector.GetName() == u8"c");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"c");
@@ -1765,7 +1765,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -1783,7 +1783,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"b");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"b");
@@ -1801,7 +1801,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"c");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"c");
@@ -1819,7 +1819,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::EndElement);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
 		assert(inspector.GetName() == u8"c");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"c");
@@ -1859,7 +1859,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -1877,7 +1877,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"b");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"b");
@@ -1895,7 +1895,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"c");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"c");
@@ -1913,7 +1913,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::EndElement);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
 		assert(inspector.GetName() == u8"c");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"c");
@@ -1960,7 +1960,7 @@ public:
 		bool result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -1978,7 +1978,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::EndElement);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -2019,7 +2019,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -2037,7 +2037,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"b");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"b");
@@ -2086,7 +2086,7 @@ public:
 		bool result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -2134,7 +2134,7 @@ public:
 		bool result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -2170,7 +2170,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::EndElement);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -2226,7 +2226,7 @@ public:
 			bool result = inspector.Inspect();
 
 			assert(result == true);
-			assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+			assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 			assert(inspector.GetName() == u8"a");
 			assert(inspector.GetValue().empty());
 			assert(inspector.GetLocalName() == u8"a");
@@ -2287,7 +2287,7 @@ public:
 			bool result = inspector.Inspect();
 
 			assert(result == true);
-			assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+			assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 			assert(inspector.GetName() == u8"a");
 			assert(inspector.GetValue().empty());
 			assert(inspector.GetLocalName() == u8"a");
@@ -2335,7 +2335,7 @@ public:
 		bool result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -2371,7 +2371,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::EndElement);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -2418,7 +2418,7 @@ public:
 		bool result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -2544,7 +2544,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::EndElement);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -2591,7 +2591,7 @@ public:
 		bool result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::StartElement);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
@@ -2627,7 +2627,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::EndElement);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
 		assert(inspector.GetName() == u8"a");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"a");
