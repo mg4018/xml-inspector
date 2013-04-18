@@ -273,15 +273,15 @@ namespace Xml
 	/**
 		@brief Delimiter for an attribute value.
 	*/
-	enum class ValueDelimiter
+	enum class QuotationMark
 	{
 		/**
-			@brief Attribute is delimited by apostrophes (for example <tt>&lt;a name='value'&gt;</tt> ).
+			@brief Attribute is delimited by single-quote characters (for example <tt>&lt;a name='value'&gt;</tt> ).
 		*/
-		Apostrophe,
+		SingleQuote,
 
 		/**
-			@brief Attribute is delimited by double quotes (for example <tt>&lt;a name="value"&gt;</tt> ).
+			@brief Attribute is delimited by double-quote characters (for example <tt>&lt;a name="value"&gt;</tt> ).
 		*/
 		DoubleQuote
 	};
@@ -330,7 +330,7 @@ namespace Xml
 		StringType NamespaceUri;
 
 		/**
-			@brief Row number of attribute name.
+			@brief Row number of the attribute name.
 
 			Starting value is 1. For example:
 			@verbatim
@@ -348,7 +348,7 @@ namespace Xml
 		SizeType Row;
 
 		/**
-			@brief Column number of attribute name.
+			@brief Column number of the attribute name.
 
 			Starting value is 1. For example:
 			@verbatim
@@ -362,9 +362,9 @@ namespace Xml
 		SizeType Column;
 
 		/**
-			@brief Delimiter for attribute value.
+			@brief Delimiter of the attribute value.
 		*/
-		ValueDelimiter Delimiter;
+		QuotationMark Delimiter;
 	};
 
 	/// @cond DETAILS
@@ -543,7 +543,7 @@ namespace Xml
 		static const char32_t LessThan = 0x3C;               // '<'
 		static const char32_t GreaterThan = 0x3E;            // '>'
 		static const char32_t Equals = 0x3D;                 // '='
-		static const char32_t Apostrophe = 0x27;             // '\''
+		static const char32_t SingleQuote = 0x27;             // '\''
 		static const char32_t DoubleQuote = 0x22;            // '\"'
 		static const char32_t Slash = 0x2F;                  // '/'
 		static const char32_t Question = 0x3F;               // '?'
@@ -2632,7 +2632,7 @@ namespace Xml
 						if (currentCharacter == Semicolon)
 						{
 							// "&apos;"
-							currentCharacter = Apostrophe;
+							currentCharacter = SingleQuote;
 							entityName.clear();
 							return 1;
 						}
