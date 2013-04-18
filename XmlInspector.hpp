@@ -177,12 +177,12 @@ namespace Xml
 		InvalidProcessingInstructionSyntax,
 
 		/**
-			@brief Check http://www.w3.org/TR/xml-names/#NT-QName.
+			@brief Check http://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-QName.
 		*/
 		InvalidTagName,
 
 		/**
-			@brief Check http://www.w3.org/TR/xml-names/#NT-QName.
+			@brief Check http://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-QName.
 		*/
 		InvalidAttributeName,
 
