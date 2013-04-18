@@ -46,12 +46,12 @@
 namespace Xml
 {
 	/**
-		@brief Specifies the type of node.
+		@brief Specifies an inspected node type.
 	*/
-	enum class NodeType
+	enum class Inspected
 	{
 		/**
-			@brief This is returned by the Inspector if a ReadNode method has not been called.
+			@brief This is returned by the Inspector if an Inspect method has not been called.
 		*/
 		None,
 
@@ -66,7 +66,7 @@ namespace Xml
 		EndElement,
 
 		/**
-			@brief En empty element (for example <tt>&lt;mytag /&gt;</tt> ).
+			@brief An empty element (for example <tt>&lt;mytag /&gt;</tt> ).
 		*/
 		EmptyElement,
 
@@ -271,7 +271,7 @@ namespace Xml
 	};
 
 	/**
-		@brief Delimiter for attribute value.
+		@brief Delimiter for an attribute value.
 	*/
 	enum class ValueDelimiter
 	{
@@ -290,7 +290,7 @@ namespace Xml
 		@brief Class for storing attribute data like name and value.
 	*/
 	template <typename TStringType>
-	class Attribute
+	class InspectedAttribute
 	{
 	public:
 		/**
@@ -450,7 +450,7 @@ namespace Xml
 	/// @endcond
 
 	/**
-		@brief Primary XML parser class.
+		@brief XML streaming parser class.
 
 		Example:
 		@code{.cpp}
@@ -464,22 +464,22 @@ namespace Xml
             Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
                 "test.xml");
 
-            while (inspector.ReadNode())
+            while (inspector.Inspect())
             {
-                switch (inspector.GetNodeType())
+                switch (inspector.GetInspected())
                 {
-                    case Xml::NodeType::StartElement:
+                    case Xml::Inspected::StartElement:
                         std::cout << "[StartElement] name(" << inspector.GetName() <<
                             "), value(" << inspector.GetValue() << ").\n";
                         break;
-                    case Xml::NodeType::EndElement:
+                    case Xml::Inspected::EndElement:
                         std::cout << "[EndElement] name(" << inspector.GetName() <<
                             "), value(" << inspector.GetValue() << ").\n";
                         break;
-                    case Xml::NodeType::Text:
+                    case Xml::Inspected::Text:
                         std::cout << "[Text] value(" << inspector.GetValue() << ").";
                         break;
-                    case Xml::NodeType::Whitespace:
+                    case Xml::Inspected::Whitespace:
                         // Ignore white spaces between markup.
                         break;
                     default:
@@ -519,7 +519,7 @@ namespace Xml
 		/**
 			@brief Attribute type.
 		*/
-		typedef Attribute<StringType> AttributeType;
+		typedef InspectedAttribute<StringType> AttributeType;
 
 		/**
 			@brief Unsigned integer type definition for determining location in XML document.
@@ -588,7 +588,7 @@ namespace Xml
 		SizeType column;
 		SizeType currentRow;
 		SizeType currentColumn;
-		NodeType node;
+		Inspected node;
 		ErrorCode err;
 		const char* errMsg;
 		std::string fPath;
@@ -697,10 +697,10 @@ namespace Xml
 				with the specified iterators.
 
 			@param[in] first,last Input iterators to the initial
-				and final positions in a sequence. The range used
-				is [first,last), which contains all the elements
-				between first and last, including the element pointed
-				by first but not the element pointed by last.
+				and final positions in a sequence of bytes. The range used
+				is [first,last), which contains all the bytes
+				between first and last, including the byte pointed
+				by first but not the byte pointed by last.
 		*/
 		template <typename TInputIterator>
 		Inspector(TInputIterator first, TInputIterator last);
@@ -729,57 +729,57 @@ namespace Xml
 		~Inspector();
 
 		/**
-			@brief Reads the next node from the stream.
+			@brief Inspects the next node from the stream.
 
 			TODO: detailed description...
 
-			@return True if the next node was read successfully.
-				False if there are no more nodes to read.
+			@return True if the next node was inspected successfully.
+				False if there are no more nodes to inspect.
 		*/
-		bool ReadNode();
+		bool Inspect();
 
 		/**
-			@brief Gets the type of the current node.
+			@brief Gets the last inspected node.
 		*/
-		NodeType GetNodeType() const;
+		Inspected GetInspected() const;
 
 		/**
-			@brief Gets the qualified name of the node.
+			@brief Gets the qualified name of the last inspected node.
 		*/
 		const StringType& GetName() const;
 
 		/**
-			@brief Gets the value of the node.
+			@brief Gets the value of the last inspected node.
 		*/
 		const StringType& GetValue() const;
 
 		/**
-			@brief Gets the local name of the node.
+			@brief Gets the local name of the last inspected node.
 		*/
 		const StringType& GetLocalName() const;
 
 		/**
-			@brief Gets the namespace prefix of the node.
+			@brief Gets the namespace prefix of the last inspected node.
 		*/
 		const StringType& GetPrefix() const;
 
 		/**
-			@brief Gets the namespace URI of the node.
+			@brief Gets the namespace URI of the last inspected node.
 		*/
 		const StringType& GetNamespaceUri() const;
 
 		/**
-			@brief Gets a value indicating whether the current node has any attributes.
+			@brief Gets a value indicating whether the last inspected node has any attributes.
 		*/
 		bool HasAttributes() const;
 
 		/**
-			@brief Gets the number of attributes on the current node.
+			@brief Gets the number of attributes on the last inspected node.
 		*/
 		SizeType GetAttributesCount() const;
 
 		/**
-			@brief Returns attribute at specified index on the current node.
+			@brief Returns attribute at specified index on the last inspected node.
 
 			@param[in] index Index of the attribute.
 			@return Constant reference to the chosen attribute.
@@ -833,7 +833,7 @@ namespace Xml
 		SizeType GetColumn() const;
 
 		/**
-			@brief Gets the depth of the current node in the XML document.
+			@brief Gets the depth of the last inspected node in the XML document.
 
 			Example:
 			@verbatim
@@ -958,7 +958,7 @@ namespace Xml
 		column(0),
 		currentRow(0),
 		currentColumn(0),
-		node(NodeType::None),
+		node(Inspected::None),
 		err(ErrorCode::None),
 		errMsg(nullptr),
 		fPath(),
@@ -1403,7 +1403,7 @@ namespace Xml
 
 		if (currentCharacter == GreaterThan)
 		{
-			node = NodeType::StartElement;
+			node = Inspected::StartElement;
 			bool noErrors = NamespacesStuff();
 			if (noErrors)
 			{
@@ -1438,7 +1438,7 @@ namespace Xml
 				return false;
 			}
 
-			node = NodeType::EmptyElement;
+			node = Inspected::EmptyElement;
 			bool noErrors = NamespacesStuff();
 			if (noErrors)
 			{
@@ -1482,7 +1482,7 @@ namespace Xml
 					return false;
 				}
 
-				node = NodeType::EmptyElement;
+				node = Inspected::EmptyElement;
 				bool noErrors = NamespacesStuff();
 				if (noErrors)
 				{
@@ -1495,7 +1495,7 @@ namespace Xml
 			if (currentCharacter == GreaterThan)
 			{
 				// <tagName >
-				node = NodeType::StartElement;
+				node = Inspected::StartElement;
 				bool noErrors = NamespacesStuff();
 				if (noErrors)
 				{
@@ -1693,7 +1693,7 @@ namespace Xml
 			++newNamespacesSize;
 		}
 		namespacesSize = newNamespacesSize;
-		node = NodeType::EndElement;
+		node = Inspected::EndElement;
 		return true;
 	}
 
@@ -1728,7 +1728,7 @@ namespace Xml
 							return false;
 						}
 
-						node = NodeType::Whitespace;
+						node = Inspected::Whitespace;
 						return true;
 					}
 					return false;
@@ -1738,7 +1738,7 @@ namespace Xml
 
 			if (currentCharacter == LessThan)
 			{
-				node = NodeType::Whitespace;
+				node = Inspected::Whitespace;
 				return true;
 			}
 		}
@@ -1819,7 +1819,7 @@ namespace Xml
 							name = entityName;
 							localName = entityName;
 							entityName.clear();
-							node = NodeType::EntityReference;
+							node = Inspected::EntityReference;
 							return true;
 						}
 						else
@@ -1827,9 +1827,9 @@ namespace Xml
 							// entityName field is set,
 							// but first I must return some text.
 							if (onlyWhite)
-								node = NodeType::Whitespace;
+								node = Inspected::Whitespace;
 							else
-								node = NodeType::Text;
+								node = Inspected::Text;
 							return true;
 						}
 					}
@@ -1924,9 +1924,9 @@ namespace Xml
 		while (currentCharacter != LessThan);
 
 		if (!onlyWhite)
-			node = NodeType::Text;
+			node = Inspected::Text;
 		else
-			node = NodeType::Whitespace;
+			node = Inspected::Whitespace;
 
 		return true;
 	}
@@ -3005,13 +3005,13 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
-	inline bool Inspector<TCharactersWriter>::ReadNode()
+	inline bool Inspector<TCharactersWriter>::Inspect()
 	{
 		SizeType tempRow;
 		SizeType tempColumn;
 		if (!afterBom && (err == ErrorCode::None || err == ErrorCode::StreamError))
 		{
-			// First call of ReadNode method or after stream error while BOM parsing.
+			// First call of Inspect method or after stream error while BOM parsing.
 			ParseBom();
 			if (err != ErrorCode::None)
 				return false;
@@ -3074,7 +3074,7 @@ namespace Xml
 					return false;
 				}
 				
-				node = NodeType::Whitespace;
+				node = Inspected::Whitespace;
 				return true;
 			}
 
@@ -3106,7 +3106,7 @@ namespace Xml
 				name = entityName;
 				localName = entityName;
 				entityName.clear();
-				node = NodeType::EntityReference;
+				node = Inspected::EntityReference;
 				row = currentRow;
 				column = (currentColumn - entityNameCharCount - 1);
 				return true;
@@ -3218,7 +3218,7 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
-	inline NodeType Inspector<TCharactersWriter>::GetNodeType() const
+	inline Inspected Inspector<TCharactersWriter>::GetInspected() const
 	{
 		return node;
 	}
@@ -3310,7 +3310,7 @@ namespace Xml
 	inline typename Inspector<TCharactersWriter>::SizeType
 		Inspector<TCharactersWriter>::GetDepth() const
 	{
-		if (node == NodeType::StartElement)
+		if (node == Inspected::StartElement)
 			return static_cast<SizeType>(unclosedTagsSize - 1);
 		else
 			return static_cast<SizeType>(unclosedTagsSize);
@@ -3323,7 +3323,7 @@ namespace Xml
 		column = 0;
 		currentRow = 0;
 		currentColumn = 0;
-		node = NodeType::None;
+		node = Inspected::None;
 		err = ErrorCode::None;
 		errMsg = nullptr;
 		afterBom = false;
