@@ -52,7 +52,7 @@ namespace Xml
 
 				@param[in] codePoint Unicode character.
 				@return True if character is allowed in XML document.
-				@sa http://www.w3.org/TR/REC-xml/#NT-Char.
+				@sa http://www.w3.org/TR/2008/REC-xml-20081126/#NT-Char.
 			*/
 			static bool IsChar(char32_t codePoint);
 
@@ -69,7 +69,7 @@ namespace Xml
 
 				@param[in] codePoint Unicode character.
 				@return True if character is allowed to be the first character of XML name.
-				@sa http://www.w3.org/TR/REC-xml/#NT-NameStartChar.
+				@sa http://www.w3.org/TR/2008/REC-xml-20081126/#NT-NameStartChar.
 			*/
 			static bool IsNameStartChar(char32_t codePoint);
 
@@ -80,7 +80,7 @@ namespace Xml
 				@param[in] codePoint Unicode character.
 				@return True if character is allowed to be the one of
 					XML name characters except first.
-				@sa http://www.w3.org/TR/REC-xml/#NT-NameChar.
+				@sa http://www.w3.org/TR/2008/REC-xml-20081126/#NT-NameChar.
 			*/
 			static bool IsNameChar(char32_t codePoint);
 
@@ -91,7 +91,7 @@ namespace Xml
 				@param[in] codePoint Unicode character.
 				@return True if character is allowed to be the first character of
 					XML encoding declaration name.
-				@sa http://www.w3.org/TR/REC-xml/#NT-EncName.
+				@sa http://www.w3.org/TR/2008/REC-xml-20081126/#NT-EncName.
 			*/
 			static bool IsEncNameStartChar(char32_t codePoint);
 
@@ -102,7 +102,7 @@ namespace Xml
 				@param[in] codePoint Unicode character.
 				@return True if character is allowed to be the one of
 					XML encoding declaration name characters except first.
-				@sa http://www.w3.org/TR/REC-xml/#NT-EncName.
+				@sa http://www.w3.org/TR/2008/REC-xml-20081126/#NT-EncName.
 			*/
 			static bool IsEncNameChar(char32_t codePoint);
 
