@@ -141,38 +141,38 @@ namespace Xml
 		InvalidSyntax,
 
 		/**
-			@brief Check http://www.w3.org/TR/REC-xml/#NT-XMLDecl.
+			@brief Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-XMLDecl.
 		*/
 		InvalidXmlDeclarationLocation,
 
 		/**
-			@brief Check http://www.w3.org/TR/REC-xml/#NT-XMLDecl.
+			@brief Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-XMLDecl.
 		*/
 		InvalidXmlDeclarationSyntax,
 
 		/**
-			@brief Check http://www.w3.org/TR/REC-xml/#NT-Comment.
+			@brief Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-Comment.
 		*/
 		InvalidCommentSyntax,
 
 		/**
 			@brief CDATA section is outside the root element.
-				Check http://www.w3.org/TR/REC-xml/#NT-CDSect.
+				Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-CDSect.
 		*/
 		CDataSectionOutside,
 
 		/**
-			@brief Check http://www.w3.org/TR/REC-xml/#NT-doctypedecl.
+			@brief Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-doctypedecl.
 		*/
 		InvalidDoctypeDeclarationLocation,
 
 		/**
-			@brief Check http://www.w3.org/TR/REC-xml/#NT-doctypedecl.
+			@brief Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-doctypedecl.
 		*/
 		DoubleDoctypeDeclaration,
 
 		/**
-			@brief Check http://www.w3.org/TR/REC-xml/#NT-PI.
+			@brief Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-PI.
 		*/
 		InvalidProcessingInstructionSyntax,
 
@@ -199,20 +199,20 @@ namespace Xml
 
 		/**
 			@brief Invalid syntax of Reference.
-				Check http://www.w3.org/TR/REC-xml/#NT-Reference.
+				Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-Reference.
 		*/
 		InvalidReferenceSyntax,
 
 		/**
 			@brief Undeclared entity.
-				Check http://www.w3.org/TR/REC-xml/#NT-EntityRef.
+				Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-EntityRef.
 		*/
 		UndeclaredEntity,
 
 		/**
 			@brief Code point in character reference doesn't match
 				the valid character in ISO/IEC 10646 character set.
-				Check http://www.w3.org/TR/REC-xml/#NT-CharRef.
+				Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-CharRef.
 		*/
 		InvalidCharacterReference,
 
@@ -2859,7 +2859,7 @@ namespace Xml
 		// x, CR, LF, y => x, LF, y
 		// x, CR, y => x, LF, y
 		// x, LF, CR, y => x, LF, LF, y
-		// Check http://www.w3.org/TR/REC-xml/#sec-line-ends.
+		// Check http://www.w3.org/TR/2008/REC-xml-20081126/#sec-line-ends.
 
 		SizeType tempRow;
 		SizeType tempColumn;

@@ -726,7 +726,7 @@ public:
 
 		unsigned char source[] = { 0x0D, 0x09, 0x0D, 0x0A, 0x20, 0x0A, 0x0D, 0x20, 0x0D, 0x3C, 0x61, 0x2F, 0x3E };
 		// After white spaces is "<a/>".
-		const char* pattern = u8"\n\t\n \n\n \n"; // Check http://www.w3.org/TR/REC-xml/#sec-line-ends.
+		const char* pattern = u8"\n\t\n \n\n \n"; // Check http://www.w3.org/TR/2008/REC-xml-20081126/#sec-line-ends.
 		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
 			source, source + sizeof(source));
 
