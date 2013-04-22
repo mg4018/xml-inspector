@@ -68,7 +68,7 @@ namespace Xml
 		/**
 			@brief An empty element (for example <tt>&lt;mytag /&gt;</tt> ).
 		*/
-		EmptyElement,
+		EmptyElementTag,
 
 		/**
 			@brief A text content of a node.
@@ -146,16 +146,6 @@ namespace Xml
 		InvalidXmlDeclarationLocation,
 
 		/**
-			@brief Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-XMLDecl.
-		*/
-		InvalidXmlDeclarationSyntax,
-
-		/**
-			@brief Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-Comment.
-		*/
-		InvalidCommentSyntax,
-
-		/**
 			@brief CDATA section is outside the root element.
 				Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-CDSect.
 		*/
@@ -172,11 +162,6 @@ namespace Xml
 		DoubleDoctypeDeclaration,
 
 		/**
-			@brief Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-PI.
-		*/
-		InvalidProcessingInstructionSyntax,
-
-		/**
 			@brief Check http://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-QName.
 		*/
 		InvalidTagName,
@@ -185,12 +170,6 @@ namespace Xml
 			@brief Check http://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-QName.
 		*/
 		InvalidAttributeName,
-
-		/**
-			@brief For example it's not allowed in XML: <tt>&lt;tagName attrName=value&gt;</tt>,
-				but this is OK: <tt>&lt;tagName attrName="value"&gt;</tt>.
-		*/
-		QuotationMarkExpected,
 
 		/**
 			@brief For example: <tt>&lt;tagname attr[end of document]</tt>.
@@ -475,8 +454,8 @@ namespace Xml
                         std::cout << "[EndTag] name(" << inspector.GetName() <<
                             "), value(" << inspector.GetValue() << ").\n";
                         break;
-                    case Xml::Inspected::EmptyElement:
-                        std::cout << "[EmptyElement] name(" << inspector.GetName() <<
+                    case Xml::Inspected::EmptyElementTag:
+                        std::cout << "[EmptyElementTag] name(" << inspector.GetName() <<
                             "), value(" << inspector.GetValue() << ").\n";
                         break;
                     case Xml::Inspected::Text:
@@ -646,6 +625,8 @@ namespace Xml
 
 		bool ParseElement();
 
+		bool ParseAttributes();
+
 		bool ParseEndTag();
 
 		bool ParseText();
@@ -663,6 +644,8 @@ namespace Xml
 
 		// Returns 1 if predefined entity, 0 if unknown entity, -1 if error.
 		int ParseEntityReference(bool insideTag);
+
+		bool AttributeUniqueness();
 
 		AttributeType& NewAttribute();
 
@@ -1080,12 +1063,6 @@ namespace Xml
 				case ErrorCode::InvalidXmlDeclarationLocation:
 					errMsg = "Invalid location of XML declaration.";
 					return;
-				case ErrorCode::InvalidXmlDeclarationSyntax:
-					errMsg = "Invalid syntax of XML declaration.";
-					return;
-				case ErrorCode::InvalidCommentSyntax:
-					errMsg = "Invalid syntax of comment.";
-					return;
 				case ErrorCode::CDataSectionOutside:
 					errMsg = "CDATA section is outside the root element.";
 					return;
@@ -1095,17 +1072,11 @@ namespace Xml
 				case ErrorCode::DoubleDoctypeDeclaration:
 					errMsg = "There should be exactly one document type declaration.";
 					return;
-				case ErrorCode::InvalidProcessingInstructionSyntax:
-					errMsg = "Invalid syntax of processing instruction.";
-					return;
 				case ErrorCode::InvalidTagName:
 					errMsg = "Invalid tag name.";
 					return;
 				case ErrorCode::InvalidAttributeName:
 					errMsg = "Invalid attribute name.";
-					return;
-				case ErrorCode::QuotationMarkExpected:
-					errMsg = "Quotation mark expected.";
 					return;
 				case ErrorCode::UnclosedToken:
 					errMsg = "Unclosed token.";
@@ -1410,15 +1381,13 @@ namespace Xml
 			bool noErrors = NamespacesStuff();
 			if (noErrors)
 			{
-				tempRow = row;
-				tempColumn = column;
 				UnclosedTagType& ref = NewUnclosedTag();
 				ref.Name = name;
 				ref.LocalName = localName;
 				ref.Prefix = prefix;
 				ref.NamespaceUri = namespaceUri;
-				ref.Row = tempRow;
-				ref.Column = tempColumn;
+				ref.Row = row;
+				ref.Column = column;
 				foundElement = true;
 				return true;
 			}
@@ -1441,7 +1410,7 @@ namespace Xml
 				return false;
 			}
 
-			node = Inspected::EmptyElement;
+			node = Inspected::EmptyElementTag;
 			bool noErrors = NamespacesStuff();
 			if (noErrors)
 			{
@@ -1465,8 +1434,7 @@ namespace Xml
 				Encoding::CharactersReader::IsNameStartChar(currentCharacter))
 			{
 				// Attributes.
-				// TODO:
-				assert(false && "Not implemented yet.");
+				return ParseAttributes();
 			}
 
 			if (currentCharacter == Slash)
@@ -1485,7 +1453,7 @@ namespace Xml
 					return false;
 				}
 
-				node = Inspected::EmptyElement;
+				node = Inspected::EmptyElementTag;
 				bool noErrors = NamespacesStuff();
 				if (noErrors)
 				{
@@ -1502,15 +1470,13 @@ namespace Xml
 				bool noErrors = NamespacesStuff();
 				if (noErrors)
 				{
-					tempRow = row;
-					tempColumn = column;
 					UnclosedTagType& ref = NewUnclosedTag();
 					ref.Name = name;
 					ref.LocalName = localName;
 					ref.Prefix = prefix;
 					ref.NamespaceUri = namespaceUri;
-					ref.Row = tempRow;
-					ref.Column = tempColumn;
+					ref.Row = row;
+					ref.Column = column;
 					foundElement = true;
 					return true;
 				}
@@ -1521,6 +1487,8 @@ namespace Xml
 			{
 				// For example <tagName 123attr="value">
 				// 1 is not allowed as a first character name.
+				tempRow = currentRow;
+				tempColumn = currentColumn;
 				Reset();
 				SetError(ErrorCode::InvalidAttributeName);
 				row = tempRow;
@@ -1546,6 +1514,350 @@ namespace Xml
 		row = tempRow;
 		column = tempColumn;
 		return false;
+	}
+
+	
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::ParseAttributes()
+	{
+		// IsNameStartChar(currentCharacter) == true
+		// and
+		// currentCharacter != Colon
+
+		SizeType tempRow;
+		SizeType tempColumn;
+		bool white = true;
+
+		do // {...} while (Encoding::CharactersReader::IsNameStartChar(currentCharacter));
+		{
+			AttributeType& attr = NewAttribute();
+			attr.Row = currentRow;
+			attr.Column = currentColumn;
+
+			// attribute.Name, attribute.LocalName, attribute.Prefix.
+			do // {...} while (Encoding::CharactersReader::IsNameChar(currentCharacter));
+			{
+				CharactersWriterType::WriteCharacter(attr.Name, currentCharacter);
+				CharactersWriterType::WriteCharacter(attr.LocalName, currentCharacter);
+
+				if (NextCharBad(true))
+					return false;
+
+				if (currentCharacter == Colon)
+				{
+					// Prefixed name.
+					attr.Prefix = attr.Name;
+					attr.LocalName.clear();
+					CharactersWriterType::WriteCharacter(attr.Name, currentCharacter);
+
+					if (NextCharBad(true))
+						return false;
+
+					if (currentCharacter == Colon ||
+						!Encoding::CharactersReader::IsNameStartChar(currentCharacter))
+					{
+						Reset();
+						SetError(ErrorCode::InvalidAttributeName);
+						row = attr.Row;
+						column = attr.Column;
+						return false;
+					}
+
+					do // {...} while (Encoding::CharactersReader::IsNameChar(currentCharacter));
+					{
+						CharactersWriterType::WriteCharacter(attr.Name, currentCharacter);
+						CharactersWriterType::WriteCharacter(attr.LocalName, currentCharacter);
+
+						if (NextCharBad(true))
+							return false;
+
+						if (currentCharacter == Colon)
+						{
+							Reset();
+							SetError(ErrorCode::InvalidAttributeName);
+							row = attr.Row;
+							column = attr.Column;
+							return false;
+						}
+					}
+					while (Encoding::CharactersReader::IsNameChar(currentCharacter));
+					break;
+				}
+			}
+			while (Encoding::CharactersReader::IsNameChar(currentCharacter));
+
+			if (IsWhiteSpace(currentCharacter))
+			{
+				// Ignore white spaces.
+				do
+				{
+					if (NextCharBad(true))
+						return false;
+				}
+				while (IsWhiteSpace(currentCharacter));
+				white = true;
+			}
+			else
+			{
+				white = false;
+			}
+
+			if (currentCharacter != Equals)
+			{
+				if (white)
+				{
+					tempRow = currentRow;
+					tempColumn = currentColumn;
+					Reset();
+					SetError(ErrorCode::InvalidSyntax);
+					row = tempRow;
+					column = tempColumn;
+					return false;
+				}
+				Reset();
+				SetError(ErrorCode::InvalidAttributeName);
+				row = attr.Row;
+				column = attr.Column;
+				return false;
+			}
+
+			// attrname=
+			if (NextCharBad(true))
+				return false;
+
+			// Ignore white spaces.
+			while (IsWhiteSpace(currentCharacter))
+			{
+				if (NextCharBad(true))
+					return false;
+			}
+
+			char32_t quoteChar = currentCharacter;
+
+			if (quoteChar == DoubleQuote)
+			{
+				// attrname="
+				attr.Delimiter = QuotationMark::DoubleQuote;
+			}
+			else if (quoteChar == SingleQuote)
+			{
+				// attrname='
+				attr.Delimiter = QuotationMark::SingleQuote;
+			}
+			else
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+
+			if (NextCharBad(true))
+				return false;
+
+			// attr.Value
+			while (currentCharacter != quoteChar)
+			{
+				if (currentCharacter == LessThan)
+				{
+					tempRow = currentRow;
+					tempColumn = currentColumn;
+					Reset();
+					SetError(ErrorCode::InvalidSyntax);
+					row = tempRow;
+					column = tempColumn;
+					return false;
+				}
+
+				if (currentCharacter == Ampersand)
+				{
+					if (NextCharBad(true))
+						return false;
+
+					if (currentCharacter == Hash)
+					{
+						// "&#"
+
+						char32_t codePoint;
+
+						if (!ParseCharacterReference(codePoint, true))
+							return false;
+
+						// currentCharacter == Semicolon.
+
+						CharactersWriterType::WriteCharacter(attr.Value, codePoint);
+						if (NextCharBad(true))
+							return false;
+						continue; // while (currentCharacter != quoteChar) {...}
+					}
+					else if (currentCharacter != Colon &&
+						Encoding::CharactersReader::IsNameStartChar(currentCharacter))
+					{
+						int resultParsing = ParseEntityReference(true);
+						if (resultParsing == -1)
+						{
+							// Error.
+							return false;
+						}
+						else if (resultParsing == 0)
+						{
+							// Unknown entity reference.
+							CharactersWriterType::WriteCharacter(attr.Value, Ampersand);
+							attr.Value.append(entityName);
+							entityName.clear();
+							CharactersWriterType::WriteCharacter(attr.Value, Semicolon);
+							if (NextCharBad(true))
+								return false;
+							continue; // while (currentCharacter != quoteChar) {...}
+						}
+						else // resultParsing == 1.
+						{
+							// Predefined entity reference.
+							CharactersWriterType::WriteCharacter(attr.Value, currentCharacter);
+							if (NextCharBad(true))
+								return false;
+							continue; // while (currentCharacter != quoteChar) {...}
+						}
+					}
+					else
+					{
+						tempRow = currentRow;
+						tempColumn = currentColumn - 1;
+						Reset();
+						SetError(ErrorCode::InvalidReferenceSyntax);
+						row = tempRow;
+						column = tempColumn;
+						return false;
+					}
+				}
+
+				if (!IsWhiteSpace(currentCharacter))
+					CharactersWriterType::WriteCharacter(attr.Value, currentCharacter);
+				else
+					CharactersWriterType::WriteCharacter(attr.Value, Space);
+
+				if (NextCharBad(true))
+					return false;
+			} // while (currentCharacter != quoteChar) {...}
+
+			// attrname="value"
+
+			if (!AttributeUniqueness())
+				return false;
+
+			if (NextCharBad(true))
+				return false;
+
+			if (IsWhiteSpace(currentCharacter))
+			{
+				// Ignore white spaces.
+				do
+				{
+					if (NextCharBad(true))
+						return false;
+				}
+				while (IsWhiteSpace(currentCharacter));
+				white = true;
+
+				if (currentCharacter == Colon)
+				{
+					Reset();
+					SetError(ErrorCode::InvalidAttributeName);
+					row = attr.Row;
+					column = attr.Column;
+					return false;
+				}
+			}
+			else
+			{
+				white = false;
+				break;
+			}
+		}
+		while (Encoding::CharactersReader::IsNameStartChar(currentCharacter));
+
+		if (currentCharacter == GreaterThan)
+		{
+			// attrname="value">
+			node = Inspected::StartTag;
+			bool noErrors = NamespacesStuff();
+			if (noErrors)
+			{
+				UnclosedTagType& ref = NewUnclosedTag();
+				ref.Name = name;
+				ref.LocalName = localName;
+				ref.Prefix = prefix;
+				ref.NamespaceUri = namespaceUri;
+				ref.Row = row;
+				ref.Column = column;
+				foundElement = true;
+				return true;
+			}
+			return false;
+		}
+		else if (currentCharacter == Slash)
+		{
+			// attrname="value"/
+			if (NextCharBad(true))
+				return false;
+			if (currentCharacter != GreaterThan)
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+
+			node = Inspected::EmptyElementTag;
+			bool noErrors = NamespacesStuff();
+			if (noErrors)
+			{
+				// Namespaces associated with this tag are no longer needed.
+				SizeType indicesToRemove = static_cast<SizeType>(unclosedTagsSize);
+				NamespacesSizeType newNamespacesSize = 0;
+				while (newNamespacesSize < namespacesSize)
+				{
+					if (namespaces[newNamespacesSize].TagIndex == indicesToRemove)
+						break;
+					++newNamespacesSize;
+				}
+				namespacesSize = newNamespacesSize;
+				foundElement = true;
+				return true;
+			}
+			return false;
+		}
+		else // Some error.
+		{
+			if (white && Encoding::CharactersReader::IsNameChar(currentCharacter))
+			{
+				// After white space, cannot be a start character of attribute name,
+				// but can be a part of this name. Something like:
+				// <tag 123attrName="value">. "1" is not allowed as the start character.
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidAttributeName);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+		return true;
 	}
 
 	template <typename TCharactersWriter>
@@ -2767,6 +3079,29 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::AttributeUniqueness()
+	{
+		if (attributesSize > 1)
+		{
+			const AttributesSizeType lastIndex = attributesSize - 1;
+			const AttributeType& last = attributes[lastIndex];
+			for (AttributesSizeType i = 0; i < lastIndex; ++i)
+			{
+				if (last.Name == attributes[i].Name)
+				{
+					Reset();
+					SetError(ErrorCode::DoubleAttributeName);
+					row = last.Row;
+					column = last.Column;
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	template <typename TCharactersWriter>
 	inline typename Inspector<TCharactersWriter>::AttributeType&
 		Inspector<TCharactersWriter>::NewAttribute()
 	{
@@ -3178,7 +3513,7 @@ namespace Xml
 			if (currentCharacter != Colon &&
 				Encoding::CharactersReader::IsNameStartChar(currentCharacter))
 			{
-				// StartTag or EmptyElement.
+				// StartTag or EmptyElementTag.
 				return ParseElement();
 			}
 

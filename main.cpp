@@ -81,6 +81,9 @@ public:
 		InvalidTagNameCharTest();
 		WeirdTagNameStartCharTest();
 		ValidTagNameTest();
+		InvalidAttributeNameStartCharTest();
+		InvalidAttributeNameCharTest();
+		WeirdAttributeNameStartCharTest();
 		XmlElementPrefixTest();
 		XmlnsElementPrefixTest();
 		UnexpectedEndTagTest();
@@ -96,10 +99,25 @@ public:
 		PredefinedEntitiesTest();
 		EntityReferenceTest();
 		WhitespaceCharacterReferenceTest();
-		EmptyElementTest();
-		EmptyElementBadEndTest();
+		EmptyElementTagTest();
+		EmptyElementTagBadEndTest();
 		OutOfRangeAttributeTest();
 		IntermingledReferencesTest();
+		AttributesTest();
+		TagNamespaceTest();
+		AttributeNamespaceTest();
+		ChildAttributeNamespaceTest();
+		DefaultNamespaceTest();
+		DoubleAttributeNameTest();
+		DoubleAttributeNamespaceTest();
+		AttributeValueReferencesTest();
+		PrefixWithoutAssignedNamespaceTest();
+		PrefixWithEmptyNamespaceTest();
+		XmlnsDeclaredTest();
+		PrefixBoundToReservedNamespaceTest();
+		ReservedNamespaceAsDefaultTest();
+		InvalidXmlPrefixDeclarationTest();
+		ValidXmlPrefixDeclarationTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -1254,6 +1272,130 @@ public:
 		std::cout << "OK\n";
 	}
 
+	void InvalidAttributeNameStartCharTest()
+	{
+		std::cout << "Invalid attribute name start char test... ";
+	
+		std::string docString = u8"<root 1name=\"value\"/>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidAttributeName);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 7);
+		assert(inspector.GetDepth() == 0);
+
+		docString = u8"<root :name=\"value\"/>";
+		inspector.Reset(docString.begin(), docString.end());
+
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidAttributeName);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 7);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void InvalidAttributeNameCharTest()
+	{
+		std::cout << "Invalid attribute name char test... ";
+	
+		std::string docString = u8"<root na^me=\"value\"/>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidAttributeName);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 7);
+		assert(inspector.GetDepth() == 0);
+
+		docString = u8"<root name:=\"value\"/>";
+		inspector.Reset(docString.begin(), docString.end());
+
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidAttributeName);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 7);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void WeirdAttributeNameStartCharTest()
+	{
+		std::cout << "Weird attribute name start char test... ";
+	
+		std::string docString = u8"<root ^name=\"value\"/>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 7);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
 	void XmlElementPrefixTest()
 	{
 		std::cout << "xml element prefix test... ";
@@ -1286,7 +1428,7 @@ public:
 	{
 		std::cout << "xmlns element prefix test... ";
 	
-		std::string docString = u8"<xmlns:local>";
+		std::string docString = u8"<xmlns:local/>";
 		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
 			docString.begin(), docString.end());
 
@@ -2663,7 +2805,7 @@ public:
 		std::cout << "OK\n";
 	}
 
-	void EmptyElementTest()
+	void EmptyElementTagTest()
 	{
 		std::cout << "Empty element test... ";
 
@@ -2675,7 +2817,7 @@ public:
 		bool result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::EmptyElement);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
 		assert(inspector.GetName() == u8"my_element123");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"my_element123");
@@ -2714,7 +2856,7 @@ public:
 		result = inspector.Inspect();
 
 		assert(result == true);
-		assert(inspector.GetInspected() == Xml::Inspected::EmptyElement);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
 		assert(inspector.GetName() == u8"my_element123");
 		assert(inspector.GetValue().empty());
 		assert(inspector.GetLocalName() == u8"my_element123");
@@ -2749,7 +2891,7 @@ public:
 		std::cout << "OK\n";
 	}
 
-	void EmptyElementBadEndTest()
+	void EmptyElementTagBadEndTest()
 	{
 		std::cout << "Bad ending of empty element test... ";
 
@@ -2929,6 +3071,915 @@ public:
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 1);
 		assert(inspector.GetColumn() == 33);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void AttributesTest()
+	{
+		std::cout << "Attributes test... ";
+
+		std::string docString = u8"<root attr=\"value\"\nattr_2\r= \'\t  v&abc;\r\n&amp;\t&#xA;  \' />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// root
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"root");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"root");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == true);
+		assert(inspector.GetAttributesCount() == 2);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// attr_2
+		const Xml::Inspector<Xml::Encoding::Utf8Writer>::AttributeType& attr2 =
+			inspector.GetAttributeAt(1);
+
+		assert(attr2.Name == u8"attr_2");
+		assert(attr2.Value == u8"   v&abc; & \n  ");
+		assert(attr2.LocalName == u8"attr_2");
+		assert(attr2.Prefix.empty());
+		assert(attr2.NamespaceUri.empty());
+		assert(attr2.Row == 2);
+		assert(attr2.Column == 1);
+		assert(attr2.Delimiter == Xml::QuotationMark::SingleQuote);
+
+		// attr
+		const Xml::Inspector<Xml::Encoding::Utf8Writer>::AttributeType& attr =
+			inspector.GetAttributeAt(0);
+
+		assert(attr.Name == u8"attr");
+		assert(attr.Value == u8"value");
+		assert(attr.LocalName == u8"attr");
+		assert(attr.Prefix.empty());
+		assert(attr.NamespaceUri.empty());
+		assert(attr.Row == 1);
+		assert(attr.Column == 7);
+		assert(attr.Delimiter == Xml::QuotationMark::DoubleQuote);
+
+		// End of file.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 4);
+		assert(inspector.GetColumn() == 18);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void TagNamespaceTest()
+	{
+		std::cout << "Tag namespace test... ";
+
+		std::string docString = u8"<pre:root xmlns:pre=\"My namespace\"></pre:root>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		typedef Xml::Inspector<Xml::Encoding::Utf8Writer> InspectorType;
+
+		// pre:root
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
+		assert(inspector.GetName() == u8"pre:root");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"root");
+		assert(inspector.GetPrefix() == u8"pre");
+		assert(inspector.GetNamespaceUri() == u8"My namespace");
+		assert(inspector.HasAttributes() == true);
+		assert(inspector.GetAttributesCount() == 1);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// xmlns:pre="My namespace"
+		const InspectorType::AttributeType& attr = inspector.GetAttributeAt(0);
+
+		assert(attr.Name == u8"xmlns:pre");
+		assert(attr.Value == u8"My namespace");
+		assert(attr.LocalName == u8"pre");
+		assert(attr.Prefix == u8"xmlns");
+		assert(attr.NamespaceUri == u8"http://www.w3.org/2000/xmlns/");
+		assert(attr.Row == 1);
+		assert(attr.Column == 11);
+		assert(attr.Delimiter == Xml::QuotationMark::DoubleQuote);
+
+		// </pre:root>
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
+		assert(inspector.GetName() == u8"pre:root");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"root");
+		assert(inspector.GetPrefix() == u8"pre");
+		assert(inspector.GetNamespaceUri() == u8"My namespace");
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 36);
+		assert(inspector.GetDepth() == 0);
+
+		// End of file.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 47);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void AttributeNamespaceTest()
+	{
+		std::cout << "Attribute namespace test... ";
+
+		std::string docString = u8"<root pre:attr=\"value\" xmlns:pre=\"My namespace\" />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		typedef Xml::Inspector<Xml::Encoding::Utf8Writer> InspectorType;
+
+		// root
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"root");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"root");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == true);
+		assert(inspector.GetAttributesCount() == 2);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// pre:attr="value"
+		const InspectorType::AttributeType& attr1 = inspector.GetAttributeAt(0);
+
+		assert(attr1.Name == u8"pre:attr");
+		assert(attr1.Value == u8"value");
+		assert(attr1.LocalName == u8"attr");
+		assert(attr1.Prefix == u8"pre");
+		assert(attr1.NamespaceUri == u8"My namespace");
+		assert(attr1.Row == 1);
+		assert(attr1.Column == 7);
+		assert(attr1.Delimiter == Xml::QuotationMark::DoubleQuote);
+
+		// xmlns:pre="My namespace"
+		const InspectorType::AttributeType& attr2 = inspector.GetAttributeAt(1);
+
+		assert(attr2.Name == u8"xmlns:pre");
+		assert(attr2.Value == u8"My namespace");
+		assert(attr2.LocalName == u8"pre");
+		assert(attr2.Prefix == u8"xmlns");
+		assert(attr2.NamespaceUri == u8"http://www.w3.org/2000/xmlns/");
+		assert(attr2.Row == 1);
+		assert(attr2.Column == 24);
+		assert(attr2.Delimiter == Xml::QuotationMark::DoubleQuote);
+
+		// End of file.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 51);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void ChildAttributeNamespaceTest()
+	{
+		std::cout << "Child attribute namespace test... ";
+
+		std::string docString = u8"<root xmlns:pre=\"My namespace\"><a pre:attr=\"value\" /></root>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		typedef Xml::Inspector<Xml::Encoding::Utf8Writer> InspectorType;
+
+		// root
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
+		assert(inspector.GetName() == u8"root");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"root");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == true);
+		assert(inspector.GetAttributesCount() == 1);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// xmlns:pre="My namespace"
+		const InspectorType::AttributeType& attr1 = inspector.GetAttributeAt(0);
+
+		assert(attr1.Name == u8"xmlns:pre");
+		assert(attr1.Value == u8"My namespace");
+		assert(attr1.LocalName == u8"pre");
+		assert(attr1.Prefix == u8"xmlns");
+		assert(attr1.NamespaceUri == u8"http://www.w3.org/2000/xmlns/");
+		assert(attr1.Row == 1);
+		assert(attr1.Column == 7);
+		assert(attr1.Delimiter == Xml::QuotationMark::DoubleQuote);
+
+		// a
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"a");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"a");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == true);
+		assert(inspector.GetAttributesCount() == 1);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 32);
+		assert(inspector.GetDepth() == 1);
+
+		// pre:attr="value"
+		const InspectorType::AttributeType& attr2 = inspector.GetAttributeAt(0);
+
+		assert(attr2.Name == u8"pre:attr");
+		assert(attr2.Value == u8"value");
+		assert(attr2.LocalName == u8"attr");
+		assert(attr2.Prefix == u8"pre");
+		assert(attr2.NamespaceUri == u8"My namespace");
+		assert(attr2.Row == 1);
+		assert(attr2.Column == 35);
+		assert(attr2.Delimiter == Xml::QuotationMark::DoubleQuote);
+
+		// </root>
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
+		assert(inspector.GetName() == u8"root");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"root");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 54);
+		assert(inspector.GetDepth() == 0);
+
+		// End of file.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 61);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void DefaultNamespaceTest()
+	{
+		std::cout << "Default namespace test... ";
+
+		std::string docString = u8"<root xmlns=\"My namespace\"><a attr=\"v\" /><b xmlns=\"\" /><c /></root>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		typedef Xml::Inspector<Xml::Encoding::Utf8Writer> InspectorType;
+
+		// root
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
+		assert(inspector.GetName() == u8"root");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"root");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri() == u8"My namespace");
+		assert(inspector.HasAttributes() == true);
+		assert(inspector.GetAttributesCount() == 1);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// xmlns="My namespace"
+		const InspectorType::AttributeType& attr = inspector.GetAttributeAt(0);
+
+		assert(attr.Name == u8"xmlns");
+		assert(attr.Value == u8"My namespace");
+		assert(attr.LocalName == u8"xmlns");
+		assert(attr.Prefix.empty());
+		assert(attr.NamespaceUri.empty());
+		assert(attr.Row == 1);
+		assert(attr.Column == 7);
+		assert(attr.Delimiter == Xml::QuotationMark::DoubleQuote);
+
+		// a
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"a");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"a");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri() == u8"My namespace");
+		assert(inspector.HasAttributes() == true);
+		assert(inspector.GetAttributesCount() == 1);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 28);
+		assert(inspector.GetDepth() == 1);
+
+		// attr="v"
+		const InspectorType::AttributeType& attr2 = inspector.GetAttributeAt(0);
+
+		assert(attr2.Name == u8"attr");
+		assert(attr2.Value == u8"v");
+		assert(attr2.LocalName == u8"attr");
+		assert(attr2.Prefix.empty());
+		assert(attr2.NamespaceUri.empty());
+		assert(attr2.Row == 1);
+		assert(attr2.Column == 31);
+		assert(attr2.Delimiter == Xml::QuotationMark::DoubleQuote);
+
+		// b
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"b");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"b");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == true);
+		assert(inspector.GetAttributesCount() == 1);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 42);
+		assert(inspector.GetDepth() == 1);
+
+		// xmlns=""
+		const InspectorType::AttributeType& attr3 = inspector.GetAttributeAt(0);
+
+		assert(attr3.Name == u8"xmlns");
+		assert(attr3.Value.empty());
+		assert(attr3.LocalName == u8"xmlns");
+		assert(attr3.Prefix.empty());
+		assert(attr3.NamespaceUri.empty());
+		assert(attr3.Row == 1);
+		assert(attr3.Column == 45);
+		assert(attr3.Delimiter == Xml::QuotationMark::DoubleQuote);
+
+		// <c />
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"c");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"c");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri() == u8"My namespace");
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 56);
+		assert(inspector.GetDepth() == 1);
+
+		// </root>
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
+		assert(inspector.GetName() == u8"root");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"root");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri() == u8"My namespace");
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 61);
+		assert(inspector.GetDepth() == 0);
+
+		// End of file.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 68);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void DoubleAttributeNameTest()
+	{
+		std::cout << "Double attribute name test... ";
+
+		std::string docString = u8"<root attr=\"first\" attr=\"second\"/>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// root
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::DoubleAttributeName);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 20);
+		assert(inspector.GetDepth() == 0);
+	
+		std::cout << "OK\n";
+	}
+
+	void DoubleAttributeNamespaceTest()
+	{
+		std::cout << "Double attribute namespace test... ";
+
+		std::string docString =
+			u8"<root aaa:name=\"value\" bbb:name=\"v2\" xmlns:aaa=\"same URI\" xmlns:bbb=\"same URI\"/>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// root
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::DoubleAttributeName);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 24);
+		assert(inspector.GetDepth() == 0);
+	
+		std::cout << "OK\n";
+	}
+
+	void AttributeValueReferencesTest()
+	{
+		std::cout << "Attribute value references test... ";
+
+		std::string docString = u8"<root name=\"&#10;&unknown;&amp; &amp2;\" />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		typedef Xml::Inspector<Xml::Encoding::Utf8Writer> InspectorType;
+
+		// root
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"root");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"root");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == true);
+		assert(inspector.GetAttributesCount() == 1);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// name="&#10;&unknown;&amp; &amp2;"
+		const InspectorType::AttributeType& attr1 = inspector.GetAttributeAt(0);
+
+		assert(attr1.Name == u8"name");
+		assert(attr1.Value == u8"\n&unknown;& &amp2;");
+		assert(attr1.LocalName == u8"name");
+		assert(attr1.Prefix.empty());
+		assert(attr1.NamespaceUri.empty());
+		assert(attr1.Row == 1);
+		assert(attr1.Column == 7);
+		assert(attr1.Delimiter == Xml::QuotationMark::DoubleQuote);
+
+		// End of file.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 43);
+		assert(inspector.GetDepth() == 0);
+	
+		std::cout << "OK\n";
+	}
+
+	void PrefixWithoutAssignedNamespaceTest()
+	{
+		std::cout << "Prefix without assigned namespace test... ";
+
+		std::string docString = u8"<root aaa:name=\"value\" />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// root
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::PrefixWithoutAssignedNamespace);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 7);
+		assert(inspector.GetDepth() == 0);
+
+		docString = u8"<aaa:root />";
+		inspector.Reset(docString.begin(), docString.end());
+
+		// root
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::PrefixWithoutAssignedNamespace);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 2);
+		assert(inspector.GetDepth() == 0);
+	
+		std::cout << "OK\n";
+	}
+
+	void PrefixWithEmptyNamespaceTest()
+	{
+		std::cout << "Prefix with empty namespace test... ";
+
+		std::string docString = u8"<root xmlns:aaa=\"\" />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// root
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::PrefixWithEmptyNamespace);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 7);
+		assert(inspector.GetDepth() == 0);
+
+		docString = u8"<aaa:root xmlns:aaa=\"\" />";
+		inspector.Reset(docString.begin(), docString.end());
+
+		// root
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::PrefixWithEmptyNamespace);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 11);
+		assert(inspector.GetDepth() == 0);
+	
+		std::cout << "OK\n";
+	}
+
+	void XmlnsDeclaredTest()
+	{
+		std::cout << "xmlns declared test... ";
+
+		std::string docString = u8"<root xmlns:xmlns=\"URI\" />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// root
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::XmlnsDeclared);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 7);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void PrefixBoundToReservedNamespaceTest()
+	{
+		std::cout << "Prefix is bound to reserved namespace test... ";
+
+		std::string docString = u8"<root xmlns:aaa=\"http://www.w3.org/XML/1998/namespace\" />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// root
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::PrefixBoundToReservedNamespace);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 7);
+		assert(inspector.GetDepth() == 0);
+
+		docString = u8"<aaa:root xmlns:aaa=\"http://www.w3.org/2000/xmlns/\" />";
+		inspector.Reset(docString.begin(), docString.end());
+
+		// root
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::PrefixBoundToReservedNamespace);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 11);
+		assert(inspector.GetDepth() == 0);
+	
+		std::cout << "OK\n";
+	}
+
+	void ReservedNamespaceAsDefaultTest()
+	{
+		std::cout << "Reserved namespace as default test... ";
+
+		std::string docString = u8"<root xmlns=\"http://www.w3.org/XML/1998/namespace\" />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// root
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::ReservedNamespaceAsDefault);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 7);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void InvalidXmlPrefixDeclarationTest()
+	{
+		std::cout << "Invalid xml prefix declaration test... ";
+
+		std::string docString = u8"<root xmlns:xml=\"invalid\" />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// root
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidXmlPrefixDeclaration);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 7);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void ValidXmlPrefixDeclarationTest()
+	{
+		std::cout << "Valid xml prefix declaration test... ";
+
+		std::string docString = u8"<root xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		typedef Xml::Inspector<Xml::Encoding::Utf8Writer> InspectorType;
+
+		// root
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"root");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"root");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == true);
+		assert(inspector.GetAttributesCount() == 1);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// xmlns:xml="http://www.w3.org/XML/1998/namespace"
+		const InspectorType::AttributeType& attr1 = inspector.GetAttributeAt(0);
+
+		assert(attr1.Name == u8"xmlns:xml");
+		assert(attr1.Value == u8"http://www.w3.org/XML/1998/namespace");
+		assert(attr1.LocalName == u8"xml");
+		assert(attr1.Prefix == u8"xmlns");
+		assert(attr1.NamespaceUri == u8"http://www.w3.org/2000/xmlns/");
+		assert(attr1.Row == 1);
+		assert(attr1.Column == 7);
+		assert(attr1.Delimiter == Xml::QuotationMark::DoubleQuote);
+
+		// End of file.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 58);
 		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
