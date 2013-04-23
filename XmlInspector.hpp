@@ -634,6 +634,8 @@ namespace Xml
 
 		bool ParseExclamation();
 
+		bool ParseComment();
+
 		void PrepareNode();
 
 		bool NamespacesStuff();
@@ -2261,10 +2263,92 @@ namespace Xml
 		// currentCharacter == Exclamation.
 		// Comment or DocumentType.
 		// TODO:
+
+		SizeType tempRow;
+		SizeType tempColumn;
+
+		if (NextCharBad(true))
+			return false;
+
+		if (currentCharacter == Minus)
+		{
+			// <!-
+			// Looks like a comment.
+			if (NextCharBad(true))
+				return false;
+			if (currentCharacter != Minus)
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+
+			return ParseComment();
+		}
+
 		assert(false && "Not implemented yet.");
 		return false;
 	}
-	
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::ParseComment()
+	{
+		// currentCharacter == Minus.
+
+		SizeType tempRow;
+		SizeType tempColumn;
+
+		PrepareNode();
+
+		bool doubleMinus = false;
+		do
+		{
+			if (NextCharBad(true))
+				return false;
+			if (currentCharacter == Minus)
+			{
+				// <!-- -
+				if (NextCharBad(true))
+					return false;
+				if (currentCharacter == Minus)
+				{
+					// <!-- --
+					if (NextCharBad(true))
+						return false;
+					doubleMinus = true;
+				}
+				else
+				{
+					CharactersWriterType::WriteCharacter(value, Minus);
+					CharactersWriterType::WriteCharacter(value, currentCharacter);
+				}
+			}
+			else // Not minus.
+			{
+				CharactersWriterType::WriteCharacter(value, currentCharacter);
+			}
+		}
+		while (!doubleMinus);
+
+		if (currentCharacter != GreaterThan)
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn - 2;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		node = Inspected::Comment;
+		return true;
+	}
+
 	template <typename TCharactersWriter>
 	inline void Inspector<TCharactersWriter>::PrepareNode()
 	{

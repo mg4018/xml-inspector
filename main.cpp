@@ -118,6 +118,8 @@ public:
 		ReservedNamespaceAsDefaultTest();
 		InvalidXmlPrefixDeclarationTest();
 		ValidXmlPrefixDeclarationTest();
+		CommentTest();
+		CommentInvalidSyntaxTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -3981,6 +3983,113 @@ public:
 		assert(inspector.GetRow() == 1);
 		assert(inspector.GetColumn() == 58);
 		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void CommentTest()
+	{
+		std::cout << "Comment test... ";
+
+		std::string docString = u8"<!--- abc- -> \t\r\n-&amp;&lol;^@!<->$^&*()_-=+def- --><root/>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		typedef Xml::Inspector<Xml::Encoding::Utf8Writer> InspectorType;
+
+		// Comment.
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::Comment);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue() == u8"- abc- -> \t\n-&amp;&lol;^@!<->$^&*()_-=+def- ");
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// root
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"root");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"root");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 2);
+		assert(inspector.GetColumn() == 36);
+		assert(inspector.GetDepth() == 0);
+
+		// End of file.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 2);
+		assert(inspector.GetColumn() == 43);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void CommentInvalidSyntaxTest()
+	{
+		std::cout << "Invalid syntax of comment test... ";
+
+		std::string bad[] =
+		{
+			u8"<!-- -- --><root/>",
+			u8"<!-- ----- --><root/>",
+			u8"<!-- ---><root/>",
+			u8"<!-- ----><root/>",
+		};
+
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector;
+
+		for (std::size_t i = 0; i < sizeof(bad) / sizeof(std::string); ++i)
+		{
+			inspector.Reset(bad[i].begin(), bad[i].end());
+
+			// InvalidSyntax.
+			bool result = inspector.Inspect();
+
+			assert(result == false);
+			assert(inspector.GetInspected() == Xml::Inspected::None);
+			assert(inspector.GetName().empty());
+			assert(inspector.GetValue().empty());
+			assert(inspector.GetLocalName().empty());
+			assert(inspector.GetPrefix().empty());
+			assert(inspector.GetNamespaceUri().empty());
+			assert(inspector.HasAttributes() == false);
+			assert(inspector.GetAttributesCount() == 0);
+			assert(inspector.GetErrorMessage() != nullptr);
+			assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
+			assert(inspector.GetRow() == 1);
+			assert(inspector.GetColumn() == 6);
+			assert(inspector.GetDepth() == 0);
+		}
 
 		std::cout << "OK\n";
 	}
