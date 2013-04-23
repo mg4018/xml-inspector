@@ -134,6 +134,11 @@ namespace Xml
 		InvalidByteSequence,
 
 		/**
+			@brief Unknown encoding.
+		*/
+		UnknownEncoding,
+
+		/**
 			@brief Not allowed characters. For example some characters
 				outside the root element, where a white spaces are the
 				only characters allowed.
@@ -181,12 +186,6 @@ namespace Xml
 				Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-Reference.
 		*/
 		InvalidReferenceSyntax,
-
-		/**
-			@brief Undeclared entity.
-				Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-EntityRef.
-		*/
-		UndeclaredEntity,
 
 		/**
 			@brief Code point in character reference doesn't match
@@ -1057,6 +1056,9 @@ namespace Xml
 				case ErrorCode::InvalidByteSequence:
 					errMsg = "Invalid byte sequence.";
 					return;
+				case ErrorCode::UnknownEncoding:
+					errMsg = "Unknown encoding.";
+					return;
 				case ErrorCode::InvalidSyntax:
 					errMsg = "Invalid syntax.";
 					return;
@@ -1083,9 +1085,6 @@ namespace Xml
 					return;
 				case ErrorCode::InvalidReferenceSyntax:
 					errMsg = "Invalid syntax of reference.";
-					return;
-				case ErrorCode::UndeclaredEntity:
-					errMsg = "Undeclared entity.";
 					return;
 				case ErrorCode::InvalidCharacterReference:
 					errMsg = "Code point in character reference doesn\'t match "
