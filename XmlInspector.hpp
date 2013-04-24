@@ -2268,7 +2268,6 @@ namespace Xml
 	{
 		// currentCharacter == Exclamation.
 		// Comment or DocumentType.
-		// TODO:
 
 		SizeType tempRow;
 		SizeType tempColumn;
