@@ -636,6 +636,8 @@ namespace Xml
 
 		bool ParseComment();
 
+		bool ParseCDATA();
+
 		void PrepareNode();
 
 		bool NamespacesStuff();
@@ -2290,6 +2292,42 @@ namespace Xml
 			return ParseComment();
 		}
 
+		if (currentCharacter == LeftSquareBracket)
+		{
+			// <![
+			// Looks like CDATA section.
+			for (std::size_t i = 0; i < 5; ++i)
+			{
+				if (NextCharBad(true))
+					return false;
+				if (currentCharacter != CDATA[i])
+				{
+					tempRow = currentRow;
+					tempColumn = currentColumn;
+					Reset();
+					SetError(ErrorCode::InvalidSyntax);
+					row = tempRow;
+					column = tempColumn;
+					return false;
+				}
+			}
+			// <![CDATA
+			if (NextCharBad(true))
+				return false;
+			if (currentCharacter != LeftSquareBracket)
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+
+			return ParseCDATA();
+		}
+
 		assert(false && "Not implemented yet.");
 		return false;
 	}
@@ -2347,6 +2385,69 @@ namespace Xml
 
 		node = Inspected::Comment;
 		return true;
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::ParseCDATA()
+	{
+		// currentCharacter == LeftSquareBracket.
+		// <![CDATA[
+
+		if (unclosedTagsSize == 0)
+		{
+			SizeType tempRow = row;
+			SizeType tempColumn = column;
+			Reset();
+			SetError(ErrorCode::CDataSectionOutside);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		PrepareNode();
+
+		do
+		{
+			if (NextCharBad(true))
+				return false;
+			if (currentCharacter == RightSquareBracket)
+			{
+				// <![CDATA[ text ]
+				if (NextCharBad(true))
+					return false;
+				if (currentCharacter == RightSquareBracket)
+				{
+					// <![CDATA[ text ]]
+					if (NextCharBad(true))
+						return false;
+					if (currentCharacter == GreaterThan)
+					{
+						// <![CDATA[ text ]]>
+						node = Inspected::CDATA;
+						return true;
+					}
+					else
+					{
+						CharactersWriterType::WriteCharacter(value, RightSquareBracket);
+						CharactersWriterType::WriteCharacter(value, RightSquareBracket);
+						CharactersWriterType::WriteCharacter(value, currentCharacter);
+					}
+				}
+				else
+				{
+					CharactersWriterType::WriteCharacter(value, RightSquareBracket);
+					CharactersWriterType::WriteCharacter(value, currentCharacter);
+				}
+			}
+			else
+			{
+				CharactersWriterType::WriteCharacter(value, currentCharacter);
+			}
+		}
+		while (true);
+
+		// Should never happen.
+		return false;
 	}
 
 	template <typename TCharactersWriter>

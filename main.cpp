@@ -120,6 +120,8 @@ public:
 		ValidXmlPrefixDeclarationTest();
 		CommentTest();
 		CommentInvalidSyntaxTest();
+		CDATATest();
+		CDATAOutsideTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -4090,6 +4092,161 @@ public:
 			assert(inspector.GetColumn() == 6);
 			assert(inspector.GetDepth() == 0);
 		}
+
+		std::cout << "OK\n";
+	}
+
+	void CDATATest()
+	{
+		std::cout << "CDATA test... ";
+
+		std::string docString = u8"<root><![CDATA[\r\n &amp;&#123;<abc>]] >\t def\r]]></root>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		typedef Xml::Inspector<Xml::Encoding::Utf8Writer> InspectorType;
+
+		// <root>
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
+		assert(inspector.GetName() == u8"root");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"root");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// CDATA
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::CDATA);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue() == u8"\n &amp;&#123;<abc>]] >\t def\n");
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 7);
+		assert(inspector.GetDepth() == 1);
+
+		// </root>
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
+		assert(inspector.GetName() == u8"root");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"root");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 3);
+		assert(inspector.GetColumn() == 4);
+		assert(inspector.GetDepth() == 0);
+
+		// End of file.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 3);
+		assert(inspector.GetColumn() == 11);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void CDATAOutsideTest()
+	{
+		std::cout << "CDATA outside root test... ";
+
+		std::string docString = u8"<![CDATA[\r\n &amp;&#123;<abc>]] >\t def\r]]><root />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		typedef Xml::Inspector<Xml::Encoding::Utf8Writer> InspectorType;
+
+		// CDATA outside root.
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::CDataSectionOutside);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		docString = u8"<root /><![CDATA[\r\n &amp;&#123;<abc>]] >\t def\r]]>";
+		inspector.Reset(docString.cbegin(), docString.cend());
+
+		// <root />
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"root");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"root");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// CDATA outside root.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::CDataSectionOutside);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 9);
+		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
 	}
