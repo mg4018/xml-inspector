@@ -159,12 +159,12 @@ namespace Xml
 		/**
 			@brief Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-doctypedecl.
 		*/
-		InvalidDoctypeDeclarationLocation,
+		InvalidDocumentTypeDeclarationLocation,
 
 		/**
 			@brief Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-doctypedecl.
 		*/
-		DoubleDoctypeDeclaration,
+		DoubleDocumentTypeDeclaration,
 
 		/**
 			@brief Check http://www.w3.org/TR/2009/REC-xml-names-20091208/#NT-QName.
@@ -589,6 +589,7 @@ namespace Xml
 		char32_t currentCharacter;
 		char32_t bufferedCharacter;
 		bool foundElement;
+		bool foundDOCTYPE;
 		bool eof;
 		StringType lowerXmlString;
 		StringType xmlnsString;
@@ -637,6 +638,8 @@ namespace Xml
 		bool ParseComment();
 
 		bool ParseCDATA();
+
+		bool ParseDOCTYPE();
 
 		void PrepareNode();
 
@@ -967,6 +970,7 @@ namespace Xml
 		currentCharacter(0),
 		bufferedCharacter(0),
 		foundElement(false),
+		foundDOCTYPE(false),
 		eof(false),
 		lowerXmlString(),
 		xmlnsString(),
@@ -1072,10 +1076,10 @@ namespace Xml
 				case ErrorCode::CDataSectionOutside:
 					errMsg = "CDATA section is outside the root element.";
 					return;
-				case ErrorCode::InvalidDoctypeDeclarationLocation:
+				case ErrorCode::InvalidDocumentTypeDeclarationLocation:
 					errMsg = "Invalid location of document type declaration.";
 					return;
-				case ErrorCode::DoubleDoctypeDeclaration:
+				case ErrorCode::DoubleDocumentTypeDeclaration:
 					errMsg = "There should be exactly one document type declaration.";
 					return;
 				case ErrorCode::InvalidTagName:
@@ -2328,8 +2332,24 @@ namespace Xml
 			return ParseCDATA();
 		}
 
-		assert(false && "Not implemented yet.");
-		return false;
+		// <!currentCharacter
+		// Should be DOCTYPE declaration.
+		for (std::size_t i = 0; i < 7; ++i)
+		{
+			if (currentCharacter != DOCTYPE[i])
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+			if (NextCharBad(true))
+				return false;
+		}
+		return ParseDOCTYPE();
 	}
 
 	template <typename TCharactersWriter>
@@ -2448,6 +2468,205 @@ namespace Xml
 
 		// Should never happen.
 		return false;
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::ParseDOCTYPE()
+	{
+		// <!DOCTYPEcurrentCharacter
+
+		SizeType tempRow;
+		SizeType tempColumn;
+
+		if (!IsWhiteSpace(currentCharacter))
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		if (foundElement)
+		{
+			tempRow = row;
+			tempColumn = column;
+			Reset();
+			SetError(ErrorCode::InvalidDocumentTypeDeclarationLocation);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		if (foundDOCTYPE)
+		{
+			tempRow = row;
+			tempColumn = column;
+			Reset();
+			SetError(ErrorCode::DoubleDocumentTypeDeclaration);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+		foundDOCTYPE = true;
+
+		PrepareNode();
+
+		// Ignore white spaces.
+		do
+		{
+			if (NextCharBad(true))
+				return false;
+		}
+		while (IsWhiteSpace(currentCharacter));
+
+		// <!DOCTYPE   currentCharacter
+		if (currentCharacter == Colon ||
+			!Encoding::CharactersReader::IsNameStartChar(currentCharacter))
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		// QName
+		do
+		{
+			CharactersWriterType::WriteCharacter(name, currentCharacter);
+			CharactersWriterType::WriteCharacter(localName, currentCharacter);
+
+			if (NextCharBad(true))
+				return false;
+
+			if (currentCharacter == Colon)
+			{
+				// Prefixed name.
+				prefix = name;
+				localName.clear();
+				CharactersWriterType::WriteCharacter(name, currentCharacter);
+
+				if (NextCharBad(true))
+					return false;
+
+				if (currentCharacter == Colon ||
+					!Encoding::CharactersReader::IsNameStartChar(currentCharacter))
+				{
+					tempRow = currentRow;
+					tempColumn = currentColumn;
+					Reset();
+					SetError(ErrorCode::InvalidSyntax);
+					row = tempRow;
+					column = tempColumn;
+					return false;
+				}
+
+				do
+				{
+					CharactersWriterType::WriteCharacter(name, currentCharacter);
+					CharactersWriterType::WriteCharacter(localName, currentCharacter);
+
+					if (NextCharBad(true))
+						return false;
+
+					if (currentCharacter == Colon)
+					{
+						tempRow = currentRow;
+						tempColumn = currentColumn;
+						Reset();
+						SetError(ErrorCode::InvalidSyntax);
+						row = tempRow;
+						column = tempColumn;
+						return false;
+					}
+				}
+				while (Encoding::CharactersReader::IsNameChar(currentCharacter));
+				break;
+			}
+		}
+		while (Encoding::CharactersReader::IsNameChar(currentCharacter));
+
+		// <!DOCTYPE QNAMEcurrentCharacter
+
+		if (currentCharacter == GreaterThan)
+		{
+			// <!DOCTYPE QName>
+			node = Inspected::DocumentType;
+			return true;
+		}
+		else if (IsWhiteSpace(currentCharacter))
+		{
+			// Ignore white spaces.
+			do
+			{
+				if (NextCharBad(true))
+					return false;
+			}
+			while (IsWhiteSpace(currentCharacter));
+
+			if (currentCharacter == GreaterThan)
+			{
+				// <!DOCTYPE QName  >
+				node = Inspected::DocumentType;
+				return true;
+			}
+		}
+		else if (currentCharacter != LeftSquareBracket)
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		do
+		{
+			CharactersWriterType::WriteCharacter(value, currentCharacter);
+			if (currentCharacter == LeftSquareBracket)
+			{
+				// <!DOCTYPE QName [
+				do
+				{
+					if (NextCharBad(true))
+						return false;
+					while (currentCharacter == RightSquareBracket)
+					{
+						CharactersWriterType::WriteCharacter(value, currentCharacter);
+						if (NextCharBad(true))
+							return false;
+						while (IsWhiteSpace(currentCharacter))
+						{
+							CharactersWriterType::WriteCharacter(value, currentCharacter);
+							if (NextCharBad(true))
+								return false;
+						}
+						if (currentCharacter == GreaterThan)
+						{
+							// <!DOCTYPE QName [...] >
+							node = Inspected::DocumentType;
+							return true;
+						}
+					}
+					CharactersWriterType::WriteCharacter(value, currentCharacter);
+				}
+				while (true);
+			}
+
+			if (NextCharBad(true))
+				return false;
+		}
+		while (currentCharacter != GreaterThan);
+
+		node = Inspected::DocumentType;
+		return true;
 	}
 
 	template <typename TCharactersWriter>
@@ -3860,6 +4079,7 @@ namespace Xml
 		currentCharacter = 0;
 		bufferedCharacter = 0;
 		foundElement = false;
+		foundDOCTYPE = false;
 		eof = false;
 		attributesSize = 0;
 		unclosedTagsSize = 0;
