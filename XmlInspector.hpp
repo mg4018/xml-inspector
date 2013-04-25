@@ -633,6 +633,10 @@ namespace Xml
 
 		bool ParseQuestion();
 
+		bool ParseXmlDeclaration();
+
+		bool ParseProcessingInstruction();
+
 		bool ParseExclamation();
 
 		bool ParseComment();
@@ -2258,8 +2262,179 @@ namespace Xml
 	{
 		// currentCharacter == Question.
 		// XmlDeclaration or ProcessingInstruction.
+
+		SizeType tempRow;
+		SizeType tempColumn;
+
+		PrepareNode();
+
+		// '<?'
+		if (NextCharBad(true))
+			return false;
+		if (currentCharacter == LowerXml[0] ||
+			currentCharacter == UpperXml[0])
+		{
+			// '<?' ('X' | 'x')
+			CharactersWriterType::WriteCharacter(name, currentCharacter);
+			if (NextCharBad(true))
+				return false;
+			if (currentCharacter == LowerXml[1] ||
+				currentCharacter == UpperXml[1])
+			{
+				// '<?' ('X' | 'x') ('M' | 'm')
+				CharactersWriterType::WriteCharacter(name, currentCharacter);
+				if (NextCharBad(true))
+					return false;
+				if (currentCharacter == LowerXml[2] ||
+					currentCharacter == UpperXml[2])
+				{
+					// '<?' ('X' | 'x') ('M' | 'm') ('L' | 'l')
+					CharactersWriterType::WriteCharacter(name, currentCharacter);
+					if (NextCharBad(true))
+						return false;
+
+					if (name == lowerXmlString)
+					{
+						// '<?xml' Char
+						if (IsWhiteSpace(currentCharacter))
+						{
+							// '<?xml '
+							localName = name;
+							return ParseXmlDeclaration();	
+						}
+					}
+
+					if (currentCharacter == Colon ||
+						!Encoding::CharactersReader::IsNameChar(currentCharacter))
+					{
+						tempRow = currentRow;
+						tempColumn = currentColumn;
+						Reset();
+						SetError(ErrorCode::InvalidSyntax);
+						row = tempRow;
+						column = tempColumn;
+						return false;
+					}
+				}
+			}
+		}
+		else if (currentCharacter == Colon ||
+			!Encoding::CharactersReader::IsNameStartChar(currentCharacter))
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+		else
+		{
+			// '<?' (NameStartChar - ':')
+			CharactersWriterType::WriteCharacter(name, currentCharacter);
+			if (NextCharBad(true))
+				return false;
+		}
+
+		while (currentCharacter != Colon &&
+			Encoding::CharactersReader::IsNameChar(currentCharacter))
+		{
+			CharactersWriterType::WriteCharacter(name, currentCharacter);
+			if (NextCharBad(true))
+				return false;
+		}
+
+		// '<?' PITarget (':' | (Char - NameChar))
+
+		return ParseProcessingInstruction();
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::ParseXmlDeclaration()
+	{
+		// '<?xml '
 		// TODO:
 		assert(false && "Not implemented yet.");
+		return false;
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::ParseProcessingInstruction()
+	{
+		// '<?' PITarget (':' | (Char - NameChar))
+		// name == PITarget
+		// localName.empty() == true
+
+		SizeType tempRow;
+		SizeType tempColumn;
+
+		if (currentCharacter == Question)
+		{
+			// '<?' PITarget '?'
+			if (NextCharBad(true))
+				return false;
+			if (currentCharacter != GreaterThan)
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+
+			// '<?' PITarget '?>'
+			localName = name;
+			node = Inspected::ProcessingInstruction;
+			return true;
+		}
+
+		if (!IsWhiteSpace(currentCharacter))
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		localName = name;
+
+		// Ignore white spaces.
+		do
+		{
+			if (NextCharBad(true))
+				return false;
+		}
+		while (IsWhiteSpace(currentCharacter));
+
+		do // {...} while (true);
+		{
+			if (currentCharacter == Question)
+			{
+				if (NextCharBad(true))
+					return false;
+				if (currentCharacter == GreaterThan)
+				{
+					node = Inspected::ProcessingInstruction;
+					return true;
+				}
+				CharactersWriterType::WriteCharacter(value, Question);
+			}
+			else
+			{
+				CharactersWriterType::WriteCharacter(value, currentCharacter);
+				if (NextCharBad(true))
+					return false;
+			}
+		}
+		while (true);
+
+		// Should never happen.
 		return false;
 	}
 
@@ -2267,7 +2442,7 @@ namespace Xml
 	inline bool Inspector<TCharactersWriter>::ParseExclamation()
 	{
 		// currentCharacter == Exclamation.
-		// Comment or DocumentType.
+		// Comment, CDATA or DocumentType.
 
 		SizeType tempRow;
 		SizeType tempColumn;

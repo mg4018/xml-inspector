@@ -125,6 +125,11 @@ public:
 		DOCTYPETest();
 		InvalidDocumentTypeDeclarationLocationTest();
 		DoubleDocumentTypeDeclarationTest();
+		EmptyProcessingInstructionTest();
+		ProcessingInstructionTest();
+		InvalidProcessingInstructionSyntaxTest();
+		XmlStartPITargetTest();
+		XmlBadPITargetTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -4502,6 +4507,358 @@ public:
 		assert(inspector.GetColumn() == 15);
 		assert(inspector.GetDepth() == 0);
 	
+		std::cout << "OK\n";
+	}
+
+	void EmptyProcessingInstructionTest()
+	{
+		std::cout << "Empty processing instruction test... ";
+
+		std::string docString = u8"<?MyTarget?><doc />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// <?MyTarget?>
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::ProcessingInstruction);
+		assert(inspector.GetName() == u8"MyTarget");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"MyTarget");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// <doc />
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"doc");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"doc");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 13);
+		assert(inspector.GetDepth() == 0);
+
+		// End of file.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 20);
+		assert(inspector.GetDepth() == 0);
+
+		docString = u8"<?MyTarget\r\n \t?><doc />";
+		inspector.Reset(docString.begin(), docString.end());
+
+		// <?MyTarget?>
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::ProcessingInstruction);
+		assert(inspector.GetName() == u8"MyTarget");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"MyTarget");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// <doc />
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"doc");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"doc");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 2);
+		assert(inspector.GetColumn() == 5);
+		assert(inspector.GetDepth() == 0);
+
+		// End of file.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 2);
+		assert(inspector.GetColumn() == 12);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void ProcessingInstructionTest()
+	{
+		std::cout << "Processing instruction test... ";
+
+		std::string docString = u8"<?MyTarget\r\n \t&amp;&#123;&lol;<?\r>]]><!> \n?><doc />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// <?MyTarget\r\n \t&amp;&#123;&lol;<?\r>]]><!> \n?>
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::ProcessingInstruction);
+		assert(inspector.GetName() == u8"MyTarget");
+		assert(inspector.GetValue() == u8"&amp;&#123;&lol;<?\n>]]><!> \n");
+		assert(inspector.GetLocalName() == u8"MyTarget");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// <doc />
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"doc");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"doc");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 4);
+		assert(inspector.GetColumn() == 3);
+		assert(inspector.GetDepth() == 0);
+
+		// End of file.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 4);
+		assert(inspector.GetColumn() == 10);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void InvalidProcessingInstructionSyntaxTest()
+	{
+		std::cout << "Invalid processing instruction syntax test... ";
+
+		std::string docString = u8"<?MyTarget\?\?><doc />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// Invalid syntax.
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 12);
+		assert(inspector.GetDepth() == 0);
+
+		docString = u8"<?My:Target?><doc />";
+		inspector.Reset(docString.begin(), docString.end());
+
+		// Invalid syntax.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 5);
+		assert(inspector.GetDepth() == 0);
+
+		docString = u8"<?1MyTarget?><doc />";
+		inspector.Reset(docString.begin(), docString.end());
+
+		// Invalid syntax.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 3);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void XmlStartPITargetTest()
+	{
+		std::cout << "xml start target name of processing instruction test... ";
+
+		std::string docString = u8"<?xml-?><doc />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// <?xml-?>
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::ProcessingInstruction);
+		assert(inspector.GetName() == u8"xml-");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"xml-");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// <doc />
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"doc");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"doc");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 9);
+		assert(inspector.GetDepth() == 0);
+
+		// End of file.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 16);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void XmlBadPITargetTest()
+	{
+		std::cout << "xMl target name of processing instruction test... ";
+
+		std::string docString = u8"<?xMl?><doc />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// Invalid syntax - xMl.
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 6);
+		assert(inspector.GetDepth() == 0);
+
 		std::cout << "OK\n";
 	}
 };
