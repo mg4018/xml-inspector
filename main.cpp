@@ -130,6 +130,15 @@ public:
 		InvalidProcessingInstructionSyntaxTest();
 		XmlStartPITargetTest();
 		XmlBadPITargetTest();
+		EmptyXmlDeclarationTest();
+		XmlDeclarationTest();
+		XmlDeclarationWrongOrderTest();
+		XmlDeclarationVersionTest();
+		XmlDeclarationInvalidVersionTest();
+		InvalidXmlDeclarationLocationTest();
+		UnknownEncodingTest();
+		EncodingConfusionTest();
+		EncodingDeclarationRequiredTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -4005,8 +4014,6 @@ public:
 		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
 			docString.begin(), docString.end());
 
-		typedef Xml::Inspector<Xml::Encoding::Utf8Writer> InspectorType;
-
 		// Comment.
 		bool result = inspector.Inspect();
 
@@ -4073,7 +4080,7 @@ public:
 			u8"<!-- -- --><root/>",
 			u8"<!-- ----- --><root/>",
 			u8"<!-- ---><root/>",
-			u8"<!-- ----><root/>",
+			u8"<!-- ----><root/>"
 		};
 
 		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector;
@@ -4857,6 +4864,435 @@ public:
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
 		assert(inspector.GetRow() == 1);
 		assert(inspector.GetColumn() == 6);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void EmptyXmlDeclarationTest()
+	{
+		std::cout << "Empty XML declaration test... ";
+
+		std::string docString = u8"<?xml?><doc />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// Invalid syntax. At least VersionInfo required.
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 6);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void XmlDeclarationTest()
+	{
+		std::cout << "XML declaration test... ";
+
+		std::string docString =
+			u8"<?xml\nversion\n=\r\'1.0\'\tencoding\t=\r\n\'UTF-8\'\tstandalone\t=\t\'yes\'\n?><doc />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		typedef Xml::Inspector<Xml::Encoding::Utf8Writer> InspectorType;
+
+		// XML declaration.
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::XmlDeclaration);
+		assert(inspector.GetName() == u8"xml");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"xml");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == true);
+		assert(inspector.GetAttributesCount() == 3);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// version='1.0'
+		const InspectorType::AttributeType& attr1 = inspector.GetAttributeAt(0);
+
+		assert(attr1.Name == u8"version");
+		assert(attr1.Value == u8"1.0");
+		assert(attr1.LocalName == u8"version");
+		assert(attr1.Prefix.empty());
+		assert(attr1.NamespaceUri.empty());
+		assert(attr1.Row == 2);
+		assert(attr1.Column == 1);
+		assert(attr1.Delimiter == Xml::QuotationMark::SingleQuote);
+
+		// encoding='UTF-8'
+		const InspectorType::AttributeType& attr2 = inspector.GetAttributeAt(1);
+
+		assert(attr2.Name == u8"encoding");
+		assert(attr2.Value == u8"UTF-8");
+		assert(attr2.LocalName == u8"encoding");
+		assert(attr2.Prefix.empty());
+		assert(attr2.NamespaceUri.empty());
+		assert(attr2.Row == 4);
+		assert(attr2.Column == 7);
+		assert(attr2.Delimiter == Xml::QuotationMark::SingleQuote);
+
+		// standalone='yes'
+		const InspectorType::AttributeType& attr3 = inspector.GetAttributeAt(2);
+
+		assert(attr3.Name == u8"standalone");
+		assert(attr3.Value == u8"yes");
+		assert(attr3.LocalName == u8"standalone");
+		assert(attr3.Prefix.empty());
+		assert(attr3.NamespaceUri.empty());
+		assert(attr3.Row == 5);
+		assert(attr3.Column == 9);
+		assert(attr3.Delimiter == Xml::QuotationMark::SingleQuote);
+
+		// <doc />
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"doc");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"doc");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 6);
+		assert(inspector.GetColumn() == 3);
+		assert(inspector.GetDepth() == 0);
+
+		// End of file.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 6);
+		assert(inspector.GetColumn() == 10);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void XmlDeclarationWrongOrderTest()
+	{
+		std::cout << "XML declaration wrong order test... ";
+
+		std::string docString = u8"<?xml version=\"1.0\" standalone=\"yes\" encoding=\"UTF-8\"?><doc />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// Invalid syntax - wrong order.
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 21);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void XmlDeclarationVersionTest()
+	{
+		std::cout << "XML declaration version test... ";
+
+		std::string docString =
+			u8"<?xml version=\"1.9999123456789000111222333444555666777888999\"?><doc />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		typedef Xml::Inspector<Xml::Encoding::Utf8Writer> InspectorType;
+
+		// XML declaration.
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::XmlDeclaration);
+		assert(inspector.GetName() == u8"xml");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"xml");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == true);
+		assert(inspector.GetAttributesCount() == 1);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// version="1.9999123456789000111222333444555666777888999"
+		const InspectorType::AttributeType& attr1 = inspector.GetAttributeAt(0);
+
+		assert(attr1.Name == u8"version");
+		assert(attr1.Value == u8"1.9999123456789000111222333444555666777888999");
+		assert(attr1.LocalName == u8"version");
+		assert(attr1.Prefix.empty());
+		assert(attr1.NamespaceUri.empty());
+		assert(attr1.Row == 1);
+		assert(attr1.Column == 7);
+		assert(attr1.Delimiter == Xml::QuotationMark::DoubleQuote);
+
+		// <doc />
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"doc");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"doc");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 64);
+		assert(inspector.GetDepth() == 0);
+
+		// End of file.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 71);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void XmlDeclarationInvalidVersionTest()
+	{
+		std::cout << "Invalid XML declaration version test... ";
+
+		std::string bad[] =
+		{
+			u8"<?xml    version=\"2.0\"><root/>",
+			u8"<?xml   version=\"1\"><root/>",
+			u8"<?xml   version=\"1,0\"><root/>",
+			u8"<?xml  version=\"1.a\"><root/>",
+			u8"<?xml  version=\"1..0\"><root/>",
+			u8"<?xml version=\"1.0 \"><root/>",
+			u8"<?xml version=\"1.0\'><root/>",
+			u8"<?xml    version=\" 1.0\"><root/>"
+		};
+
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector;
+
+		for (std::size_t i = 0; i < sizeof(bad) / sizeof(std::string); ++i)
+		{
+			inspector.Reset(bad[i].begin(), bad[i].end());
+
+			// InvalidSyntax.
+			bool result = inspector.Inspect();
+
+			assert(result == false);
+			assert(inspector.GetInspected() == Xml::Inspected::None);
+			assert(inspector.GetName().empty());
+			assert(inspector.GetValue().empty());
+			assert(inspector.GetLocalName().empty());
+			assert(inspector.GetPrefix().empty());
+			assert(inspector.GetNamespaceUri().empty());
+			assert(inspector.HasAttributes() == false);
+			assert(inspector.GetAttributesCount() == 0);
+			assert(inspector.GetErrorMessage() != nullptr);
+			assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
+			assert(inspector.GetRow() == 1);
+			assert(inspector.GetColumn() == 19);
+			assert(inspector.GetDepth() == 0);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void InvalidXmlDeclarationLocationTest()
+	{
+		std::cout << "Invalid XML declaration location test... ";
+
+		std::string docString = u8"\n<?xml version=\"1.0\"?><doc />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// Whitespace.
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::Whitespace);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue() == u8"\n");
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// InvalidXmlDeclarationLocation.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidXmlDeclarationLocation);
+		assert(inspector.GetRow() == 2);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void UnknownEncodingTest()
+	{
+		std::cout << "Unknown encoding test... ";
+
+		std::string docString = u8"<?xml version=\"1.0\" encoding=\"unknown-123\"?><doc />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// Unknown encoding.
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::UnknownEncoding);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 21);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void EncodingConfusionTest()
+	{
+		std::cout << "Encoding confusion test... ";
+
+		std::string docString = u8"<?xml version=\"1.0\" encoding=\"UTF-16\"?><doc />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// Encoding confusion, UTF-8 or UTF-16?
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::EncodingConfusion);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 21);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void EncodingDeclarationRequiredTest()
+	{
+		std::cout << "Encoding declaration required test... ";
+
+		unsigned char source[] =
+		{
+			0x00, 0x00, 0xFE, 0xFF, // UTF-32BE
+			0x00, 0x00, 0x00, 0x3C, // '<'
+			0x00, 0x00, 0x00, 0x61, // 'a'
+			0x00, 0x00, 0x00, 0x2F, // '/'
+			0x00, 0x00, 0x00, 0x3E // '>'
+		};
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(&is);
+
+		// EncodingDeclarationRequired.
+		bool result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::EncodingDeclarationRequired);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
 		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";

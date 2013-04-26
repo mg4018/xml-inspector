@@ -139,6 +139,18 @@ namespace Xml
 		UnknownEncoding,
 
 		/**
+			@brief Encoding confusion. For example UTF-8 from Byte Order Mark,
+				but UTF-32 in XML declaration encoding.
+		*/
+		EncodingConfusion,
+
+		/**
+			@brief Encoding declaration must precede content
+				that is not legal UTF-8 or UTF-16.
+		*/
+		EncodingDeclarationRequired,
+
+		/**
 			@brief Not allowed characters. For example some characters
 				outside the root element, where a white spaces are the
 				only characters allowed.
@@ -585,6 +597,7 @@ namespace Xml
 		StringType prefix;
 		StringType namespaceUri;
 		StringType entityName;
+		std::u32string comparingName;
 		SizeType entityNameCharCount;
 		char32_t currentCharacter;
 		char32_t bufferedCharacter;
@@ -656,6 +669,22 @@ namespace Xml
 		int ParseEntityReference(bool insideTag);
 
 		bool AttributeUniqueness();
+
+		bool ResolveEncoding(const AttributeType& encoding);
+
+		bool IsUtf8Charset();
+
+		bool IsUtf16Charset();
+
+		bool IsUtf16BECharset();
+
+		bool IsUtf16LECharset();
+
+		bool IsUtf32Charset();
+
+		bool IsUtf32BECharset();
+
+		bool IsUtf32LECharset();
 
 		AttributeType& NewAttribute();
 
@@ -970,6 +999,7 @@ namespace Xml
 		prefix(),
 		namespaceUri(),
 		entityName(),
+		comparingName(),
 		entityNameCharCount(0),
 		currentCharacter(0),
 		bufferedCharacter(0),
@@ -1070,6 +1100,13 @@ namespace Xml
 					return;
 				case ErrorCode::UnknownEncoding:
 					errMsg = "Unknown encoding.";
+					return;
+				case ErrorCode::EncodingConfusion:
+					errMsg = "Encoding confusion.";
+					return;
+				case ErrorCode::EncodingDeclarationRequired:
+					errMsg = "Encoding declaration must precede content that is not "
+						"legal UTF-8 or UTF-16.";
 					return;
 				case ErrorCode::InvalidSyntax:
 					errMsg = "Invalid syntax.";
@@ -2354,8 +2391,618 @@ namespace Xml
 	inline bool Inspector<TCharactersWriter>::ParseXmlDeclaration()
 	{
 		// '<?xml '
-		// TODO:
-		assert(false && "Not implemented yet.");
+
+		SizeType tempRow;
+		SizeType tempColumn;
+
+		if (row != 1 || column != 1)
+		{
+			tempRow = row;
+			tempColumn = column;
+			Reset();
+			SetError(ErrorCode::InvalidXmlDeclarationLocation);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		// Ignore white spaces.
+		do
+		{
+			if (NextCharBad(true))
+				return false;
+		}
+		while (IsWhiteSpace(currentCharacter));
+
+		AttributeType& versionAttr = NewAttribute();
+		versionAttr.Row = currentRow;
+		versionAttr.Column = currentColumn;
+
+		for (std::size_t i = 0; i < 7; ++i)
+		{
+			if (currentCharacter != XmlDeclarationVersion[i])
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+			CharactersWriterType::WriteCharacter(versionAttr.Name, currentCharacter);
+			CharactersWriterType::WriteCharacter(versionAttr.LocalName, currentCharacter);
+			if (NextCharBad(true))
+				return false;
+		}
+
+		// '<?xml version' Char
+		
+		while (IsWhiteSpace(currentCharacter))
+		{
+			if (NextCharBad(true))
+				return false;
+		}
+
+		if (currentCharacter != Equals)
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		// '<?xml version='
+
+		if (NextCharBad(true))
+			return false;
+
+		while (IsWhiteSpace(currentCharacter))
+		{
+			if (NextCharBad(true))
+				return false;
+		}
+
+		char32_t quoteChar = currentCharacter;
+
+		if (quoteChar == DoubleQuote)
+		{
+			// <?xml version="
+			versionAttr.Delimiter = QuotationMark::DoubleQuote;
+		}
+		else if (quoteChar == SingleQuote)
+		{
+			// <?xml version='
+			versionAttr.Delimiter = QuotationMark::SingleQuote;
+		}
+		else
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		if (NextCharBad(true))
+			return false;
+
+		// Now should be:
+		// '1.' [0-9]+
+
+		if (Encoding::CharactersReader::GetHexDigitValue(currentCharacter) != 1)
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		// <?xml version="1
+		CharactersWriterType::WriteCharacter(versionAttr.Value, currentCharacter);
+
+		if (NextCharBad(true))
+			return false;
+
+		if (currentCharacter != Dot)
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		// <?xml version="1.
+		CharactersWriterType::WriteCharacter(versionAttr.Value, currentCharacter);
+
+		if (NextCharBad(true))
+			return false;
+
+		int digit = Encoding::CharactersReader::GetHexDigitValue(currentCharacter);
+
+		if (digit < 0 || digit > 9)
+		{
+			// After a dot should be at least one digit.
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		do
+		{
+			CharactersWriterType::WriteCharacter(versionAttr.Value, currentCharacter);
+			if (NextCharBad(true))
+				return false;
+			digit = Encoding::CharactersReader::GetHexDigitValue(currentCharacter);
+		}
+		while (digit >= 0 && digit <= 9);
+
+		if (currentCharacter != quoteChar)
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		// <?xml version="1.x"
+
+		if (NextCharBad(true))
+			return false;
+
+		if (IsWhiteSpace(currentCharacter))
+		{
+			do
+			{
+				if (NextCharBad(true))
+					return false;
+			}
+			while (IsWhiteSpace(currentCharacter));
+
+			if (currentCharacter == Question)
+			{
+				// <?xml version="1.x"   ?
+				if (NextCharBad(true))
+					return false;
+
+				if (currentCharacter != GreaterThan)
+				{
+					tempRow = currentRow;
+					tempColumn = currentColumn;
+					Reset();
+					SetError(ErrorCode::InvalidSyntax);
+					row = tempRow;
+					column = tempColumn;
+					return false;
+				}
+
+				// <?xml version="1.x"   ?>
+				node = Inspected::XmlDeclaration;
+				return true;
+			}
+		}
+		else // IsWhiteSpace(currentCharacter) == false
+		{
+			if (currentCharacter != Question)
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+
+			// <?xml version="1.x"?
+			if (NextCharBad(true))
+				return false;
+
+			if (currentCharacter != GreaterThan)
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+
+			// <?xml version="1.x"?>
+			node = Inspected::XmlDeclaration;
+			return true;
+		}
+
+		// Now should be an encoding attribute.
+		AttributeType& encodingAttr = NewAttribute();
+		encodingAttr.Row = currentRow;
+		encodingAttr.Column = currentColumn;
+		comparingName.clear(); // Could be not empty after call of Reset method.
+		comparingName.reserve(NameReserve);
+
+		for (std::size_t i = 0; i < 8; ++i)
+		{
+			if (currentCharacter != XmlDeclarationEncoding[i])
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+			CharactersWriterType::WriteCharacter(encodingAttr.Name, currentCharacter);
+			CharactersWriterType::WriteCharacter(encodingAttr.LocalName, currentCharacter);
+			if (NextCharBad(true))
+				return false;
+		}
+
+		// '<?xml version="1.x" encoding' Char
+		
+		while (IsWhiteSpace(currentCharacter))
+		{
+			if (NextCharBad(true))
+				return false;
+		}
+
+		if (currentCharacter != Equals)
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		// '<?xml version="1.x" encoding='
+
+		if (NextCharBad(true))
+			return false;
+
+		while (IsWhiteSpace(currentCharacter))
+		{
+			if (NextCharBad(true))
+				return false;
+		}
+
+		quoteChar = currentCharacter;
+
+		if (quoteChar == DoubleQuote)
+		{
+			// <?xml version="1.x" encoding="
+			encodingAttr.Delimiter = QuotationMark::DoubleQuote;
+		}
+		else if (quoteChar == SingleQuote)
+		{
+			// <?xml version="1.x" encoding='
+			encodingAttr.Delimiter = QuotationMark::SingleQuote;
+		}
+		else
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		if (NextCharBad(true))
+			return false;
+
+		if (!Encoding::CharactersReader::IsEncNameStartChar(currentCharacter))
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		do
+		{
+			CharactersWriterType::WriteCharacter(encodingAttr.Value, currentCharacter);
+			comparingName.push_back(currentCharacter);
+			if (NextCharBad(true))
+				return false;
+		}
+		while (Encoding::CharactersReader::IsEncNameChar(currentCharacter));
+
+		if (currentCharacter != quoteChar)
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		// '<?xml' VersionInfo EncodingDecl
+		if (sourceType != SourceReader && !ResolveEncoding(encodingAttr))
+			return false;
+		if (NextCharBad(true))
+			return false;
+		
+		if (IsWhiteSpace(currentCharacter))
+		{
+			do
+			{
+				if (NextCharBad(true))
+					return false;
+			}
+			while (IsWhiteSpace(currentCharacter));
+
+			if (currentCharacter == Question)
+			{
+				// '<?xml' VersionInfo EncodingDecl S '?'
+				if (NextCharBad(true))
+					return false;
+
+				if (currentCharacter != GreaterThan)
+				{
+					tempRow = currentRow;
+					tempColumn = currentColumn;
+					Reset();
+					SetError(ErrorCode::InvalidSyntax);
+					row = tempRow;
+					column = tempColumn;
+					return false;
+				}
+
+				// '<?xml' VersionInfo EncodingDecl S '?>'
+				node = Inspected::XmlDeclaration;
+				return true;
+			}
+		}
+		else // IsWhiteSpace(currentCharacter) == false
+		{
+			if (currentCharacter != Question)
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+
+			if (NextCharBad(true))
+				return false;
+
+			if (currentCharacter != GreaterThan)
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+
+			// '<?xml' VersionInfo EncodingDecl '?>'
+			node = Inspected::XmlDeclaration;
+			return true;
+		}
+
+		// Now should be a standalone attribute.
+		AttributeType& standaloneAttr = NewAttribute();
+		standaloneAttr.Row = currentRow;
+		standaloneAttr.Column = currentColumn;
+
+		for (std::size_t i = 0; i < 10; ++i)
+		{
+			if (currentCharacter != XmlDeclarationStandalone[i])
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+			CharactersWriterType::WriteCharacter(standaloneAttr.Name, currentCharacter);
+			CharactersWriterType::WriteCharacter(standaloneAttr.LocalName, currentCharacter);
+			if (NextCharBad(true))
+				return false;
+		}
+
+		// '<?xml' VersionInfo EncodingDecl S 'standalone' Char
+		
+		while (IsWhiteSpace(currentCharacter))
+		{
+			if (NextCharBad(true))
+				return false;
+		}
+
+		if (currentCharacter != Equals)
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		// '<?xml' VersionInfo EncodingDecl S 'standalone' S? '='
+
+		if (NextCharBad(true))
+			return false;
+
+		while (IsWhiteSpace(currentCharacter))
+		{
+			if (NextCharBad(true))
+				return false;
+		}
+
+		quoteChar = currentCharacter;
+
+		if (quoteChar == DoubleQuote)
+		{
+			// '<?xml' VersionInfo EncodingDecl S 'standalone' Eq '"'
+			standaloneAttr.Delimiter = QuotationMark::DoubleQuote;
+		}
+		else if (quoteChar == SingleQuote)
+		{
+			// '<?xml' VersionInfo EncodingDecl S 'standalone' Eq "'"
+			standaloneAttr.Delimiter = QuotationMark::SingleQuote;
+		}
+		else
+		{
+			tempRow = currentRow;
+			tempColumn = currentColumn;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
+		if (NextCharBad(true))
+			return false;
+
+		if (currentCharacter == Yes[0])
+		{
+			CharactersWriterType::WriteCharacter(standaloneAttr.Value, currentCharacter);
+			if (NextCharBad(true))
+				return false;
+			if (currentCharacter == Yes[1])
+			{
+				CharactersWriterType::WriteCharacter(standaloneAttr.Value, currentCharacter);
+				if (NextCharBad(true))
+					return false;
+				if (currentCharacter == Yes[2])
+				{
+					CharactersWriterType::WriteCharacter(standaloneAttr.Value, currentCharacter);
+					if (NextCharBad(true))
+						return false;
+					if (currentCharacter == quoteChar)
+					{
+						// '<?xml' VersionInfo EncodingDecl SDDecl
+						if (NextCharBad(true))
+							return false;
+						while (IsWhiteSpace(currentCharacter))
+						{
+							if (NextCharBad(true))
+								return false;
+						}
+						if (currentCharacter != Question)
+						{
+							tempRow = currentRow;
+							tempColumn = currentColumn;
+							Reset();
+							SetError(ErrorCode::InvalidSyntax);
+							row = tempRow;
+							column = tempColumn;
+							return false;
+						}
+						if (NextCharBad(true))
+							return false;
+						if (currentCharacter != GreaterThan)
+						{
+							tempRow = currentRow;
+							tempColumn = currentColumn;
+							Reset();
+							SetError(ErrorCode::InvalidSyntax);
+							row = tempRow;
+							column = tempColumn;
+							return false;
+						}
+
+						// '<?xml' VersionInfo EncodingDecl SDDecl '?>'
+						node = Inspected::XmlDeclaration;
+						return true;
+					}
+				}
+			}
+		}
+		else if (currentCharacter == No[0])
+		{
+			CharactersWriterType::WriteCharacter(standaloneAttr.Value, currentCharacter);
+			if (NextCharBad(true))
+				return false;
+			if (currentCharacter == No[1])
+			{
+				CharactersWriterType::WriteCharacter(standaloneAttr.Value, currentCharacter);
+				if (NextCharBad(true))
+					return false;
+				if (currentCharacter == quoteChar)
+				{
+					// '<?xml' VersionInfo EncodingDecl SDDecl
+					if (NextCharBad(true))
+						return false;
+					while (IsWhiteSpace(currentCharacter))
+					{
+						if (NextCharBad(true))
+							return false;
+					}
+					if (currentCharacter != Question)
+					{
+						tempRow = currentRow;
+						tempColumn = currentColumn;
+						Reset();
+						SetError(ErrorCode::InvalidSyntax);
+						row = tempRow;
+						column = tempColumn;
+						return false;
+					}
+					if (NextCharBad(true))
+						return false;
+					if (currentCharacter != GreaterThan)
+					{
+						tempRow = currentRow;
+						tempColumn = currentColumn;
+						Reset();
+						SetError(ErrorCode::InvalidSyntax);
+						row = tempRow;
+						column = tempColumn;
+						return false;
+					}
+
+					// '<?xml' VersionInfo EncodingDecl SDDecl '?>'
+					node = Inspected::XmlDeclaration;
+					return true;
+				}
+			}
+		}
+
+		tempRow = currentRow;
+		tempColumn = currentColumn;
+		Reset();
+		SetError(ErrorCode::InvalidSyntax);
+		row = tempRow;
+		column = tempColumn;
 		return false;
 	}
 
@@ -3679,6 +4326,128 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::ResolveEncoding(const AttributeType& encoding)
+	{
+		// comparingName is already set.
+
+		SizeType tempRow;
+		SizeType tempColumn;
+
+		if (IsUtf8Charset())
+		{
+			if (bom == Details::Bom::Utf8 ||
+				bom == Details::Bom::None)
+				return true;
+		}
+		else if (IsUtf16Charset())
+		{
+			if (bom == Details::Bom::Utf16BE ||
+				bom == Details::Bom::Utf16LE)
+				return true;
+		}
+		else if (IsUtf32Charset())
+		{
+			if (bom == Details::Bom::Utf32BE ||
+				bom == Details::Bom::Utf32LE)
+				return true;
+		}
+		else if (IsUtf16BECharset())
+		{
+			if (bom == Details::Bom::Utf16BE)
+				return true;
+		}
+		else if (IsUtf16LECharset())
+		{
+			if (bom == Details::Bom::Utf16LE)
+				return true;
+		}
+		else if (IsUtf32BECharset())
+		{
+			if (bom == Details::Bom::Utf32BE)
+				return true;
+		}
+		else if (IsUtf32LECharset())
+		{
+			if (bom == Details::Bom::Utf32LE)
+				return true;
+		}
+		else
+		{
+			tempRow = encoding.Row;
+			tempColumn = encoding.Column;
+			Reset();
+			SetError(ErrorCode::UnknownEncoding);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+		
+		tempRow = encoding.Row;
+		tempColumn = encoding.Column;
+		Reset();
+		SetError(ErrorCode::EncodingConfusion);
+		row = tempRow;
+		column = tempColumn;
+		return false;
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsUtf8Charset()
+	{
+		// comparingName contains encoding name.
+		return (comparingName == U"UTF-8" ||
+			comparingName == U"csUTF8");
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsUtf16Charset()
+	{
+		// comparingName contains encoding name.
+		return (comparingName == U"UTF-16" ||
+			comparingName == U"csUTF16");
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsUtf16BECharset()
+	{
+		// comparingName contains encoding name.
+		return (comparingName == U"UTF-16BE" ||
+			comparingName == U"csUTF16BE");
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsUtf16LECharset()
+	{
+		// comparingName contains encoding name.
+		return (comparingName == U"UTF-16LE" ||
+			comparingName == U"csUTF16LE");
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsUtf32Charset()
+	{
+		// comparingName contains encoding name.
+		return (comparingName == U"UTF-32" ||
+			comparingName == U"csUTF32");
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsUtf32BECharset()
+	{
+		// comparingName contains encoding name.
+		return (comparingName == U"UTF-32BE" ||
+			comparingName == U"csUTF32BE");
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsUtf32LECharset()
+	{
+		// comparingName contains encoding name.
+		return (comparingName == U"UTF-32LE" ||
+			comparingName == U"csUTF32LE");
+	}
+
+	template <typename TCharactersWriter>
 	inline typename Inspector<TCharactersWriter>::AttributeType&
 		Inspector<TCharactersWriter>::NewAttribute()
 	{
@@ -3949,6 +4718,66 @@ namespace Xml
 					SetError(ErrorCode::NoElement);
 					return false;
 				}
+			}
+
+			if (bom != Details::Bom::None &&
+				bom != Details::Bom::Utf8 &&
+				bom != Details::Bom::Utf16BE &&
+				bom != Details::Bom::Utf16LE)
+			{
+				// Encoding declaration is required here.
+
+				if (currentCharacter != LessThan)
+				{
+					Reset();
+					SetError(ErrorCode::EncodingDeclarationRequired);
+					row = 1;
+					column = 1;
+					return false;
+				}
+
+				if (NextCharBad(true))
+					return false;
+
+				if (currentCharacter != Question)
+				{
+					Reset();
+					SetError(ErrorCode::EncodingDeclarationRequired);
+					row = 1;
+					column = 1;
+					return false;
+				}
+
+				for (std::size_t i = 0; i < 3; ++i)
+				{
+					if (NextCharBad(true))
+						return false;
+					if (currentCharacter != LowerXml[i])
+					{
+						Reset();
+						SetError(ErrorCode::EncodingDeclarationRequired);
+						row = 1;
+						column = 1;
+						return false;
+					}
+					CharactersWriterType::WriteCharacter(name, currentCharacter);
+					CharactersWriterType::WriteCharacter(localName, currentCharacter);
+				}
+
+				// '<?xml'
+				if (NextCharBad(true))
+					return false;
+
+				if (!IsWhiteSpace(currentCharacter))
+				{
+					Reset();
+					SetError(ErrorCode::EncodingDeclarationRequired);
+					row = 1;
+					column = 1;
+					return false;
+				}
+
+				return ParseXmlDeclaration();
 			}
 
 			if (IsWhiteSpace(currentCharacter))
