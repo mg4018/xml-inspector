@@ -4720,7 +4720,8 @@ namespace Xml
 				}
 			}
 
-			if (bom != Details::Bom::None &&
+			if (sourceType != SourceReader &&
+				bom != Details::Bom::None &&
 				bom != Details::Bom::Utf8 &&
 				bom != Details::Bom::Utf16BE &&
 				bom != Details::Bom::Utf16LE)
