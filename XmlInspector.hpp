@@ -1184,7 +1184,7 @@ namespace Xml
 	{
 		if (sourceType == SourcePath)
 		{
-			fileStream.open(fPath.c_str());
+			fileStream.open(fPath.c_str(), std::ifstream::binary);
 			if (!fileStream.is_open())
 			{
 				fileStream.clear();
