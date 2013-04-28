@@ -50,7 +50,7 @@ namespace Xml
 			/**
 				@brief Checks if character is allowed in XML document.
 
-				@param[in] codePoint Unicode character.
+				@param codePoint Unicode character.
 				@return True if character is allowed in XML document.
 				@sa http://www.w3.org/TR/2008/REC-xml-20081126/#NT-Char.
 			*/
@@ -59,49 +59,49 @@ namespace Xml
 			/**
 				@brief Checks if character is a white space.
 
-				@param[in] codePoint Unicode character.
-				@return True if character is either space, carriage return, line feed, or tab.
+				@param codePoint Unicode character.
+				@return True if character is either space, carriage return, line feed or tab.
 			*/
 			static bool IsWhiteSpace(char32_t codePoint);
 
 			/**
-				@brief Checks if character is allowed to be the first character of XML name.
+				@brief Checks if character is allowed to be the first character of the XML name.
 
-				@param[in] codePoint Unicode character.
-				@return True if character is allowed to be the first character of XML name.
+				@param codePoint Unicode character.
+				@return True if character is allowed to be the first character of the XML name.
 				@sa http://www.w3.org/TR/2008/REC-xml-20081126/#NT-NameStartChar.
 			*/
 			static bool IsNameStartChar(char32_t codePoint);
 
 			/**
 				@brief Checks if character is allowed to be the one of
-					XML name characters except first.
+					the XML name characters except first.
 
-				@param[in] codePoint Unicode character.
+				@param codePoint Unicode character.
 				@return True if character is allowed to be the one of
-					XML name characters except first.
+					the XML name characters except first.
 				@sa http://www.w3.org/TR/2008/REC-xml-20081126/#NT-NameChar.
 			*/
 			static bool IsNameChar(char32_t codePoint);
 
 			/**
 				@brief Checks if character is allowed to be the first character of
-					XML encoding declaration name.
+					the XML encoding declaration name.
 
-				@param[in] codePoint Unicode character.
+				@param codePoint Unicode character.
 				@return True if character is allowed to be the first character of
-					XML encoding declaration name.
+					the XML encoding declaration name.
 				@sa http://www.w3.org/TR/2008/REC-xml-20081126/#NT-EncName.
 			*/
 			static bool IsEncNameStartChar(char32_t codePoint);
 
 			/**
 				@brief Checks if character is allowed to be the one of
-					XML encoding declaration name characters except first.
+					the XML encoding declaration name characters except first.
 
-				@param[in] codePoint Unicode character.
+				@param codePoint Unicode character.
 				@return True if character is allowed to be the one of
-					XML encoding declaration name characters except first.
+					the XML encoding declaration name characters except first.
 				@sa http://www.w3.org/TR/2008/REC-xml-20081126/#NT-EncName.
 			*/
 			static bool IsEncNameChar(char32_t codePoint);
@@ -109,7 +109,7 @@ namespace Xml
 			/**
 				@brief Gets the value represented by hexadecimal character.
 
-				@param[in] codePoint Unicode character.
+				@param codePoint Unicode character.
 				@return Value represented by hexadecimal character,
 					or -1 if this is not the hexadecimal character.
 			*/
@@ -117,7 +117,7 @@ namespace Xml
 
 			/**
 				@brief Reads one character from the specifically encoded source
-					and translates it to Unicode character.
+					and translates it to the Unicode character.
 
 				The source could be a stream, buffer or anything
 				depending on derived class.
@@ -140,7 +140,7 @@ namespace Xml
 			/**
 				@brief Gets the bytes count of UTF-8 encoded character.
 
-				@param[in] leadingByte First byte of character sequence.
+				@param leadingByte First byte of character sequence.
 				@return Bytes count of UTF-8 encoded character or 0 if
 					character is invalid.
 			*/
@@ -188,12 +188,12 @@ namespace Xml
 			virtual int ReadCharacter(char32_t& result);
 
 			/**
-				@brief Gets the pointer to input stream.
+				@brief Gets the pointer to the input stream.
 			*/
 			std::istream* GetInputStream() const;
 
 			/**
-				@brief Replaces the pointer to input stream.
+				@brief Replaces the pointer to the input stream.
 			*/
 			void ResetInputStream(std::istream* inputStream);
 		};
@@ -201,15 +201,15 @@ namespace Xml
 		/**
 			@brief UTF-8 characters reader from iterators.
 
-			Purpose of this class is ability to parsing XML documents
+			Purpose of this class is an ability to parsing XML documents
 			from iterators with a fixed encoding (UTF-8) without
 			checking BOM and character set in XML declaration.
-			If you are not sure how document is encoded, use Inspector
-			constructor or Reset method with specified iterators instead
-			of this reader.
+			If you are not sure how document is encoded, use Xml::Inspector
+			constructor or Xml::Inspector::Reset method with specified
+			iterators instead of this reader.
 
-			You can also use reader object without intermediate
-			Inspector class:
+			You can also use the reader object without intermediate
+			Xml::Inspector class:
 			@code{.cpp}
             #include "CharactersReader.hpp"
             #include <iostream>
@@ -255,9 +255,9 @@ namespace Xml
 			/**
 				@brief Constructor.
 
-				@param[in] first,last Input iterators to the initial
+				@param first,last Input iterators to the initial
 					and final positions in a sequence of bytes. The range used
-					is [first,last), which contains all the elements
+					is [first,last), which contains all the bytes
 					between first and last, including the element pointed
 					by first but not the element pointed by last.
 			*/
@@ -295,9 +295,9 @@ namespace Xml
 			/**
 				@brief Replaces the iterators.
 
-				@param[in] first,last Input iterators to the initial
-					and final positions in a sequence. The range used
-					is [first,last), which contains all the elements
+				@param first,last Input iterators to the initial
+					and final positions in a sequence of bytes. The range used
+					is [first,last), which contains all the bytes
 					between first and last, including the element pointed
 					by first but not the element pointed by last.
 			*/
@@ -340,18 +340,18 @@ namespace Xml
 			virtual int ReadCharacter(char32_t& result);
 
 			/**
-				@brief Gets the pointer to input stream.
+				@brief Gets the pointer to the input stream.
 			*/
 			std::istream* GetInputStream() const;
 
 			/**
-				@brief Replaces the pointer to input stream.
+				@brief Replaces the pointer to the input stream.
 			*/
 			void ResetInputStream(std::istream* inputStream);
 		};
 
 		/**
-			@brief UTF-16 (little endian) characters reader from input stream.
+			@brief UTF-16 (little endian) characters reader from the input stream.
 		*/
 		class Utf16LEStreamReader : public CharactersReader
 		{
@@ -386,18 +386,18 @@ namespace Xml
 			virtual int ReadCharacter(char32_t& result);
 
 			/**
-				@brief Gets the pointer to input stream.
+				@brief Gets the pointer to the input stream.
 			*/
 			std::istream* GetInputStream() const;
 
 			/**
-				@brief Replaces the pointer to input stream.
+				@brief Replaces the pointer to the input stream.
 			*/
 			void ResetInputStream(std::istream* inputStream);
 		};
 
 		/**
-			@brief UTF-32 (big endian) characters reader from input stream.
+			@brief UTF-32 (big endian) characters reader from the input stream.
 		*/
 		class Utf32BEStreamReader : public CharactersReader
 		{
@@ -432,18 +432,18 @@ namespace Xml
 			virtual int ReadCharacter(char32_t& result);
 
 			/**
-				@brief Gets the pointer to input stream.
+				@brief Gets the pointer to the input stream.
 			*/
 			std::istream* GetInputStream() const;
 
 			/**
-				@brief Replaces the pointer to input stream.
+				@brief Replaces the pointer to the input stream.
 			*/
 			void ResetInputStream(std::istream* inputStream);
 		};
 
 		/**
-			@brief UTF-32 (little endian) characters reader from input stream.
+			@brief UTF-32 (little endian) characters reader from the input stream.
 		*/
 		class Utf32LEStreamReader : public CharactersReader
 		{
@@ -478,12 +478,12 @@ namespace Xml
 			virtual int ReadCharacter(char32_t& result);
 
 			/**
-				@brief Gets the pointer to input stream.
+				@brief Gets the pointer to the input stream.
 			*/
 			std::istream* GetInputStream() const;
 
 			/**
-				@brief Replaces the pointer to input stream.
+				@brief Replaces the pointer to the input stream.
 			*/
 			void ResetInputStream(std::istream* inputStream);
 		};

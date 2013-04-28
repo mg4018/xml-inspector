@@ -34,9 +34,7 @@ namespace Xml
 	namespace Encoding
 	{
 		/**
-			@brief Class responsible for writing strings in UTF-8 encoding.
-
-			TODO: detailed description...
+			@brief Class responsible for writing strings in the UTF-8 encoding.
 
 			@sa Utf16Writer, Utf32Writer and Inspector.
 		*/
@@ -44,25 +42,21 @@ namespace Xml
 		{
 		public:
 			/**
-				@brief String type that is able to store UTF-8 string.
+				@brief String type that is able to store the UTF-8 string.
 			*/
 			typedef std::string StringType;
 
 			/**
-				@brief Inserts Unicode character into the UTF-8 encoded string.
-
-				TODO: detailed description...
+				@brief Inserts the Unicode character into the UTF-8 encoded string.
 
 				@param[out] stringDestination String where the character should be inserted.
-				@param[in] codePoint Code point of Unicode character to write.
+				@param codePoint Code point of the Unicode character to write.
 			*/
 			static void WriteCharacter(StringType& stringDestination, char32_t codePoint);
 		};
 
 		/**
-			@brief Class responsible for writing strings in UTF-16 encoding.
-
-			TODO: detailed description...
+			@brief Class responsible for writing strings in the UTF-16 encoding.
 
 			@sa Utf8Writer, Utf32Writer and Inspector.
 		*/
@@ -70,25 +64,21 @@ namespace Xml
 		{
 		public:
 			/**
-				@brief String type that is able to store UTF-16 string.
+				@brief String type that is able to store the UTF-16 string.
 			*/
 			typedef std::u16string StringType;
 
 			/**
-				@brief Inserts Unicode character into the UTF-16 encoded string.
-
-				TODO: detailed description...
+				@brief Inserts the Unicode character into the UTF-16 encoded string.
 
 				@param[out] stringDestination String where the character should be inserted.
-				@param[in] codePoint Code point of Unicode character to write.
+				@param codePoint Code point of the Unicode character to write.
 			*/
 			static void WriteCharacter(StringType& stringDestination, char32_t codePoint);
 		};
 
 		/**
-			@brief Class responsible for writing strings in UTF-32 encoding.
-
-			TODO: detailed description...
+			@brief Class responsible for writing strings in the UTF-32 encoding.
 
 			@sa Utf8Writer, Utf16Writer and Inspector.
 		*/
@@ -96,17 +86,15 @@ namespace Xml
 		{
 		public:
 			/**
-				@brief String type that is able to store UTF-32 string.
+				@brief String type that is able to store the UTF-32 string.
 			*/
 			typedef std::u32string StringType;
 
 			/**
 				@brief Inserts Unicode character into the UTF-32 encoded string.
 
-				TODO: detailed description...
-
 				@param[out] stringDestination String where the character should be inserted.
-				@param[in] codePoint Code point of Unicode character to write.
+				@param codePoint Code point of Unicode character to write.
 			*/
 			static void WriteCharacter(StringType& stringDestination, char32_t codePoint);
 		};

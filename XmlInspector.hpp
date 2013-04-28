@@ -41,7 +41,7 @@
 */
 
 /**
-	@brief Main namespace for XML solutions.
+	@brief Main namespace for the XML solutions.
 */
 namespace Xml
 {
@@ -66,7 +66,7 @@ namespace Xml
 		EndTag,
 
 		/**
-			@brief An empty element (for example <tt>&lt;mytag /&gt;</tt> ).
+			@brief An empty element tag (for example <tt>&lt;mytag /&gt;</tt> ).
 		*/
 		EmptyElementTag,
 
@@ -129,7 +129,7 @@ namespace Xml
 		/**
 			@brief Invalid byte sequence. For example
 				invalid byte order mark (BOM) or alone
-				surrogate halve in UTF-16.
+				surrogate halve in the UTF-16 encoding.
 		*/
 		InvalidByteSequence,
 
@@ -194,7 +194,7 @@ namespace Xml
 		UnclosedToken,
 
 		/**
-			@brief Invalid syntax of Reference.
+			@brief Invalid syntax of the Reference.
 				Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-Reference.
 		*/
 		InvalidReferenceSyntax,
@@ -209,7 +209,7 @@ namespace Xml
 		/**
 			@brief For example: <tt>&lt;a&gt;text&lt;/b&gt;</tt>. <tt>&lt;/a&gt;</tt> expected, but <tt>&lt;/b&gt;</tt> found.
 				Another example: <tt>&lt;/b&gt;</tt>. Found closing tag, but there is no start tag of @c b.
-				Both examples are not allowed in XML files.
+				Both examples are not allowed in the XML files.
 		*/
 		UnexpectedEndTag,
 
@@ -234,17 +234,17 @@ namespace Xml
 		PrefixWithoutAssignedNamespace,
 
 		/**
-			@brief Namespace declaration with prefix cannot have empty value.
+			@brief Namespace declaration with a prefix cannot have an empty value.
 		*/
 		PrefixWithEmptyNamespace,
 
 		/**
-			@brief Reserved xmlns prefix cannot be declared or set to empty value.
+			@brief Reserved xmlns prefix cannot be declared or set to an empty value.
 		*/
 		XmlnsDeclared,
 
 		/**
-			@brief Prefix is bound to reserved namespace.
+			@brief Prefix is bound to the reserved namespace.
 		*/
 		PrefixBoundToReservedNamespace,
 
@@ -254,7 +254,7 @@ namespace Xml
 		ReservedNamespaceAsDefault,
 
 		/**
-			@brief Prefix 'xml' is reserved for use by XML and has a fixed
+			@brief Prefix 'xml' is reserved for use by the XML and has a fixed
 				namespace URI http://www.w3.org/XML/1998/namespace.
 		*/
 		InvalidXmlPrefixDeclaration
@@ -266,12 +266,12 @@ namespace Xml
 	enum class QuotationMark
 	{
 		/**
-			@brief Attribute is delimited by single-quote characters (for example <tt>&lt;a name='value'&gt;</tt> ).
+			@brief Attribute is delimited by a single-quote characters (for example <tt>&lt;a name='value'&gt;</tt> ).
 		*/
 		SingleQuote,
 
 		/**
-			@brief Attribute is delimited by double-quote characters (for example <tt>&lt;a name="value"&gt;</tt> ).
+			@brief Attribute is delimited by a double-quote characters (for example <tt>&lt;a name="value"&gt;</tt> ).
 		*/
 		DoubleQuote
 	};
@@ -284,12 +284,12 @@ namespace Xml
 	{
 	public:
 		/**
-			@brief Alias to string type provided by class template parameter.
+			@brief Alias to string type provided by the class template parameter.
 		*/
 		typedef TStringType StringType;
 
 		/**
-			@brief Unsigned integer type definition for determining location in XML document.
+			@brief Unsigned integer type definition for determining location in the XML document.
 				This type should be enough to store any file size or memory buffer size.
 		*/
 		typedef uint_least64_t SizeType;
@@ -447,7 +447,6 @@ namespace Xml
         #include "XmlInspector.hpp"
         #include <iostream>
         #include <cstdlib>
-        #include <string>
 
         int main()
         {
@@ -483,13 +482,17 @@ namespace Xml
             }
 
             if (inspector.GetErrorCode() != Xml::ErrorCode::None)
-                std::cout << "Error: " << inspector.GetErrorMessage() << "\n";
+            {
+                std::cout << "Error: " << inspector.GetErrorMessage() <<
+                " At row: " << inspector.GetRow() <<
+				", column: " << inspector.GetColumn() << "\n";
+            }
 
             return EXIT_SUCCESS;
         }
 		@endcode
 
-		@tparam TCharactersWriter Writer with specified encoding. You don't need to care how XML file is encoded.
+		@tparam TCharactersWriter Writer with specified encoding. You don't need to care how the XML file is encoded.
 			You can choose how you want to store the strings between Utf8CharactersWriter, Utf16CharactersWriter
 			and Utf32CharactersWriter class from CharactersWriter.hpp file. They respectively store the strings in
 			@c std::string, @c std::u16string and @c std::u32string. You can also write your own fancy way of
@@ -500,12 +503,12 @@ namespace Xml
 	{
 	public:
 		/**
-			@brief Alias of characters writer type that is used to write strings.
+			@brief Alias of a characters writer type that is used to write strings.
 		*/
 		typedef TCharactersWriter CharactersWriterType;
 
 		/**
-			@brief String type provided by CharactersWriterType.
+			@brief String type provided by the CharactersWriterType.
 		*/
 		typedef typename TCharactersWriter::StringType StringType;
 
@@ -515,7 +518,7 @@ namespace Xml
 		typedef InspectedAttribute<StringType> AttributeType;
 
 		/**
-			@brief Unsigned integer type definition for determining location in XML document.
+			@brief Unsigned integer type definition for determining location in the XML document.
 				This type should be enough to store any file size or memory buffer size.
 		*/
 		typedef uint_least64_t SizeType;
@@ -712,8 +715,6 @@ namespace Xml
 		/**
 			@brief Initializes a new instance of the Inspector class
 				with the specified stream.
-
-			TODO: warning - stream from this pointer must exist while reading nodes.
 		*/
 		Inspector(std::istream* inputStream);
 
@@ -721,7 +722,7 @@ namespace Xml
 			@brief Initializes a new instance of the Inspector class
 				with the specified iterators.
 
-			@param[in] first,last Input iterators to the initial
+			@param first,last Input iterators to the initial
 				and final positions in a sequence of bytes. The range used
 				is [first,last), which contains all the bytes
 				between first and last, including the byte pointed
@@ -733,8 +734,6 @@ namespace Xml
 		/**
 			@brief Initializes a new instance of the Inspector class
 				with the specified characters reader interface.
-
-			TODO: warning message about BOM.
 		*/
 		Inspector(Encoding::CharactersReader* reader);
 
@@ -755,8 +754,6 @@ namespace Xml
 
 		/**
 			@brief Inspects the next node from the stream.
-
-			TODO: detailed description...
 
 			@return True if the next node was inspected successfully.
 				False if there are no more nodes to inspect.
@@ -806,7 +803,7 @@ namespace Xml
 		/**
 			@brief Returns attribute at specified index on the last inspected node.
 
-			@param[in] index Index of the attribute.
+			@param index Index of the attribute.
 			@return Constant reference to the chosen attribute.
 			@exception std::out_of_range Index starting value is 0,
 				and GetAttributesCount() result should be greater than index.
@@ -852,7 +849,6 @@ namespace Xml
 			@endverbatim
 			Column number of <tt>&lt;mytag /&gt;</tt> is 7.
 
-			@warning Carriage return characters (U+000D) are ignored.
 			@sa GetRow() and GetDepth().
 		*/
 		SizeType GetColumn() const;
@@ -919,7 +915,6 @@ namespace Xml
 			It doesn't clear the helpful containers to reduce the number of
 			string allocations in future reading nodes. To completely
 			clear those containers you can call the Clear method.
-			TODO: warning - stream from this pointer must exist while reading nodes.
 
 			@sa Clear().
 		*/
@@ -927,11 +922,11 @@ namespace Xml
 
 		/**
 			@brief Resets the state of Inspector object and assign
-				the source to the specified iterators.
+				the source to the specified byte sequence.
 
-			@param[in] first,last Input iterators to the initial
-				and final positions in a sequence. The range used
-				is [first,last), which contains all the elements
+			@param first,last Input iterators to the initial
+				and final positions in a sequence of bytes. The range used
+				is [first,last), which contains all the bytes
 				between first and last, including the element pointed
 				by first but not the element pointed by last.
 
@@ -951,7 +946,6 @@ namespace Xml
 			It doesn't clear the helpful containers to reduce the number of
 			string allocations in future reading nodes. To completely
 			clear those containers you can call the Clear method.
-			TODO: warning message about BOM.
 
 			@sa Clear().
 		*/
