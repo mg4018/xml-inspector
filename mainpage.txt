@@ -33,7 +33,8 @@ I think this project met these expectations, but first you should know two thing
 	</li>
 	<li>
 		XML Inspector uses C++11 standard, mainly for Unicode string literals. When this documentation
-		was written, there weren't so many common compilers supporting full standard yet.
+		was written, there weren't so many common compilers supporting full standard yet. Tested on
+		gcc 4.7.2 on Linux and MinGW 4.7.2 on Windows.
 	</li>
 </ul>
 
@@ -60,7 +61,7 @@ of parsing XML documents. For more information, search "StAX". Now let's parse s
 	<pokemons />
 </shelter>
 @endverbatim
-First you need to add 3 headers to you project:
+First you need to add 3 headers to your project:
 @verbatim
 XmlInspector.hpp
 CharactersReader.hpp

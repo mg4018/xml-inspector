@@ -493,8 +493,8 @@ namespace Xml
 		@endcode
 
 		@tparam TCharactersWriter Writer with specified encoding. You don't need to care how the XML file is encoded.
-			You can choose how you want to store the strings between Utf8CharactersWriter, Utf16CharactersWriter
-			and Utf32CharactersWriter class from CharactersWriter.hpp file. They respectively store the strings in
+			You can choose how you want to store the strings between Utf8Writer, Utf16Writer
+			and Utf32Writer class from CharactersWriter.hpp file. They respectively store the strings in
 			@c std::string, @c std::u16string and @c std::u32string. You can also write your own fancy way of
 			storing strings. For example you may want to use @c std::wstring and even other than Unicode encoding.
 	*/
