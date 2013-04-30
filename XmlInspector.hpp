@@ -4370,7 +4370,22 @@ namespace Xml
 		else if (IsISO_8859_2_Charset())
 		{
 			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+				{
+					newReader = new Encoding::ISO_8859_2_StreamReader(&fileStream);
+					delete reader;
+					reader = newReader;
+				}
+				else
+				{
+					newReader = new Encoding::ISO_8859_2_StreamReader(inputStreamPtr);
+					delete reader;
+					reader = newReader;
+				}
 				return true;
+			}
 		}
 		else
 		{
