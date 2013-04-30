@@ -42,7 +42,7 @@ namespace Xml
 		{
 		public:
 			/**
-				@brief String type that is able to store the UTF-8 string.
+				@brief String type that is able to store the UTF-8 encoded string.
 			*/
 			typedef std::string StringType;
 
@@ -64,7 +64,7 @@ namespace Xml
 		{
 		public:
 			/**
-				@brief String type that is able to store the UTF-16 string.
+				@brief String type that is able to store the UTF-16 encoded string.
 			*/
 			typedef std::u16string StringType;
 
@@ -86,7 +86,7 @@ namespace Xml
 		{
 		public:
 			/**
-				@brief String type that is able to store the UTF-32 string.
+				@brief String type that is able to store the UTF-32 encoded string.
 			*/
 			typedef std::u32string StringType;
 

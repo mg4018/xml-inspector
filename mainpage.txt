@@ -34,7 +34,7 @@ I think this project met these expectations, but first you should know two thing
 	<li>
 		XML Inspector uses C++11 standard, mainly for Unicode string literals. When this documentation
 		was written, there weren't so many common compilers supporting full standard yet. Tested on
-		gcc 4.7.2 on Linux and MinGW 4.7.2 on Windows.
+		GCC 4.7.2 on Linux and MinGW 4.7.2 on Windows.
 	</li>
 </ul>
 
@@ -212,7 +212,7 @@ Root element needs to allocate space for 3 attributes. Element <tt>aaa</tt> has 
 one attribute, so the two more attributes are not needed now. If element <tt>aaa</tt>
 would delete those strings, then the next element <tt>bbb</tt> would need to allocate
 space for attribute again. XML Inspector tries to reduce the number of allocations for
-next elements or documents. If you don't need Xml::Inspector object anymore, you can
+next elements and documents. If you don't need Xml::Inspector object anymore, you can
 call Xml::Inspector::Clear method, or wait for destructor to free some space.
 
 */

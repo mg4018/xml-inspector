@@ -140,6 +140,7 @@ public:
 		UnknownEncodingTest();
 		EncodingConfusionTest();
 		EncodingDeclarationRequiredTest();
+		ISO_8859_2_Test();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -5295,6 +5296,45 @@ public:
 		assert(inspector.GetRow() == 1);
 		assert(inspector.GetColumn() == 1);
 		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void ISO_8859_2_Test()
+	{
+		std::cout << "ISO-8859-2 test... ";
+
+		// ISO-8859-2
+		unsigned char source[] =
+		{
+			0x20, 0x33, 0x58, 0xA0, 0xA1, 0xB1, 0xA6, 0xEA,
+			0xFC, 0xFF, 0xD0, 0xB7
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x20, 0x33, 0x58, 0xA0, 0x0104, 0x0105, 0x015A, 0x0119,
+			0xFC, 0x02D9, 0x0110, 0x02C7
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::ISO_8859_2_StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
 
 		std::cout << "OK\n";
 	}

@@ -46,7 +46,7 @@
 namespace Xml
 {
 	/**
-		@brief Specifies an inspected node type.
+		@brief An inspected node type.
 	*/
 	enum class Inspected
 	{
@@ -139,8 +139,8 @@ namespace Xml
 		UnknownEncoding,
 
 		/**
-			@brief Encoding confusion. For example UTF-8 from Byte Order Mark,
-				but UTF-32 in XML declaration encoding.
+			@brief Encoding confusion. For example UTF-8 from a byte order mark,
+				but UTF-32 in an XML declaration encoding.
 		*/
 		EncodingConfusion,
 
@@ -152,7 +152,7 @@ namespace Xml
 
 		/**
 			@brief Not allowed characters. For example some characters
-				outside the root element, where a white spaces are the
+				outside a root element, where a white spaces are the
 				only characters allowed.
 		*/
 		InvalidSyntax,
@@ -163,7 +163,7 @@ namespace Xml
 		InvalidXmlDeclarationLocation,
 
 		/**
-			@brief CDATA section is outside the root element.
+			@brief CDATA section is outside a root element.
 				Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-CDSect.
 		*/
 		CDataSectionOutside,
@@ -200,7 +200,7 @@ namespace Xml
 		InvalidReferenceSyntax,
 
 		/**
-			@brief Code point in character reference doesn't match
+			@brief Code point in the character reference doesn't match
 				the valid character in ISO/IEC 10646 character set.
 				Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-CharRef.
 		*/
@@ -219,7 +219,7 @@ namespace Xml
 		UnclosedTag,
 
 		/**
-			@brief There is no root element in document.
+			@brief There is no root element in a document.
 		*/
 		NoElement,
 
@@ -284,7 +284,7 @@ namespace Xml
 	{
 	public:
 		/**
-			@brief Alias to string type provided by the class template parameter.
+			@brief Alias to the string type provided by the class template parameter.
 		*/
 		typedef TStringType StringType;
 
@@ -492,9 +492,9 @@ namespace Xml
         }
 		@endcode
 
-		@tparam TCharactersWriter Writer with specified encoding. You don't need to care how the XML file is encoded.
-			You can choose how you want to store the strings between Utf8Writer, Utf16Writer
-			and Utf32Writer class from CharactersWriter.hpp file. They respectively store the strings in
+		@tparam TCharactersWriter Writer with a specified encoding. You don't need to care how the XML file is encoded.
+			You can choose how you want to store the strings between Xml::Encoding::Utf8Writer, Xml::Encoding::Utf16Writer
+			and Xml::Encoding::Utf32Writer class from CharactersWriter.hpp file. They respectively store the strings in
 			@c std::string, @c std::u16string and @c std::u32string. You can also write your own fancy way of
 			storing strings. For example you may want to use @c std::wstring and even other than Unicode encoding.
 	*/
@@ -503,7 +503,7 @@ namespace Xml
 	{
 	public:
 		/**
-			@brief Alias of a characters writer type that is used to write strings.
+			@brief Alias of the characters writer type that is used to write strings.
 		*/
 		typedef TCharactersWriter CharactersWriterType;
 
@@ -689,6 +689,8 @@ namespace Xml
 
 		bool IsUtf32LECharset();
 
+		bool IsISO_8859_2_Charset();
+
 		AttributeType& NewAttribute();
 
 		UnclosedTagType& NewUnclosedTag();
@@ -801,7 +803,7 @@ namespace Xml
 		SizeType GetAttributesCount() const;
 
 		/**
-			@brief Returns attribute at specified index on the last inspected node.
+			@brief Returns attribute at the specified index on the last inspected node.
 
 			@param index Index of the attribute.
 			@return Constant reference to the chosen attribute.
@@ -1100,7 +1102,7 @@ namespace Xml
 					return;
 				case ErrorCode::EncodingDeclarationRequired:
 					errMsg = "Encoding declaration must precede content that is not "
-						"legal UTF-8 or UTF-16.";
+						"a legal UTF-8 or UTF-16.";
 					return;
 				case ErrorCode::InvalidSyntax:
 					errMsg = "Invalid syntax.";
@@ -1150,10 +1152,10 @@ namespace Xml
 					errMsg = "Name prefix must bound to the namespace URI.";
 					return;
 				case ErrorCode::PrefixWithEmptyNamespace:
-					errMsg = "Namespace declaration with prefix cannot have empty value.";
+					errMsg = "Namespace declaration with prefix cannot have an empty value.";
 					return;
 				case ErrorCode::XmlnsDeclared:
-					errMsg = "Reserved xmlns prefix cannot be declared or set to empty value.";
+					errMsg = "Reserved xmlns prefix cannot be declared or set to an empty value.";
 					return;
 				case ErrorCode::PrefixBoundToReservedNamespace:
 					errMsg = "Prefix is bound to reserved namespace.";
@@ -4365,6 +4367,11 @@ namespace Xml
 			if (bom == Details::Bom::Utf32LE)
 				return true;
 		}
+		else if (IsISO_8859_2_Charset())
+		{
+			if (bom == Details::Bom::None)
+				return true;
+		}
 		else
 		{
 			tempRow = encoding.Row;
@@ -4439,6 +4446,18 @@ namespace Xml
 		// comparingName contains encoding name.
 		return (comparingName == U"UTF-32LE" ||
 			comparingName == U"csUTF32LE");
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsISO_8859_2_Charset()
+	{
+		// comparingName contains encoding name.
+		return (comparingName == U"ISO-8859-2" ||
+			comparingName == U"iso-ir-101" ||
+			comparingName == U"ISO_8859-2" ||
+			comparingName == U"latin2" ||
+			comparingName == U"l2" ||
+			comparingName == U"csISOLatin2");
 	}
 
 	template <typename TCharactersWriter>
