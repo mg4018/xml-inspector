@@ -689,6 +689,8 @@ namespace Xml
 
 		bool IsUtf32LECharset();
 
+		bool IsISO_8859_1_Charset();
+
 		bool IsISO_8859_2_Charset();
 
 		AttributeType& NewAttribute();
@@ -4367,23 +4369,31 @@ namespace Xml
 			if (bom == Details::Bom::Utf32LE)
 				return true;
 		}
+		else if (IsISO_8859_1_Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::ISO_8859_1_StreamReader(&fileStream);
+				else
+					newReader = new Encoding::ISO_8859_1_StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
 		else if (IsISO_8859_2_Charset())
 		{
 			if (bom == Details::Bom::None)
 			{
 				Encoding::CharactersReader* newReader;
 				if (sourceType == SourcePath)
-				{
 					newReader = new Encoding::ISO_8859_2_StreamReader(&fileStream);
-					delete reader;
-					reader = newReader;
-				}
 				else
-				{
 					newReader = new Encoding::ISO_8859_2_StreamReader(inputStreamPtr);
-					delete reader;
-					reader = newReader;
-				}
+				delete reader;
+				reader = newReader;
 				return true;
 			}
 		}
@@ -4461,6 +4471,20 @@ namespace Xml
 		// comparingName contains encoding name.
 		return (comparingName == U"UTF-32LE" ||
 			comparingName == U"csUTF32LE");
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsISO_8859_1_Charset()
+	{
+		// comparingName contains encoding name.
+		return (comparingName == U"ISO-8859-1" ||
+			comparingName == U"iso-ir-100" ||
+			comparingName == U"ISO_8859-1" ||
+			comparingName == U"latin1" ||
+			comparingName == U"l1" ||
+			comparingName == U"IBM819" ||
+			comparingName == U"CP819" ||
+			comparingName == U"csISOLatin1");
 	}
 
 	template <typename TCharactersWriter>
