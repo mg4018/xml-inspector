@@ -693,6 +693,8 @@ namespace Xml
 
 		bool IsISO_8859_2_Charset();
 
+		bool IsWindows1250Charset();
+
 		AttributeType& NewAttribute();
 
 		UnclosedTagType& NewUnclosedTag();
@@ -4397,6 +4399,20 @@ namespace Xml
 				return true;
 			}
 		}
+		else if (IsWindows1250Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::Windows1250StreamReader(&fileStream);
+				else
+					newReader = new Encoding::Windows1250StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
 		else
 		{
 			tempRow = encoding.Row;
@@ -4497,6 +4513,14 @@ namespace Xml
 			comparingName == U"latin2" ||
 			comparingName == U"l2" ||
 			comparingName == U"csISOLatin2");
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsWindows1250Charset()
+	{
+		// comparingName contains encoding name.
+		return (comparingName == U"windows-1250" ||
+			comparingName == U"cswindows1250");
 	}
 
 	template <typename TCharactersWriter>

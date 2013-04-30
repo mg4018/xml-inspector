@@ -142,6 +142,7 @@ public:
 		EncodingDeclarationRequiredTest();
 		ISO_8859_1_Test();
 		ISO_8859_2_Test();
+		Windows1250Test();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -5361,6 +5362,43 @@ public:
 		std::istream is(&buf);
 
 		Xml::Encoding::ISO_8859_2_StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void Windows1250Test()
+	{
+		std::cout << "windows-1250 test... ";
+
+		// windows-1250
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x80, 0x9F, 0xA5, 0xFF
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x20AC, 0x017A, 0x0104, 0x02D9
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::Windows1250StreamReader reader(&is);
 		char32_t c;
 		std::u32string destination;
 		int result;
