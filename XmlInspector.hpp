@@ -693,7 +693,25 @@ namespace Xml
 
 		bool IsISO_8859_2_Charset();
 
+		bool IsWindows874Charset();
+
 		bool IsWindows1250Charset();
+
+		bool IsWindows1251Charset();
+
+		bool IsWindows1252Charset();
+
+		bool IsWindows1253Charset();
+
+		bool IsWindows1254Charset();
+
+		bool IsWindows1255Charset();
+
+		bool IsWindows1256Charset();
+
+		bool IsWindows1257Charset();
+
+		bool IsWindows1258Charset();
 
 		AttributeType& NewAttribute();
 
@@ -4401,6 +4419,20 @@ namespace Xml
 				return true;
 			}
 		}
+		else if (IsWindows874Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::Windows874StreamReader(&fileStream);
+				else
+					newReader = new Encoding::Windows874StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
 		else if (IsWindows1250Charset())
 		{
 			if (bom == Details::Bom::None)
@@ -4410,6 +4442,118 @@ namespace Xml
 					newReader = new Encoding::Windows1250StreamReader(&fileStream);
 				else
 					newReader = new Encoding::Windows1250StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsWindows1251Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::Windows1251StreamReader(&fileStream);
+				else
+					newReader = new Encoding::Windows1251StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsWindows1252Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::Windows1252StreamReader(&fileStream);
+				else
+					newReader = new Encoding::Windows1252StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsWindows1253Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::Windows1253StreamReader(&fileStream);
+				else
+					newReader = new Encoding::Windows1253StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsWindows1254Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::Windows1254StreamReader(&fileStream);
+				else
+					newReader = new Encoding::Windows1254StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsWindows1255Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::Windows1255StreamReader(&fileStream);
+				else
+					newReader = new Encoding::Windows1255StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsWindows1256Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::Windows1256StreamReader(&fileStream);
+				else
+					newReader = new Encoding::Windows1256StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsWindows1257Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::Windows1257StreamReader(&fileStream);
+				else
+					newReader = new Encoding::Windows1257StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsWindows1258Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::Windows1258StreamReader(&fileStream);
+				else
+					newReader = new Encoding::Windows1258StreamReader(inputStreamPtr);
 				delete reader;
 				reader = newReader;
 				return true;
@@ -4518,11 +4662,83 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsWindows874Charset()
+	{
+		return (
+			CharsetEqual(U"windows-874") ||
+			CharsetEqual(U"cswindows874"));
+	}
+
+	template <typename TCharactersWriter>
 	inline bool Inspector<TCharactersWriter>::IsWindows1250Charset()
 	{
 		return (
 			CharsetEqual(U"windows-1250") ||
 			CharsetEqual(U"cswindows1250"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsWindows1251Charset()
+	{
+		return (
+			CharsetEqual(U"windows-1251") ||
+			CharsetEqual(U"cswindows1251"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsWindows1252Charset()
+	{
+		return (
+			CharsetEqual(U"windows-1252") ||
+			CharsetEqual(U"cswindows1252"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsWindows1253Charset()
+	{
+		return (
+			CharsetEqual(U"windows-1253") ||
+			CharsetEqual(U"cswindows1253"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsWindows1254Charset()
+	{
+		return (
+			CharsetEqual(U"windows-1254") ||
+			CharsetEqual(U"cswindows1254"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsWindows1255Charset()
+	{
+		return (
+			CharsetEqual(U"windows-1255") ||
+			CharsetEqual(U"cswindows1255"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsWindows1256Charset()
+	{
+		return (
+			CharsetEqual(U"windows-1256") ||
+			CharsetEqual(U"cswindows1256"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsWindows1257Charset()
+	{
+		return (
+			CharsetEqual(U"windows-1257") ||
+			CharsetEqual(U"cswindows1257"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsWindows1258Charset()
+	{
+		return (
+			CharsetEqual(U"windows-1258") ||
+			CharsetEqual(U"cswindows1258"));
 	}
 
 	template <typename TCharactersWriter>

@@ -142,7 +142,16 @@ public:
 		EncodingDeclarationRequiredTest();
 		ISO_8859_1_Test();
 		ISO_8859_2_Test();
+		Windows874Test();
 		Windows1250Test();
+		Windows1251Test();
+		Windows1252Test();
+		Windows1253Test();
+		Windows1254Test();
+		Windows1255Test();
+		Windows1256Test();
+		Windows1257Test();
+		Windows1258Test();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -5378,6 +5387,43 @@ public:
 		std::cout << "OK\n";
 	}
 
+	void Windows874Test()
+	{
+		std::cout << "windows-874 test... ";
+
+		// windows-874
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0xA0, 0x80, 0xC2, 0xDF, 0xFB
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0xA0, 0x20AC, 0x0E22, 0x0E3F, 0x0E5B
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::Windows874StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
 	void Windows1250Test()
 	{
 		std::cout << "windows-1250 test... ";
@@ -5399,6 +5445,302 @@ public:
 		std::istream is(&buf);
 
 		Xml::Encoding::Windows1250StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void Windows1251Test()
+	{
+		std::cout << "windows-1251 test... ";
+
+		// windows-1251
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x88, 0xC6, 0xFF
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x20AC, 0x0416, 0x044F
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::Windows1251StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void Windows1252Test()
+	{
+		std::cout << "windows-1252 test... ";
+
+		// windows-1252
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x8A, 0xD7, 0xFF, 0x95
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x0160, 0xD7, 0xFF, 0x2022
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::Windows1252StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void Windows1253Test()
+	{
+		std::cout << "windows-1253 test... ";
+
+		// windows-1253
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x89, 0xA9, 0xFE
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x2030, 0xA9, 0x03CE
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::Windows1253StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void Windows1254Test()
+	{
+		std::cout << "windows-1254 test... ";
+
+		// windows-1254
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x95, 0x9F, 0xB1, 0xFF
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x2022, 0x0178, 0xB1, 0xFF
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::Windows1254StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void Windows1255Test()
+	{
+		std::cout << "windows-1255 test... ";
+
+		// windows-1255
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x8B, 0xA4, 0xB5, 0xCB, 0xFE
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x2039, 0x20AA, 0xB5, 0x05BB, 0x200F
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::Windows1255StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void Windows1256Test()
+	{
+		std::cout << "windows-1256 test... ";
+
+		// windows-1256
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x86, 0xA3, 0xAA, 0xFF
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x2020, 0xA3, 0x06BE, 0x06D2
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::Windows1256StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void Windows1257Test()
+	{
+		std::cout << "windows-1257 test... ";
+
+		// windows-1257
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x8E, 0xE3, 0xF3, 0xFF
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x02C7, 0x0107, 0xF3, 0x02D9
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::Windows1257StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void Windows1258Test()
+	{
+		std::cout << "windows-1258 test... ";
+
+		// windows-1258
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x8C, 0x9F, 0xC3, 0xFE, 0xFF
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x34, 0x7A, 0x0152, 0x0178, 0x0102, 0x20AB, 0xFF
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::Windows1258StreamReader reader(&is);
 		char32_t c;
 		std::u32string destination;
 		int result;
