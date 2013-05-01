@@ -700,6 +700,8 @@ namespace Xml
 		UnclosedTagType& NewUnclosedTag();
 
 		NamespaceDeclarationType& NewNamespace();
+
+		bool CharsetEqual(const char32_t* upper, const char32_t* lower, std::size_t size);
 	public:
 		/**
 			@brief Initializes a new instance of the Inspector class.
@@ -4436,91 +4438,131 @@ namespace Xml
 	template <typename TCharactersWriter>
 	inline bool Inspector<TCharactersWriter>::IsUtf8Charset()
 	{
-		// comparingName contains encoding name.
-		return (comparingName == U"UTF-8" ||
-			comparingName == U"csUTF8");
+		// 1234567890123456789
+		// UTF-8
+		// csUTF8
+		return (
+			CharsetEqual(U"UTF-8", U"utf-8", 5) ||
+			CharsetEqual(U"CSUTF8", U"csutf8", 6));
 	}
 
 	template <typename TCharactersWriter>
 	inline bool Inspector<TCharactersWriter>::IsUtf16Charset()
 	{
-		// comparingName contains encoding name.
-		return (comparingName == U"UTF-16" ||
-			comparingName == U"csUTF16");
+		// 1234567890123456789
+		// UTF-16
+		// csUTF16
+		return (
+			CharsetEqual(U"UTF-16", U"utf-16", 6) ||
+			CharsetEqual(U"CSUTF16", U"csutf16", 7));
 	}
 
 	template <typename TCharactersWriter>
 	inline bool Inspector<TCharactersWriter>::IsUtf16BECharset()
 	{
-		// comparingName contains encoding name.
-		return (comparingName == U"UTF-16BE" ||
-			comparingName == U"csUTF16BE");
+		// 1234567890123456789
+		// UTF-16BE
+		// csUTF16BE
+		return (
+			CharsetEqual(U"UTF-16BE", U"utf-16be", 8) ||
+			CharsetEqual(U"CSUTF16BE", U"csutf16be", 9));
 	}
 
 	template <typename TCharactersWriter>
 	inline bool Inspector<TCharactersWriter>::IsUtf16LECharset()
 	{
-		// comparingName contains encoding name.
-		return (comparingName == U"UTF-16LE" ||
-			comparingName == U"csUTF16LE");
+		// 1234567890123456789
+		// UTF-16LE
+		// csUTF16LE
+		return (
+			CharsetEqual(U"UTF-16LE", U"utf-16le", 8) ||
+			CharsetEqual(U"CSUTF16LE", U"csutf16le", 9));
 	}
 
 	template <typename TCharactersWriter>
 	inline bool Inspector<TCharactersWriter>::IsUtf32Charset()
 	{
-		// comparingName contains encoding name.
-		return (comparingName == U"UTF-32" ||
-			comparingName == U"csUTF32");
+		// 1234567890123456789
+		// UTF-32
+		// csUTF32
+		return (
+			CharsetEqual(U"UTF-32", U"utf-32", 6) ||
+			CharsetEqual(U"CSUTF32", U"csutf32", 7));
 	}
 
 	template <typename TCharactersWriter>
 	inline bool Inspector<TCharactersWriter>::IsUtf32BECharset()
 	{
-		// comparingName contains encoding name.
-		return (comparingName == U"UTF-32BE" ||
-			comparingName == U"csUTF32BE");
+		// 1234567890123456789
+		// UTF-32BE
+		// csUTF32BE
+		return (
+			CharsetEqual(U"UTF-32BE", U"utf-32be", 8) ||
+			CharsetEqual(U"CSUTF32BE", U"csutf32be", 9));
 	}
 
 	template <typename TCharactersWriter>
 	inline bool Inspector<TCharactersWriter>::IsUtf32LECharset()
 	{
-		// comparingName contains encoding name.
-		return (comparingName == U"UTF-32LE" ||
-			comparingName == U"csUTF32LE");
+		// 1234567890123456789
+		// UTF-32LE
+		// csUTF32LE
+		return (
+			CharsetEqual(U"UTF-32LE", U"utf-32le", 8) ||
+			CharsetEqual(U"CSUTF32LE", U"csutf32le", 9));
 	}
 
 	template <typename TCharactersWriter>
 	inline bool Inspector<TCharactersWriter>::IsISO_8859_1_Charset()
 	{
-		// comparingName contains encoding name.
-		return (comparingName == U"ISO-8859-1" ||
-			comparingName == U"iso-ir-100" ||
-			comparingName == U"ISO_8859-1" ||
-			comparingName == U"latin1" ||
-			comparingName == U"l1" ||
-			comparingName == U"IBM819" ||
-			comparingName == U"CP819" ||
-			comparingName == U"csISOLatin1");
+		// 1234567890123456789
+		// ISO-8859-1
+		// iso-ir-100
+		// ISO_8859-1
+		// latin1
+		// l1
+		// IBM819
+		// CP819
+		// csISOLatin1
+		return (
+			CharsetEqual(U"ISO-8859-1", U"iso-8859-1", 10) ||
+			CharsetEqual(U"ISO-IR-100", U"iso-ir-100", 10) ||
+			CharsetEqual(U"ISO_8859-1", U"iso_8859-1", 10) ||
+			CharsetEqual(U"LATIN1", U"latin1", 6) ||
+			CharsetEqual(U"L1", U"l1", 2) ||
+			CharsetEqual(U"IBM819", U"ibm819", 6) ||
+			CharsetEqual(U"CP819", U"cp819", 5) ||
+			CharsetEqual(U"CSISOLATIN1", U"csisolatin1", 11));
 	}
 
 	template <typename TCharactersWriter>
 	inline bool Inspector<TCharactersWriter>::IsISO_8859_2_Charset()
 	{
-		// comparingName contains encoding name.
-		return (comparingName == U"ISO-8859-2" ||
-			comparingName == U"iso-ir-101" ||
-			comparingName == U"ISO_8859-2" ||
-			comparingName == U"latin2" ||
-			comparingName == U"l2" ||
-			comparingName == U"csISOLatin2");
+		// 1234567890123456789
+		// ISO-8859-2
+		// iso-ir-101
+		// ISO_8859-2
+		// latin2
+		// l2
+		// csISOLatin2
+		return (
+			CharsetEqual(U"ISO-8859-2", U"iso-8859-2", 10) ||
+			CharsetEqual(U"ISO-IR-101", U"iso-ir-101", 10) ||
+			CharsetEqual(U"ISO_8859-2", U"iso_8859-2", 10) ||
+			CharsetEqual(U"LATIN2", U"latin2", 6) ||
+			CharsetEqual(U"L2", U"l2", 2) ||
+			CharsetEqual(U"CSISOLATIN2", U"csisolatin2", 11));
 	}
 
 	template <typename TCharactersWriter>
 	inline bool Inspector<TCharactersWriter>::IsWindows1250Charset()
 	{
-		// comparingName contains encoding name.
-		return (comparingName == U"windows-1250" ||
-			comparingName == U"cswindows1250");
+		// 1234567890123456789
+		// windows-1250
+		// cswindows1250
+		return (
+			CharsetEqual(U"WINDOWS-1250", U"windows-1250", 12) ||
+			CharsetEqual(U"CSWINDOWS1250", U"cswindows1250", 13));
 	}
 
 	template <typename TCharactersWriter>
@@ -4601,6 +4643,23 @@ namespace Xml
 		ref.Prefix.reserve(PrefixReserve);
 		ref.Uri.reserve(NamespaceUriReserve);
 		return ref;
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::CharsetEqual(
+		const char32_t* upper, const char32_t* lower, std::size_t size)
+	{
+		// comparingName contains encoding name.
+		if (size != comparingName.size())
+			return false;
+
+		for (std::size_t i = 0; i < size; ++i)
+		{
+			if (comparingName[i] != upper[i] && comparingName[i] != lower[i])
+				return false;
+		}
+
+		return true;
 	}
 
 	template <typename TCharactersWriter>
