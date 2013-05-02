@@ -2279,10 +2279,10 @@ namespace Xml
 			{
 				// "]]>" is not allowed here.
 				SizeType bracketCount = 0;
+				onlyWhite = false;
 				do
 				{
 					++bracketCount;
-					onlyWhite = false;
 					CharactersWriterType::WriteCharacter(value, currentCharacter);
 
 					if (NextCharBad(false))
@@ -2311,6 +2311,7 @@ namespace Xml
 					column = tempColumn;
 					return false;
 				}
+				continue;
 			}
 
 			if (!IsWhiteSpace(currentCharacter))
