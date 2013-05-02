@@ -1,7 +1,7 @@
 /** @mainpage
 
 <h2>Introduction</h2>
-XML Inspector is a streaming XML parser written in C++.
+XmlInspector is a streaming XML parser written in C++.
 This project was born because I could not find any parser that meets my requirements:
 <ul>
 	<li>
@@ -32,7 +32,7 @@ I think this project met these expectations, but first you should know two thing
 		then all information from such element would be ignored. This XML parser doesn't parse any DTDs.
 	</li>
 	<li>
-		XML Inspector uses C++11 standard, mainly for Unicode string literals. When this documentation
+		XmlInspector uses C++11 standard, mainly for Unicode string literals. When this documentation
 		was written, there weren't so many common compilers supporting full standard yet. Tested on
 		GCC 4.7.2 on Linux and MinGW 4.7.2 on Windows.
 	</li>
@@ -42,7 +42,7 @@ There are two most popular APIs for XML parsers:@n
 <b>DOM</b> - Tree-based parser that reads entire document into the tree structure.@n
 <b>SAX</b> - Event-based parser that operates on each piece of document sequentially.@n
 
-XML Inspector has similar idea to SAX, but instead of register callback functions and wait for events,
+XmlInspector has similar idea to SAX, but instead of register callback functions and wait for events,
 you can read a next node from XML document anytime you need. In my opinion it's a more convenient way
 of parsing XML documents. For more information, search "StAX". Now let's parse some file:
 
@@ -211,7 +211,7 @@ delete it, even if this string is not required now. Consider this file:
 Root element needs to allocate space for 3 attributes. Element <tt>aaa</tt> has only
 one attribute, so the two more attributes are not needed now. If element <tt>aaa</tt>
 would delete those strings, then the next element <tt>bbb</tt> would need to allocate
-space for attribute again. XML Inspector tries to reduce the number of allocations for
+space for attribute again. XmlInspector tries to reduce the number of allocations for
 next elements and documents. If you don't need Xml::Inspector object anymore, you can
 call Xml::Inspector::Clear method, or wait for destructor to free some space.
 
