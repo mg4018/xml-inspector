@@ -195,6 +195,7 @@ Result:
 Rambo
 Pinky
 @endverbatim
+
 <h2>How it works</h2>
 XmlInspector doesn't load the entire XML document in memory. It allocates as much
 memory as it needs to walk through elements, so the size of the file is not important.
@@ -214,6 +215,21 @@ would delete those strings, then the next element <tt>bbb</tt> would need to all
 space for attribute again. XmlInspector tries to reduce the number of allocations for
 next elements and documents. If you don't need Xml::Inspector object anymore, you can
 call Xml::Inspector::Clear method, or wait for destructor to free some space.
+
+<h2>Supported encodings</h2>
+Encoding sets supported by XmlInspector:
+<ul>
+	<li>UTF-8, UTF-16, UTF-16BE, UTF-16LE, UTF-32, UTF-32BE, UTF-32LE;</li>
+    <li>
+		ISO-8859-1, ISO-8859-2, ISO-8859-3, ISO-8859-4, ISO-8859-5, ISO-8859-6,
+		ISO-8859-7, ISO-8859-8, ISO-8859-9, ISO-8859-10, ISO-8859-13, ISO-8859-14,
+		ISO-8859-15, ISO-8859-16, TIS-620;
+	</li>
+    <li>
+		windows-874, windows-1250, windows-1251, windows-1252, windows-1253,
+		windows-1254, windows-1255, windows-1256, windows-1257, windows-1258.
+	</li>
+</ul>
 
 */
 
