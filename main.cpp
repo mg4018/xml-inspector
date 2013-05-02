@@ -142,6 +142,19 @@ public:
 		EncodingDeclarationRequiredTest();
 		ISO_8859_1_Test();
 		ISO_8859_2_Test();
+		ISO_8859_3_Test();
+		ISO_8859_4_Test();
+		ISO_8859_5_Test();
+		ISO_8859_6_Test();
+		ISO_8859_7_Test();
+		ISO_8859_8_Test();
+		ISO_8859_9_Test();
+		ISO_8859_10_Test();
+		ISO_8859_13_Test();
+		ISO_8859_14_Test();
+		ISO_8859_15_Test();
+		ISO_8859_16_Test();
+		TIS620Test();
 		Windows874Test();
 		Windows1250Test();
 		Windows1251Test();
@@ -5371,6 +5384,513 @@ public:
 		std::istream is(&buf);
 
 		Xml::Encoding::ISO_8859_2_StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void ISO_8859_3_Test()
+	{
+		std::cout << "ISO-8859-3 test... ";
+
+		// ISO-8859-3
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0xA1, 0xA7, 0xBA, 0xD9, 0xDE, 0xFF
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0x0126, 0xA7, 0x015F, 0xD9, 0x015C, 0x02D9
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::ISO_8859_3_StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void ISO_8859_4_Test()
+	{
+		std::cout << "ISO-8859-4 test... ";
+
+		// ISO-8859-4
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0xA3, 0xA4, 0xAA, 0xD7, 0xFE
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0x0156, 0xA4, 0x0112, 0xD7, 0x016B
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::ISO_8859_4_StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void ISO_8859_5_Test()
+	{
+		std::cout << "ISO-8859-5 test... ";
+
+		// ISO-8859-5
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0xA6, 0xAD, 0xC6, 0xF0, 0xFF
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0x0406, 0xAD, 0x0426, 0x2116, 0x045F
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::ISO_8859_5_StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void ISO_8859_6_Test()
+	{
+		std::cout << "ISO-8859-6 test... ";
+
+		// ISO-8859-6
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0xAC, 0xC1, 0xE5, 0xF2
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0x060C, 0x0621, 0x0645, 0x0652
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::ISO_8859_6_StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void ISO_8859_7_Test()
+	{
+		std::cout << "ISO-8859-7 test... ";
+
+		// ISO-8859-7
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0xA7, 0xB6, 0xBD, 0xFE
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0xA7, 0x0386, 0xBD, 0x03CE
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::ISO_8859_7_StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void ISO_8859_8_Test()
+	{
+		std::cout << "ISO-8859-8 test... ";
+
+		// ISO-8859-8
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0xBC, 0xDF, 0xE0, 0xFE
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0xBC, 0x2017, 0x05D0, 0x200F
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::ISO_8859_8_StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void ISO_8859_9_Test()
+	{
+		std::cout << "ISO-8859-9 test... ";
+
+		// ISO-8859-9
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0xCA, 0xD0, 0xD7, 0xFE, 0xFF
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0xCA, 0x011E, 0xD7, 0x015F, 0xFF
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::ISO_8859_9_StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void ISO_8859_10_Test()
+	{
+		std::cout << "ISO-8859-10 test... ";
+
+		// ISO-8859-10
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0xA1, 0xB7, 0xC1, 0xC7, 0xEA, 0xFF
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0x0104, 0xB7, 0xC1, 0x012E, 0x0119, 0x0138
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::ISO_8859_10_StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void ISO_8859_13_Test()
+	{
+		std::cout << "ISO-8859-13 test... ";
+
+		// ISO-8859-13
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0xA1, 0xA2, 0xE7, 0xF5, 0xFF
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0x201D, 0xA2, 0x0113, 0xF5, 0x2019
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::ISO_8859_13_StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void ISO_8859_14_Test()
+	{
+		std::cout << "ISO-8859-14 test... ";
+
+		// ISO-8859-14
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0xA1, 0xB6, 0xBF, 0xC0, 0xFE, 0xFF
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0x1E02, 0xB6, 0x1E61, 0xC0, 0x0177, 0xFF
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::ISO_8859_14_StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void ISO_8859_15_Test()
+	{
+		std::cout << "ISO-8859-15 test... ";
+
+		// ISO-8859-15
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0xA4, 0xA5, 0xBE, 0xFF
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0x20AC, 0xA5, 0x0178, 0xFF
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::ISO_8859_15_StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void ISO_8859_16_Test()
+	{
+		std::cout << "ISO-8859-16 test... ";
+
+		// ISO-8859-16
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0xA1, 0xA4, 0xFE, 0xFF
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66, 0xA0,
+			0x0104, 0x20AC, 0x021B, 0xFF
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::ISO_8859_16_StreamReader reader(&is);
+		char32_t c;
+		std::u32string destination;
+		int result;
+		while ((result = reader.ReadCharacter(c)) == 1)
+			destination.push_back(c);
+
+		assert(result == 0);
+		assert(destination.size() == sizeof(source));
+		for (std::u32string::size_type i = 0; i < destination.size(); ++i)
+		{
+			assert(destination[i] == pattern[i]);
+		}
+
+		std::cout << "OK\n";
+	}
+
+	void TIS620Test()
+	{
+		std::cout << "TIS-620 test... ";
+
+		// TIS-620
+		unsigned char source[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66,
+			0xA1, 0xD4, 0xFB
+		};
+
+		// UTF-32
+		const char32_t pattern[] =
+		{
+			0x0A, 0x20, 0x3E, 0x44, 0x66,
+			0x0E01, 0x0E34, 0x0E5B
+		};
+
+		// Memory buffer to istream.
+		MemBuf buf(source, sizeof(source));
+		std::istream is(&buf);
+
+		Xml::Encoding::TIS620StreamReader reader(&is);
 		char32_t c;
 		std::u32string destination;
 		int result;

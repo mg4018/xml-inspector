@@ -693,6 +693,32 @@ namespace Xml
 
 		bool IsISO_8859_2_Charset();
 
+		bool IsISO_8859_3_Charset();
+
+		bool IsISO_8859_4_Charset();
+
+		bool IsISO_8859_5_Charset();
+
+		bool IsISO_8859_6_Charset();
+
+		bool IsISO_8859_7_Charset();
+
+		bool IsISO_8859_8_Charset();
+
+		bool IsISO_8859_9_Charset();
+
+		bool IsISO_8859_10_Charset();
+
+		bool IsISO_8859_13_Charset();
+
+		bool IsISO_8859_14_Charset();
+
+		bool IsISO_8859_15_Charset();
+
+		bool IsISO_8859_16_Charset();
+
+		bool IsTIS620Charset();
+
 		bool IsWindows874Charset();
 
 		bool IsWindows1250Charset();
@@ -4559,6 +4585,188 @@ namespace Xml
 				return true;
 			}
 		}
+		else if (IsISO_8859_3_Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::ISO_8859_3_StreamReader(&fileStream);
+				else
+					newReader = new Encoding::ISO_8859_3_StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsISO_8859_4_Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::ISO_8859_4_StreamReader(&fileStream);
+				else
+					newReader = new Encoding::ISO_8859_4_StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsISO_8859_5_Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::ISO_8859_5_StreamReader(&fileStream);
+				else
+					newReader = new Encoding::ISO_8859_5_StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsISO_8859_6_Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::ISO_8859_6_StreamReader(&fileStream);
+				else
+					newReader = new Encoding::ISO_8859_6_StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsISO_8859_7_Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::ISO_8859_7_StreamReader(&fileStream);
+				else
+					newReader = new Encoding::ISO_8859_7_StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsISO_8859_8_Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::ISO_8859_8_StreamReader(&fileStream);
+				else
+					newReader = new Encoding::ISO_8859_8_StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsISO_8859_9_Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::ISO_8859_9_StreamReader(&fileStream);
+				else
+					newReader = new Encoding::ISO_8859_9_StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsISO_8859_10_Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::ISO_8859_10_StreamReader(&fileStream);
+				else
+					newReader = new Encoding::ISO_8859_10_StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsISO_8859_13_Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::ISO_8859_13_StreamReader(&fileStream);
+				else
+					newReader = new Encoding::ISO_8859_13_StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsISO_8859_14_Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::ISO_8859_14_StreamReader(&fileStream);
+				else
+					newReader = new Encoding::ISO_8859_14_StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsISO_8859_15_Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::ISO_8859_15_StreamReader(&fileStream);
+				else
+					newReader = new Encoding::ISO_8859_15_StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsISO_8859_16_Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::ISO_8859_16_StreamReader(&fileStream);
+				else
+					newReader = new Encoding::ISO_8859_16_StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
+		else if (IsTIS620Charset())
+		{
+			if (bom == Details::Bom::None)
+			{
+				Encoding::CharactersReader* newReader;
+				if (sourceType == SourcePath)
+					newReader = new Encoding::TIS620StreamReader(&fileStream);
+				else
+					newReader = new Encoding::TIS620StreamReader(inputStreamPtr);
+				delete reader;
+				reader = newReader;
+				return true;
+			}
+		}
 		else
 		{
 			tempRow = encoding.Row;
@@ -4659,6 +4867,154 @@ namespace Xml
 			CharsetEqual(U"latin2") ||
 			CharsetEqual(U"l2") ||
 			CharsetEqual(U"csISOLatin2"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsISO_8859_3_Charset()
+	{
+		return (
+			CharsetEqual(U"ISO-8859-3") ||
+			CharsetEqual(U"iso-ir-109") ||
+			CharsetEqual(U"ISO_8859-3") ||
+			CharsetEqual(U"latin3") ||
+			CharsetEqual(U"l3") ||
+			CharsetEqual(U"csISOLatin3"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsISO_8859_4_Charset()
+	{
+		return (
+			CharsetEqual(U"ISO-8859-4") ||
+			CharsetEqual(U"iso-ir-110") ||
+			CharsetEqual(U"ISO_8859-4") ||
+			CharsetEqual(U"latin4") ||
+			CharsetEqual(U"l4") ||
+			CharsetEqual(U"csISOLatin4"));
+	}
+	
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsISO_8859_5_Charset()
+	{
+		return (
+			CharsetEqual(U"ISO-8859-5") ||
+			CharsetEqual(U"iso-ir-144") ||
+			CharsetEqual(U"ISO_8859-5") ||
+			CharsetEqual(U"cyrillic") ||
+			CharsetEqual(U"csISOLatinCyrillic"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsISO_8859_6_Charset()
+	{
+		return (
+			CharsetEqual(U"ISO-8859-6") ||
+			CharsetEqual(U"iso-ir-127") ||
+			CharsetEqual(U"ISO_8859-6") ||
+			CharsetEqual(U"ECMA-114") ||
+			CharsetEqual(U"ASMO-708") ||
+			CharsetEqual(U"arabic") ||
+			CharsetEqual(U"csISOLatinArabic"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsISO_8859_7_Charset()
+	{
+		return (
+			CharsetEqual(U"ISO-8859-7") ||
+			CharsetEqual(U"iso-ir-126") ||
+			CharsetEqual(U"ISO_8859-7") ||
+			CharsetEqual(U"ELOT_928") ||
+			CharsetEqual(U"ECMA-118") ||
+			CharsetEqual(U"greek") ||
+			CharsetEqual(U"greek8") ||
+			CharsetEqual(U"csISOLatinGreek"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsISO_8859_8_Charset()
+	{
+		return (
+			CharsetEqual(U"ISO-8859-8") ||
+			CharsetEqual(U"iso-ir-138") ||
+			CharsetEqual(U"ISO_8859-8") ||
+			CharsetEqual(U"hebrew") ||
+			CharsetEqual(U"csISOLatinHebrew"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsISO_8859_9_Charset()
+	{
+		return (
+			CharsetEqual(U"ISO-8859-9") ||
+			CharsetEqual(U"iso-ir-148") ||
+			CharsetEqual(U"ISO_8859-9") ||
+			CharsetEqual(U"latin5") ||
+			CharsetEqual(U"l5") ||
+			CharsetEqual(U"csISOLatin5"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsISO_8859_10_Charset()
+	{
+		return (
+			CharsetEqual(U"ISO-8859-10") ||
+			CharsetEqual(U"iso-ir-157") ||
+			CharsetEqual(U"l6") ||
+			CharsetEqual(U"ISO_8859-10") ||
+			CharsetEqual(U"csISOLatin6") ||
+			CharsetEqual(U"latin6"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsISO_8859_13_Charset()
+	{
+		return (
+			CharsetEqual(U"ISO-8859-13") ||
+			CharsetEqual(U"csISO885913"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsISO_8859_14_Charset()
+	{
+		return (
+			CharsetEqual(U"ISO-8859-14") ||
+			CharsetEqual(U"iso-ir-199") ||
+			CharsetEqual(U"ISO_8859-14") ||
+			CharsetEqual(U"latin8") ||
+			CharsetEqual(U"iso-celtic") ||
+			CharsetEqual(U"l8") ||
+			CharsetEqual(U"csISO885914"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsISO_8859_15_Charset()
+	{
+		return (
+			CharsetEqual(U"ISO-8859-15") ||
+			CharsetEqual(U"ISO_8859-15") ||
+			CharsetEqual(U"Latin-9") ||
+			CharsetEqual(U"csISO885915"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsISO_8859_16_Charset()
+	{
+		return (
+			CharsetEqual(U"ISO-8859-16") ||
+			CharsetEqual(U"iso-ir-226") ||
+			CharsetEqual(U"ISO_8859-16") ||
+			CharsetEqual(U"latin10") ||
+			CharsetEqual(U"l10") ||
+			CharsetEqual(U"csISO885916"));
+	}
+
+	template <typename TCharactersWriter>
+	inline bool Inspector<TCharactersWriter>::IsTIS620Charset()
+	{
+		return (
+			CharsetEqual(U"TIS-620") ||
+			CharsetEqual(U"csTIS620"));
 	}
 
 	template <typename TCharactersWriter>
