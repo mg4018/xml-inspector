@@ -2653,6 +2653,19 @@ namespace Xml
 				}
 
 				// <?xml version="1.x"   ?>
+				if (sourceType != SourceReader &&
+					bom != Details::Bom::None &&
+					bom != Details::Bom::Utf8 &&
+					bom != Details::Bom::Utf16BE &&
+					bom != Details::Bom::Utf16LE)
+				{
+					Reset();
+					SetError(ErrorCode::EncodingDeclarationRequired);
+					row = 1;
+					column = 1;
+					return false;
+				}
+
 				node = Inspected::XmlDeclaration;
 				return true;
 			}
@@ -2686,6 +2699,19 @@ namespace Xml
 			}
 
 			// <?xml version="1.x"?>
+			if (sourceType != SourceReader &&
+				bom != Details::Bom::None &&
+				bom != Details::Bom::Utf8 &&
+				bom != Details::Bom::Utf16BE &&
+				bom != Details::Bom::Utf16LE)
+			{
+				Reset();
+				SetError(ErrorCode::EncodingDeclarationRequired);
+				row = 1;
+				column = 1;
+				return false;
+			}
+
 			node = Inspected::XmlDeclaration;
 			return true;
 		}
@@ -2872,6 +2898,21 @@ namespace Xml
 				// '<?xml' VersionInfo EncodingDecl '?>'
 				node = Inspected::XmlDeclaration;
 				return true;
+			}
+		}
+		else
+		{
+			if (sourceType != SourceReader &&
+				bom != Details::Bom::None &&
+				bom != Details::Bom::Utf8 &&
+				bom != Details::Bom::Utf16BE &&
+				bom != Details::Bom::Utf16LE)
+			{
+				Reset();
+				SetError(ErrorCode::EncodingDeclarationRequired);
+				row = 1;
+				column = 1;
+				return false;
 			}
 		}
 
