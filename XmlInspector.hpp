@@ -3301,29 +3301,28 @@ namespace Xml
 			if (currentCharacter == RightSquareBracket)
 			{
 				// <![CDATA[ text ]
-				if (NextCharBad(true))
-					return false;
-				if (currentCharacter == RightSquareBracket)
+				SizeType bracketCount = 0;
+				do
 				{
-					// <![CDATA[ text ]]
+					++bracketCount;
 					if (NextCharBad(true))
 						return false;
-					if (currentCharacter == GreaterThan)
-					{
-						// <![CDATA[ text ]]>
-						node = Inspected::CDATA;
-						return true;
-					}
-					else
-					{
+				}
+				while (currentCharacter == RightSquareBracket);
+
+				if (currentCharacter == GreaterThan && bracketCount >= 2)
+				{
+					// <![CDATA[ text ]]>
+					bracketCount -= 2;
+					for (SizeType i = 0; i < bracketCount; ++i)
 						CharactersWriterType::WriteCharacter(value, RightSquareBracket);
-						CharactersWriterType::WriteCharacter(value, RightSquareBracket);
-						CharactersWriterType::WriteCharacter(value, currentCharacter);
-					}
+					node = Inspected::CDATA;
+					return true;
 				}
 				else
 				{
-					CharactersWriterType::WriteCharacter(value, RightSquareBracket);
+					for (SizeType i = 0; i < bracketCount; ++i)
+						CharactersWriterType::WriteCharacter(value, RightSquareBracket);
 					CharactersWriterType::WriteCharacter(value, currentCharacter);
 				}
 			}
