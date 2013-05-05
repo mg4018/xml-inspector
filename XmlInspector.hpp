@@ -1415,6 +1415,17 @@ namespace Xml
 		SizeType tempRow = currentRow;
 		SizeType tempColumn = currentColumn;
 
+		if (unclosedTagsSize == 0 && foundElement)
+		{
+			tempRow = row;
+			tempColumn = column;
+			Reset();
+			SetError(ErrorCode::InvalidSyntax);
+			row = tempRow;
+			column = tempColumn;
+			return false;
+		}
+
 		PrepareNode();
 
 		// Element name.

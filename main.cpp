@@ -133,6 +133,7 @@ public:
 		XmlBadPITargetTest();
 		EmptyXmlDeclarationTest();
 		XmlDeclarationTest();
+		XmlDeclaration2Test();
 		XmlDeclarationWrongOrderTest();
 		XmlDeclarationVersionTest();
 		XmlDeclarationInvalidVersionTest();
@@ -165,6 +166,7 @@ public:
 		Windows1256Test();
 		Windows1257Test();
 		Windows1258Test();
+		TwoRootsTest();
 
 		std::cout << "--END TEST--\n";
 	}
@@ -4141,7 +4143,7 @@ public:
 	{
 		std::cout << "CDATA test... ";
 
-		std::string docString = u8"<root><![CDATA[\r\n &amp;&#123;<abc>]] >\t def\r]]></root>";
+		std::string docString = u8"<root><![CDATA[\r\n &amp;&#123;<abc>]] >\t def\r<&]>]]]></root>";
 		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
 			docString.begin(), docString.end());
 
@@ -4169,7 +4171,7 @@ public:
 		assert(result == true);
 		assert(inspector.GetInspected() == Xml::Inspected::CDATA);
 		assert(inspector.GetName().empty());
-		assert(inspector.GetValue() == u8"\n &amp;&#123;<abc>]] >\t def\n");
+		assert(inspector.GetValue() == u8"\n &amp;&#123;<abc>]] >\t def\n<&]>]");
 		assert(inspector.GetLocalName().empty());
 		assert(inspector.GetPrefix().empty());
 		assert(inspector.GetNamespaceUri().empty());
@@ -4196,7 +4198,7 @@ public:
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 3);
-		assert(inspector.GetColumn() == 4);
+		assert(inspector.GetColumn() == 9);
 		assert(inspector.GetDepth() == 0);
 
 		// End of file.
@@ -4214,7 +4216,7 @@ public:
 		assert(inspector.GetErrorMessage() == nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 3);
-		assert(inspector.GetColumn() == 11);
+		assert(inspector.GetColumn() == 16);
 		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
@@ -5023,6 +5025,98 @@ public:
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
 		assert(inspector.GetRow() == 6);
 		assert(inspector.GetColumn() == 10);
+		assert(inspector.GetDepth() == 0);
+
+		std::cout << "OK\n";
+	}
+
+	void XmlDeclaration2Test()
+	{
+		std::cout << "XML declaration test... ";
+
+		std::string docString =
+			u8"<?xml version=\"1.0\" standalone=\"no\"?><doc />";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		typedef Xml::Inspector<Xml::Encoding::Utf8Writer> InspectorType;
+
+		// XML declaration.
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::XmlDeclaration);
+		assert(inspector.GetName() == u8"xml");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"xml");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == true);
+		assert(inspector.GetAttributesCount() == 2);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// version="1.0"
+		const InspectorType::AttributeType& attr1 = inspector.GetAttributeAt(0);
+
+		assert(attr1.Name == u8"version");
+		assert(attr1.Value == u8"1.0");
+		assert(attr1.LocalName == u8"version");
+		assert(attr1.Prefix.empty());
+		assert(attr1.NamespaceUri.empty());
+		assert(attr1.Row == 1);
+		assert(attr1.Column == 7);
+		assert(attr1.Delimiter == Xml::QuotationMark::DoubleQuote);
+
+		// standalone="no"
+		const InspectorType::AttributeType& attr3 = inspector.GetAttributeAt(1);
+
+		assert(attr3.Name == u8"standalone");
+		assert(attr3.Value == u8"no");
+		assert(attr3.LocalName == u8"standalone");
+		assert(attr3.Prefix.empty());
+		assert(attr3.NamespaceUri.empty());
+		assert(attr3.Row == 1);
+		assert(attr3.Column == 21);
+		assert(attr3.Delimiter == Xml::QuotationMark::DoubleQuote);
+
+		// <doc />
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EmptyElementTag);
+		assert(inspector.GetName() == u8"doc");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"doc");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 38);
+		assert(inspector.GetDepth() == 0);
+
+		// End of file.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 45);
 		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
@@ -6273,6 +6367,71 @@ public:
 		{
 			assert(destination[i] == pattern[i]);
 		}
+
+		std::cout << "OK\n";
+	}
+
+	void TwoRootsTest()
+	{
+		std::cout << "Two roots test... ";
+
+		std::string docString = u8"<doc></doc><doc></doc>";
+		Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(
+			docString.begin(), docString.end());
+
+		// <doc>
+		bool result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::StartTag);
+		assert(inspector.GetName() == u8"doc");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"doc");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 1);
+		assert(inspector.GetDepth() == 0);
+
+		// </doc>
+		result = inspector.Inspect();
+
+		assert(result == true);
+		assert(inspector.GetInspected() == Xml::Inspected::EndTag);
+		assert(inspector.GetName() == u8"doc");
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName() == u8"doc");
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() == nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::None);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 6);
+		assert(inspector.GetDepth() == 0);
+
+		// Invalid syntax - there should be only one root.
+		result = inspector.Inspect();
+
+		assert(result == false);
+		assert(inspector.GetInspected() == Xml::Inspected::None);
+		assert(inspector.GetName().empty());
+		assert(inspector.GetValue().empty());
+		assert(inspector.GetLocalName().empty());
+		assert(inspector.GetPrefix().empty());
+		assert(inspector.GetNamespaceUri().empty());
+		assert(inspector.HasAttributes() == false);
+		assert(inspector.GetAttributesCount() == 0);
+		assert(inspector.GetErrorMessage() != nullptr);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
+		assert(inspector.GetRow() == 1);
+		assert(inspector.GetColumn() == 12);
+		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
 	}
