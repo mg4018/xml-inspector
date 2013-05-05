@@ -2679,16 +2679,43 @@ namespace Xml
 			return true;
 		}
 
-		// Now should be an encoding attribute.
-		AttributeType& encodingAttr = NewAttribute();
-		encodingAttr.Row = currentRow;
-		encodingAttr.Column = currentColumn;
-		comparingName.clear(); // Could be not empty after call of Reset method.
-		comparingName.reserve(NameReserve);
-
-		for (std::size_t i = 0; i < 8; ++i)
+		// Now should be an encoding or standalone attribute.
+		if (currentCharacter == XmlDeclarationEncoding[0])
 		{
-			if (currentCharacter != XmlDeclarationEncoding[i])
+			// encoding
+			AttributeType& encodingAttr = NewAttribute();
+			encodingAttr.Row = currentRow;
+			encodingAttr.Column = currentColumn;
+			comparingName.clear(); // Could be not empty after call of Reset method.
+			comparingName.reserve(NameReserve);
+
+			for (std::size_t i = 0; i < 8; ++i)
+			{
+				if (currentCharacter != XmlDeclarationEncoding[i])
+				{
+					tempRow = currentRow;
+					tempColumn = currentColumn;
+					Reset();
+					SetError(ErrorCode::InvalidSyntax);
+					row = tempRow;
+					column = tempColumn;
+					return false;
+				}
+				CharactersWriterType::WriteCharacter(encodingAttr.Name, currentCharacter);
+				CharactersWriterType::WriteCharacter(encodingAttr.LocalName, currentCharacter);
+				if (NextCharBad(true))
+					return false;
+			}
+
+			// '<?xml version="1.x" encoding' Char
+			
+			while (IsWhiteSpace(currentCharacter))
+			{
+				if (NextCharBad(true))
+					return false;
+			}
+
+			if (currentCharacter != Equals)
 			{
 				tempRow = currentRow;
 				tempColumn = currentColumn;
@@ -2698,117 +2725,125 @@ namespace Xml
 				column = tempColumn;
 				return false;
 			}
-			CharactersWriterType::WriteCharacter(encodingAttr.Name, currentCharacter);
-			CharactersWriterType::WriteCharacter(encodingAttr.LocalName, currentCharacter);
+
+			// '<?xml version="1.x" encoding='
+
 			if (NextCharBad(true))
 				return false;
-		}
 
-		// '<?xml version="1.x" encoding' Char
-		
-		while (IsWhiteSpace(currentCharacter))
-		{
-			if (NextCharBad(true))
-				return false;
-		}
-
-		if (currentCharacter != Equals)
-		{
-			tempRow = currentRow;
-			tempColumn = currentColumn;
-			Reset();
-			SetError(ErrorCode::InvalidSyntax);
-			row = tempRow;
-			column = tempColumn;
-			return false;
-		}
-
-		// '<?xml version="1.x" encoding='
-
-		if (NextCharBad(true))
-			return false;
-
-		while (IsWhiteSpace(currentCharacter))
-		{
-			if (NextCharBad(true))
-				return false;
-		}
-
-		quoteChar = currentCharacter;
-
-		if (quoteChar == DoubleQuote)
-		{
-			// <?xml version="1.x" encoding="
-			encodingAttr.Delimiter = QuotationMark::DoubleQuote;
-		}
-		else if (quoteChar == SingleQuote)
-		{
-			// <?xml version="1.x" encoding='
-			encodingAttr.Delimiter = QuotationMark::SingleQuote;
-		}
-		else
-		{
-			tempRow = currentRow;
-			tempColumn = currentColumn;
-			Reset();
-			SetError(ErrorCode::InvalidSyntax);
-			row = tempRow;
-			column = tempColumn;
-			return false;
-		}
-
-		if (NextCharBad(true))
-			return false;
-
-		if (!Encoding::CharactersReader::IsEncNameStartChar(currentCharacter))
-		{
-			tempRow = currentRow;
-			tempColumn = currentColumn;
-			Reset();
-			SetError(ErrorCode::InvalidSyntax);
-			row = tempRow;
-			column = tempColumn;
-			return false;
-		}
-
-		do
-		{
-			CharactersWriterType::WriteCharacter(encodingAttr.Value, currentCharacter);
-			comparingName.push_back(currentCharacter);
-			if (NextCharBad(true))
-				return false;
-		}
-		while (Encoding::CharactersReader::IsEncNameChar(currentCharacter));
-
-		if (currentCharacter != quoteChar)
-		{
-			tempRow = currentRow;
-			tempColumn = currentColumn;
-			Reset();
-			SetError(ErrorCode::InvalidSyntax);
-			row = tempRow;
-			column = tempColumn;
-			return false;
-		}
-
-		// '<?xml' VersionInfo EncodingDecl
-		if (sourceType != SourceReader && !ResolveEncoding(encodingAttr))
-			return false;
-		if (NextCharBad(true))
-			return false;
-		
-		if (IsWhiteSpace(currentCharacter))
-		{
-			do
+			while (IsWhiteSpace(currentCharacter))
 			{
 				if (NextCharBad(true))
 					return false;
 			}
-			while (IsWhiteSpace(currentCharacter));
 
-			if (currentCharacter == Question)
+			quoteChar = currentCharacter;
+
+			if (quoteChar == DoubleQuote)
 			{
-				// '<?xml' VersionInfo EncodingDecl S '?'
+				// <?xml version="1.x" encoding="
+				encodingAttr.Delimiter = QuotationMark::DoubleQuote;
+			}
+			else if (quoteChar == SingleQuote)
+			{
+				// <?xml version="1.x" encoding='
+				encodingAttr.Delimiter = QuotationMark::SingleQuote;
+			}
+			else
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+
+			if (NextCharBad(true))
+				return false;
+
+			if (!Encoding::CharactersReader::IsEncNameStartChar(currentCharacter))
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+
+			do
+			{
+				CharactersWriterType::WriteCharacter(encodingAttr.Value, currentCharacter);
+				comparingName.push_back(currentCharacter);
+				if (NextCharBad(true))
+					return false;
+			}
+			while (Encoding::CharactersReader::IsEncNameChar(currentCharacter));
+
+			if (currentCharacter != quoteChar)
+			{
+				tempRow = currentRow;
+				tempColumn = currentColumn;
+				Reset();
+				SetError(ErrorCode::InvalidSyntax);
+				row = tempRow;
+				column = tempColumn;
+				return false;
+			}
+
+			// '<?xml' VersionInfo EncodingDecl
+			if (sourceType != SourceReader && !ResolveEncoding(encodingAttr))
+				return false;
+			if (NextCharBad(true))
+				return false;
+			
+			if (IsWhiteSpace(currentCharacter))
+			{
+				do
+				{
+					if (NextCharBad(true))
+						return false;
+				}
+				while (IsWhiteSpace(currentCharacter));
+
+				if (currentCharacter == Question)
+				{
+					// '<?xml' VersionInfo EncodingDecl S '?'
+					if (NextCharBad(true))
+						return false;
+
+					if (currentCharacter != GreaterThan)
+					{
+						tempRow = currentRow;
+						tempColumn = currentColumn;
+						Reset();
+						SetError(ErrorCode::InvalidSyntax);
+						row = tempRow;
+						column = tempColumn;
+						return false;
+					}
+
+					// '<?xml' VersionInfo EncodingDecl S '?>'
+					node = Inspected::XmlDeclaration;
+					return true;
+				}
+			}
+			else // IsWhiteSpace(currentCharacter) == false
+			{
+				if (currentCharacter != Question)
+				{
+					tempRow = currentRow;
+					tempColumn = currentColumn;
+					Reset();
+					SetError(ErrorCode::InvalidSyntax);
+					row = tempRow;
+					column = tempColumn;
+					return false;
+				}
+
 				if (NextCharBad(true))
 					return false;
 
@@ -2823,41 +2858,10 @@ namespace Xml
 					return false;
 				}
 
-				// '<?xml' VersionInfo EncodingDecl S '?>'
+				// '<?xml' VersionInfo EncodingDecl '?>'
 				node = Inspected::XmlDeclaration;
 				return true;
 			}
-		}
-		else // IsWhiteSpace(currentCharacter) == false
-		{
-			if (currentCharacter != Question)
-			{
-				tempRow = currentRow;
-				tempColumn = currentColumn;
-				Reset();
-				SetError(ErrorCode::InvalidSyntax);
-				row = tempRow;
-				column = tempColumn;
-				return false;
-			}
-
-			if (NextCharBad(true))
-				return false;
-
-			if (currentCharacter != GreaterThan)
-			{
-				tempRow = currentRow;
-				tempColumn = currentColumn;
-				Reset();
-				SetError(ErrorCode::InvalidSyntax);
-				row = tempRow;
-				column = tempColumn;
-				return false;
-			}
-
-			// '<?xml' VersionInfo EncodingDecl '?>'
-			node = Inspected::XmlDeclaration;
-			return true;
 		}
 
 		// Now should be a standalone attribute.

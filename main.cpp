@@ -5051,7 +5051,7 @@ public:
 		assert(inspector.GetErrorMessage() != nullptr);
 		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
 		assert(inspector.GetRow() == 1);
-		assert(inspector.GetColumn() == 21);
+		assert(inspector.GetColumn() == 38);
 		assert(inspector.GetDepth() == 0);
 
 		std::cout << "OK\n";
