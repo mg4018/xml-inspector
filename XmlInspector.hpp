@@ -31,7 +31,6 @@
 #include <istream>
 #include <fstream>
 #include <cstdint>
-#include <cassert>
 #include <memory>
 #include <deque>
 #include <stdexcept>
@@ -6915,8 +6914,8 @@ namespace Xml
 			BasicIteratorsBuf<TInputIterator, TCharacterType, TTraits>::showmanyc()
 		{
 			return (curIter != endIter)
-					? 1
-					: 0;
+				? 1
+				: 0;
 		}
 	}
 	/// @endcond
