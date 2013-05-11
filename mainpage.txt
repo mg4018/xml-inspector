@@ -32,15 +32,22 @@ I think this project met these expectations, but first you should know two thing
 		then all information from such element would be ignored. This XML parser doesn't parse any DTDs.
 	</li>
 	<li>
-		XmlInspector uses C++11 standard, mainly for Unicode string literals. When this documentation
-		was written, there weren't so many common compilers supporting full standard yet. Tested on
-		GCC 4.7.2 on Linux and MinGW 4.7.2 on Windows.
+		XmlInspector uses few features from C++11 standard (<tt>char16_t</tt>, <tt>char32_t</tt>,
+		<tt>std::u16string</tt>, <tt>std::u32string</tt> and <tt>strongly typed enumerations</tt>).
+		When this documentation was written, there weren't so many common compilers supporting full standard yet.
+		Tested on GCC 4.7.2 on Linux, Visual C++ 2012 and MinGW 4.7.2 on Windows.
 	</li>
 </ul>
 
 There are two most popular APIs for XML parsers:@n
-<b>DOM</b> - Tree-based parser that reads entire document into the tree structure.@n
-<b>SAX</b> - Event-based parser that operates on each piece of document sequentially.@n
+<ul>
+	<li>
+		<b>DOM</b> - Tree-based parser that reads entire document into the tree structure.
+	</li>
+	<li>
+		<b>SAX</b> - Event-based parser that operates on each piece of document sequentially.
+	</li>
+</ul>
 
 XmlInspector has similar idea to SAX, but instead of register callback functions and wait for events,
 you can read a next node from XML document anytime you need. In my opinion it's a more convenient way
@@ -61,13 +68,17 @@ of parsing XML documents. For more information, search "StAX". Now let's parse s
 	<pokemons />
 </shelter>
 @endverbatim
+
 First you need to add 3 headers to your project:
+
 @verbatim
 XmlInspector.hpp
 CharactersReader.hpp
 CharactersWriter.hpp
 @endverbatim
+
 Now you can read some elements like this:
+
 @code{.cpp}
 #include "XmlInspector.hpp"
 #include <iostream>
@@ -105,14 +116,16 @@ int main()
 	if (inspector.GetErrorCode() != Xml::ErrorCode::None)
 	{
 		std::cout << "Error: " << inspector.GetErrorMessage() <<
-		" At row: " << inspector.GetRow() <<
-		", column: " << inspector.GetColumn() << ".\n";
+			" At row: " << inspector.GetRow() <<
+			", column: " << inspector.GetColumn() << ".\n";
 	}
 
 	return EXIT_SUCCESS;
 }
 @endcode
+
 Result:
+
 @verbatim
 StartTag name: shelter
 Comment value: Only 3 pets at this moment. It's the new shelter.
@@ -136,15 +149,31 @@ EndTag name: shelter
 <tt>Xml::Encoding::Utf8Writer</tt> is the class chosen to write characters
 in UTF-8 encoding. It means that you will receive references to <tt>std::string</tt>.
 If you prefer for example UTF-16 encoding and <tt>std::u16string</tt>, you can write:
+
 @code{.cpp}
 Xml::Inspector<Xml::Encoding::Utf16Writer> inspector("test.xml");
 // ...
 const std::u16string& referenceToElementName = inspector.GetName();
 @endcode
+
 Xml::Inspector class has more constructors, for example you may want to parse
-XML document that is stored in memory. You can also parse more XML documents
-using a single Inspector object - there are Xml::Inspector::Reset methods with
-the same parameters as in constructors.
+XML document that is stored in memory:
+
+@code{.cpp}
+std::string doc = "<root>abc</root>";
+Xml::Inspector<Xml::Encoding::Utf16Writer> inspector(doc.begin(), doc.end());
+@endcode
+
+You can also parse more XML documents using a single Inspector object - there are
+Xml::Inspector::Reset methods with the same parameters as in constructors:
+
+@code{.cpp}
+Xml::Inspector<Xml::Encoding::Utf16Writer> inspector;
+inspector.Reset("test.xml");
+// ...
+std::string doc = "<root>abc</root>";
+inspector.Reset(doc.begin(), doc.end());
+@endcode
 
 Every call of Xml::Inspector::Inspect method tries to read exactly one element from
 document. When inspected element is for example <tt>StartTag</tt>, then Xml::Inspector::GetName
@@ -153,6 +182,7 @@ method will provide the name of this element. If inspected element is for exampl
 the target name of this processing instruction.
 
 Now let's print only dog names:
+
 @code{.cpp}
 #include "XmlInspector.hpp"
 #include <iostream>
@@ -183,18 +213,23 @@ int main()
 	if (inspector.GetErrorCode() != Xml::ErrorCode::None)
 	{
 		std::cout << "Error: " << inspector.GetErrorMessage() <<
-		" At row: " << inspector.GetRow() <<
-		", column: " << inspector.GetColumn() << ".\n";
+			" At row: " << inspector.GetRow() <<
+			", column: " << inspector.GetColumn() << ".\n";
 	}
 
 	return EXIT_SUCCESS;
 }
 @endcode
+
 Result:
+
 @verbatim
 Rambo
 Pinky
 @endverbatim
+
+As you see access to attribute names a bit differ from Xml::Inspector methods.
+Attribute is a simple structure with some strings and without any method.
 
 <h2>How it works</h2>
 XmlInspector doesn't load the entire XML document in memory. It allocates as much
@@ -203,12 +238,14 @@ You can have even less memory on your computer than XML document size.
 
 If some element needs one more string allocation, then the next element will not
 delete it, even if this string is not required now. Consider this file:
+
 @verbatim
 <root name1="value1" name2="value2" name3="value3">
 	<aaa attr="abc" />
 	<bbb name1="value1" name2="value2" />
 </root>
 @endverbatim
+
 Root element needs to allocate space for 3 attributes. Element <tt>aaa</tt> has only
 one attribute, so the two more attributes are not needed now. If element <tt>aaa</tt>
 would delete those strings, then the next element <tt>bbb</tt> would need to allocate
