@@ -175,7 +175,7 @@ namespace Xml
 			{
 				// We have surrogate pair.
 				codePoint -= 0x10000;
-				char16_t surr = (codePoint >> 10) + 0xD800; // Lead surrogate.
+				char32_t surr = (codePoint >> 10) + 0xD800; // Lead surrogate.
 				stringDestination.push_back(static_cast<StringType::value_type>(surr));
 				surr = (codePoint & 0x3FF) + 0xDC00; // Trail surrogate.
 				stringDestination.push_back(static_cast<StringType::value_type>(surr));

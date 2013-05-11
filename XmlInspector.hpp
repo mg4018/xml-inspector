@@ -384,7 +384,7 @@ namespace Xml
 		template <
 			typename TInputIterator,
 			typename TCharacterType,
-			typename TTraits = std::char_traits<TCharacterType>>
+			typename TTraits = std::char_traits<TCharacterType> >
 		class BasicIteratorsBuf
 			: public std::basic_streambuf<TCharacterType, TTraits>
 		{
@@ -756,6 +756,14 @@ namespace Xml
 		bool CharsetEqual(const char32_t* charset);
 
 		bool CharsetEqual(const unsigned char* charset, std::size_t len);
+
+		void InitStrings();
+
+		// Copy constructor is inaccessible for this class.
+		Inspector(const Inspector&) { };
+
+		// Assignment operator is inaccessible for this class.
+		Inspector& operator=(Inspector&) { };
 	public:
 		/**
 			@brief Initializes a new instance of the Inspector class.
@@ -798,16 +806,6 @@ namespace Xml
 				with the specified characters reader interface.
 		*/
 		Inspector(Encoding::CharactersReader* reader);
-
-		/**
-			@brief Copy constructor is inaccessible for this class.
-		*/
-		Inspector(const Inspector&) = delete;
-
-		/**
-			@brief Assignment operator is inaccessible for this class.
-		*/
-		Inspector& operator=(Inspector&) = delete;
 
 		/**
 			@brief Destructor.
@@ -1216,48 +1214,138 @@ namespace Xml
 		namespaces(),
 		namespacesSize(0)
 	{
-		name.reserve(NameReserve);
-		value.reserve(ValueReserve);
-		localName.reserve(LocalNameReserve);
-		prefix.reserve(PrefixReserve);
-		namespaceUri.reserve(NamespaceUriReserve);
-
-		lowerXmlString.reserve(3);
-		xmlnsString.reserve(5);
-		xmlUriString.reserve(36);
-		xmlnsUriString.reserve(29);
-
-		for (std::size_t i = 0; i < 3; ++i)
-			CharactersWriterType::WriteCharacter(lowerXmlString, LowerXml[i]);
-
-		for (std::size_t i = 0; i < 5; ++i)
-			CharactersWriterType::WriteCharacter(xmlnsString, Xmlns[i]);
-
-		for (std::size_t i = 0; i < 36; ++i)
-			CharactersWriterType::WriteCharacter(xmlUriString, XmlUri[i]);
-
-		for (std::size_t i = 0; i < 29; ++i)
-			CharactersWriterType::WriteCharacter(xmlnsUriString, XmlnsUri[i]);
+		InitStrings();
 	}
 
 	template <typename TCharactersWriter>
 	inline Inspector<TCharactersWriter>::Inspector(const char* filePath)
-		: Inspector<TCharactersWriter>()
+		: row(0),
+		column(0),
+		currentRow(0),
+		currentColumn(0),
+		node(Inspected::None),
+		err(ErrorCode::None),
+		errMsg(nullptr),
+		fPath(),
+		fileStream(),
+		inputStreamPtr(nullptr),
+		reader(nullptr),
+		sourceType(SourceNone),
+		afterBom(false),
+		bom(Details::Bom::None),
+		name(),
+		value(),
+		localName(),
+		prefix(),
+		namespaceUri(),
+		entityName(),
+		comparingName(),
+		entityNameCharCount(0),
+		currentCharacter(0),
+		bufferedCharacter(0),
+		foundElement(false),
+		foundDOCTYPE(false),
+		eof(false),
+		lowerXmlString(),
+		xmlnsString(),
+		xmlUriString(),
+		xmlnsUriString(),
+		attributes(),
+		attributesSize(0),
+		unclosedTags(),
+		unclosedTagsSize(0),
+		namespaces(),
+		namespacesSize(0)
 	{
+		InitStrings();
 		Reset(filePath);
 	}
 
 	template <typename TCharactersWriter>
 	inline Inspector<TCharactersWriter>::Inspector(const std::string& filePath)
-		: Inspector<TCharactersWriter>()
+		: row(0),
+		column(0),
+		currentRow(0),
+		currentColumn(0),
+		node(Inspected::None),
+		err(ErrorCode::None),
+		errMsg(nullptr),
+		fPath(),
+		fileStream(),
+		inputStreamPtr(nullptr),
+		reader(nullptr),
+		sourceType(SourceNone),
+		afterBom(false),
+		bom(Details::Bom::None),
+		name(),
+		value(),
+		localName(),
+		prefix(),
+		namespaceUri(),
+		entityName(),
+		comparingName(),
+		entityNameCharCount(0),
+		currentCharacter(0),
+		bufferedCharacter(0),
+		foundElement(false),
+		foundDOCTYPE(false),
+		eof(false),
+		lowerXmlString(),
+		xmlnsString(),
+		xmlUriString(),
+		xmlnsUriString(),
+		attributes(),
+		attributesSize(0),
+		unclosedTags(),
+		unclosedTagsSize(0),
+		namespaces(),
+		namespacesSize(0)
 	{
+		InitStrings();
 		Reset(filePath);
 	}
 
 	template <typename TCharactersWriter>
 	inline Inspector<TCharactersWriter>::Inspector(std::istream* inputStream)
-		: Inspector<TCharactersWriter>()
+		: row(0),
+		column(0),
+		currentRow(0),
+		currentColumn(0),
+		node(Inspected::None),
+		err(ErrorCode::None),
+		errMsg(nullptr),
+		fPath(),
+		fileStream(),
+		inputStreamPtr(nullptr),
+		reader(nullptr),
+		sourceType(SourceNone),
+		afterBom(false),
+		bom(Details::Bom::None),
+		name(),
+		value(),
+		localName(),
+		prefix(),
+		namespaceUri(),
+		entityName(),
+		comparingName(),
+		entityNameCharCount(0),
+		currentCharacter(0),
+		bufferedCharacter(0),
+		foundElement(false),
+		foundDOCTYPE(false),
+		eof(false),
+		lowerXmlString(),
+		xmlnsString(),
+		xmlUriString(),
+		xmlnsUriString(),
+		attributes(),
+		attributesSize(0),
+		unclosedTags(),
+		unclosedTagsSize(0),
+		namespaces(),
+		namespacesSize(0)
 	{
+		InitStrings();
 		Reset(inputStream);
 	}
 
@@ -1265,15 +1353,89 @@ namespace Xml
 	template <typename TInputIterator>
 	inline Inspector<TCharactersWriter>::Inspector(
 		TInputIterator first, TInputIterator last)
-			: Inspector<TCharactersWriter>()
+		: row(0),
+		column(0),
+		currentRow(0),
+		currentColumn(0),
+		node(Inspected::None),
+		err(ErrorCode::None),
+		errMsg(nullptr),
+		fPath(),
+		fileStream(),
+		inputStreamPtr(nullptr),
+		reader(nullptr),
+		sourceType(SourceNone),
+		afterBom(false),
+		bom(Details::Bom::None),
+		name(),
+		value(),
+		localName(),
+		prefix(),
+		namespaceUri(),
+		entityName(),
+		comparingName(),
+		entityNameCharCount(0),
+		currentCharacter(0),
+		bufferedCharacter(0),
+		foundElement(false),
+		foundDOCTYPE(false),
+		eof(false),
+		lowerXmlString(),
+		xmlnsString(),
+		xmlUriString(),
+		xmlnsUriString(),
+		attributes(),
+		attributesSize(0),
+		unclosedTags(),
+		unclosedTagsSize(0),
+		namespaces(),
+		namespacesSize(0)
 	{
+		InitStrings();
 		Reset(first, last);
 	}
 
 	template <typename TCharactersWriter>
 	inline Inspector<TCharactersWriter>::Inspector(Encoding::CharactersReader* reader)
-		: Inspector<TCharactersWriter>()
+		: row(0),
+		column(0),
+		currentRow(0),
+		currentColumn(0),
+		node(Inspected::None),
+		err(ErrorCode::None),
+		errMsg(nullptr),
+		fPath(),
+		fileStream(),
+		inputStreamPtr(nullptr),
+		reader(nullptr),
+		sourceType(SourceNone),
+		afterBom(false),
+		bom(Details::Bom::None),
+		name(),
+		value(),
+		localName(),
+		prefix(),
+		namespaceUri(),
+		entityName(),
+		comparingName(),
+		entityNameCharCount(0),
+		currentCharacter(0),
+		bufferedCharacter(0),
+		foundElement(false),
+		foundDOCTYPE(false),
+		eof(false),
+		lowerXmlString(),
+		xmlnsString(),
+		xmlUriString(),
+		xmlnsUriString(),
+		attributes(),
+		attributesSize(0),
+		unclosedTags(),
+		unclosedTagsSize(0),
+		namespaces(),
+		namespacesSize(0)
 	{
+		InitStrings();
 		Reset(reader);
 	}
 
@@ -2118,7 +2280,6 @@ namespace Xml
 			column = tempColumn;
 			return false;
 		}
-		return true;
 	}
 
 	template <typename TCharactersWriter>
@@ -6004,6 +6165,33 @@ namespace Xml
 	}
 
 	template <typename TCharactersWriter>
+	inline void Inspector<TCharactersWriter>::InitStrings()
+	{
+		name.reserve(NameReserve);
+		value.reserve(ValueReserve);
+		localName.reserve(LocalNameReserve);
+		prefix.reserve(PrefixReserve);
+		namespaceUri.reserve(NamespaceUriReserve);
+
+		lowerXmlString.reserve(3);
+		xmlnsString.reserve(5);
+		xmlUriString.reserve(36);
+		xmlnsUriString.reserve(29);
+
+		for (std::size_t i = 0; i < 3; ++i)
+			CharactersWriterType::WriteCharacter(lowerXmlString, LowerXml[i]);
+
+		for (std::size_t i = 0; i < 5; ++i)
+			CharactersWriterType::WriteCharacter(xmlnsString, Xmlns[i]);
+
+		for (std::size_t i = 0; i < 36; ++i)
+			CharactersWriterType::WriteCharacter(xmlUriString, XmlUri[i]);
+
+		for (std::size_t i = 0; i < 29; ++i)
+			CharactersWriterType::WriteCharacter(xmlnsUriString, XmlnsUri[i]);
+	}
+
+	template <typename TCharactersWriter>
 	inline void Inspector<TCharactersWriter>::SavePosition()
 	{
 		row = currentRow;
@@ -6624,7 +6812,7 @@ namespace Xml
 		TInputIterator first, TInputIterator last)
 	{
 		Reset();
-		std::unique_ptr<Details::BasicIteratorsBuf<TInputIterator, char>> buf(
+		std::unique_ptr<Details::BasicIteratorsBuf<TInputIterator, char> > buf(
 			new Details::BasicIteratorsBuf<TInputIterator, char>(first, last));
 		inputStreamPtr = new std::istream(buf.get());
 		buf.release();
