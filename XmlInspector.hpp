@@ -168,6 +168,11 @@ namespace Xml
 		CDataSectionOutside,
 
 		/**
+			@brief Element is outside a root element.
+		*/
+		ElementOutside,
+
+		/**
 			@brief Check http://www.w3.org/TR/2008/REC-xml-20081126/#NT-doctypedecl.
 		*/
 		InvalidDocumentTypeDeclarationLocation,
@@ -1309,7 +1314,10 @@ namespace Xml
 					errMsg = "Invalid location of XML declaration.";
 					return;
 				case ErrorCode::CDataSectionOutside:
-					errMsg = "CDATA section is outside the root element.";
+					errMsg = "CDATA section is outside a root element.";
+					return;
+				case ErrorCode::ElementOutside:
+					errMsg = "Element is outside a root element.";
 					return;
 				case ErrorCode::InvalidDocumentTypeDeclarationLocation:
 					errMsg = "Invalid location of document type declaration.";
@@ -1568,7 +1576,7 @@ namespace Xml
 			tempRow = row;
 			tempColumn = column;
 			Reset();
-			SetError(ErrorCode::InvalidSyntax);
+			SetError(ErrorCode::ElementOutside);
 			row = tempRow;
 			column = tempColumn;
 			return false;

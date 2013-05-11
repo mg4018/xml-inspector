@@ -6428,7 +6428,7 @@ public:
 		assert(inspector.HasAttributes() == false);
 		assert(inspector.GetAttributesCount() == 0);
 		assert(inspector.GetErrorMessage() != nullptr);
-		assert(inspector.GetErrorCode() == Xml::ErrorCode::InvalidSyntax);
+		assert(inspector.GetErrorCode() == Xml::ErrorCode::ElementOutside);
 		assert(inspector.GetRow() == 1);
 		assert(inspector.GetColumn() == 12);
 		assert(inspector.GetDepth() == 0);
