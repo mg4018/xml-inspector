@@ -296,7 +296,7 @@ namespace Xml
 			@brief Unsigned integer type definition for determining location in the XML document.
 				This type should be enough to store any file size or memory buffer size.
 		*/
-		typedef uint_least64_t SizeType;
+		typedef std::uint_least64_t SizeType;
 
 		/**
 			@brief Qualified name of the attribute.
@@ -419,7 +419,7 @@ namespace Xml
 		{
 		public:	
 			typedef TStringType StringType;
-			typedef uint_least64_t SizeType;
+			typedef std::uint_least64_t SizeType;
 
 			StringType Prefix;
 			StringType Uri;
@@ -431,7 +431,7 @@ namespace Xml
 		{
 		public:	
 			typedef TStringType StringType;
-			typedef uint_least64_t SizeType;
+			typedef std::uint_least64_t SizeType;
 
 			StringType Name;
 			StringType LocalName;
@@ -525,7 +525,7 @@ namespace Xml
 			@brief Unsigned integer type definition for determining location in the XML document.
 				This type should be enough to store any file size or memory buffer size.
 		*/
-		typedef uint_least64_t SizeType;
+		typedef std::uint_least64_t SizeType;
 	private:
 		typedef typename StringType::size_type StringSizeType;
 		typedef Details::UnclosedTag<StringType> UnclosedTagType;

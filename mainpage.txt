@@ -33,9 +33,10 @@ I think this project met these expectations, but first you should know two thing
 	</li>
 	<li>
 		XmlInspector uses few features from C++11 standard (<tt>char16_t</tt>, <tt>char32_t</tt>,
-		<tt>std::u16string</tt>, <tt>std::u32string</tt> and <tt>strongly typed enumerations</tt>).
-		When this documentation was written, there weren't so many common compilers supporting full standard yet.
-		Tested on GCC 4.7.2 on Linux, Visual C++ 2012 and MinGW 4.7.2 on Windows.
+		<tt>std::u16string</tt>, <tt>std::u32string</tt>, <tt>std::uint_least64_t</tt>
+		and strongly typed enumerations). When this documentation was written, there weren't so many common
+		compilers supporting full standard yet. Tested on GCC 4.7.2 on Linux, Visual C++ 2012 and MinGW 4.7.2
+		on Windows.
 	</li>
 </ul>
 
