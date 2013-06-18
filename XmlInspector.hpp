@@ -412,6 +412,11 @@ namespace Xml
 			{
 			
 			}
+
+			virtual ~BasicIteratorsBuf()
+			{
+			
+			}
 		};
 
 		template <typename TStringType>
@@ -763,7 +768,7 @@ namespace Xml
 		Inspector(const Inspector&) { };
 
 		// Assignment operator is inaccessible for this class.
-		Inspector& operator=(Inspector&) { };
+		Inspector& operator=(Inspector&) { return *this; };
 	public:
 		/**
 			@brief Initializes a new instance of the Inspector class.
