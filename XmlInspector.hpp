@@ -768,7 +768,7 @@ namespace Xml
 		Inspector(const Inspector&) { };
 
 		// Assignment operator is inaccessible for this class.
-		Inspector& operator=(Inspector&) { return *this; };
+		Inspector& operator=(const Inspector&) { return *this; };
 	public:
 		/**
 			@brief Initializes a new instance of the Inspector class.
