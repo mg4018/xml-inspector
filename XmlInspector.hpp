@@ -454,8 +454,8 @@ namespace Xml
 		Example:
 		@code{.cpp}
         #include "XmlInspector.hpp"
-        #include <iostream>
-        #include <cstdlib>
+        #include &lt;iostream&gt;
+        #include &lt;cstdlib&gt
 
         int main()
         {

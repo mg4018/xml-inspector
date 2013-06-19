@@ -212,9 +212,9 @@ namespace Xml
 			Xml::Inspector class:
 			@code{.cpp}
             #include "CharactersReader.hpp"
-            #include <iostream>
-            #include <cstdlib>
-            #include <string>
+            #include &lt;iostream&gt;
+            #include &lt;cstdlib&gt;
+            #include &lt;string&gt;
 
             int main()
             {
