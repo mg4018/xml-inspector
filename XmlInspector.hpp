@@ -90,7 +90,7 @@ namespace Xml
 		Comment,
 
 		/**
-			@brief A processing instruction (for example <tt>&lt;?php echo "Hello, world!"; ?&gt;</tt> ).
+			@brief A processing instruction (for example <tt>&lt;?mypi ...?&gt;</tt> ).
 		*/
 		ProcessingInstruction,
 
